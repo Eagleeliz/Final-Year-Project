@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                 // JavaScript version to output
+    "module": "NodeNext",               // Use Node-style ES modules
+    "moduleResolution": "NodeNext",     // Resolve imports correctly
+    "outDir": "dist",                   // Compiled JS output folder
+    "rootDir": ".",                      // Root of TS files
+    "strict": true,                      // Enable strict type checking
+    "esModuleInterop": true,             // Allow import/export interop
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": ["server.ts", "app.ts", "src/**/*"]  // Include your TS files
+}
