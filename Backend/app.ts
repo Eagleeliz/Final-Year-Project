@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 
-import weekRouter from './Weeks/week.route'
+import weekRouter from './src/Weeks/week.route'
 import cors from "cors";
 import dotenv from 'dotenv'
 

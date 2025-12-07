@@ -1,11 +1,11 @@
-import db from "../src/drizzle/db.js";
+import db from "../drizzle/db.js";
 import { desc, eq, and } from "drizzle-orm";
 import { 
   weeklyCheckinsTable,
   pregnanciesTable,
   type WeeklyCheckin,
   type NewWeeklyCheckin
-} from ".././src/drizzle/schema.js";
+} from "../drizzle/schema.js";
 
 // Get all weekly check-ins
 export const getWeeklyCheckinsService = async (): Promise<WeeklyCheckin[] | null> => {
