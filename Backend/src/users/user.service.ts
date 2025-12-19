@@ -16,7 +16,29 @@ export const createUserServices = async(user:User): Promise<string | null> =>{
  return "User Created Successfully😎"
 }
 
+
+
 // //update User
+export const updateUserService = async (
+  userId: number,               // number type
+  updatedData: Partial<User>
+): Promise<string | null> => {
+
+  // Check if user exists
+  const existingUser = await db.query.usersTable.findFirst({
+    where: eq(usersTable.id, userId),
+  });
+
+  if (!existingUser) return null;
+
+  // Update user
+  await db.update(usersTable)
+    .set(updatedData)
+    .where(eq(usersTable.id, userId))
+    .returning();
+
+  return "User Updated Successfully 😎";
+};
 // export const updateUserServices = async( userId: number, user:Partial<NewUser>):
 // Promise<string>=>{
 //     if(Object.keys(user).length ====== 0){
