@@ -3,6 +3,7 @@ import express, { Request, Response } from "express";
 import weekRouter from './src/Weeks/week.route'
 import cors from "cors";
 import dotenv from 'dotenv'
+import userRouter from "./src/users/user.route";
 
 dotenv.config() //loads the env file 
 
@@ -21,6 +22,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 //Routers
 app.use('/api',weekRouter)
+app.use('/api',userRouter)
 
 
 //404 handler

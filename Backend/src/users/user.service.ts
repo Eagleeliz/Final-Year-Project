@@ -39,10 +39,53 @@ export const updateUserService = async (
 
   return "User Updated Successfully 😎";
 };
-// export const updateUserServices = async( userId: number, user:Partial<NewUser>):
-// Promise<string>=>{
-//     if(Object.keys(user).length ====== 0){
-//         trhoe new Error ("No fields provided to update");
-//     }
-//     await
-// }
+
+// Delete User
+export const deleteUserService = async(userId:number):Promise<string | null> => {
+
+  //check i fthe user exist
+  const existingUser= await db.query.usersTable.findFirst({
+    where: eq(usersTable.id,userId)
+  });
+ if(!existingUser) return null; //user not found
+
+ //delete user
+ await db.delete(usersTable).where(eq(usersTable.id,userId));
+ return "User deleted successfully 😎"
+
+
+}
+;
+
+//get user by id
+
+export const userByIdService = async (userId:number) =>{
+
+  //check if user exists:
+  const existingUser= await db.query.usersTable.findFirst({
+    where: eq(usersTable.id ,userId ),
+    columns:{
+      passwordHash:false
+    }
+  });
+  if(!existingUser){
+     return null;
+  }
+
+  //get user
+return (existingUser)
+}
+
+//get all users
+
+export const getAllUsersService = async () => {
+  return await db.query.usersTable.findMany({
+    columns: {
+      passwordHash: false, // 🔐 hide passwords
+    },
+    orderBy: [desc(usersTable.createdAt)], // newest first
+  });
+};
+
+
+
