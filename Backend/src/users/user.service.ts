@@ -1,20 +1,29 @@
-import {desc,eq} from "drizzle-orm";
+import {desc,eq,or } from "drizzle-orm";
 import db from  "../drizzle/db"
 import {User,NewUser,usersTable} from "../drizzle/schema"
 
 //create a user
-export const createUserServices = async(user:User): Promise<string | null> =>{
-    const existingUser =await db.query.usersTable.findFirst({
-        where: eq(usersTable.email,user.email),
-    });
+export const createUserServices = async (user: User): Promise<string | { conflict: "email" | "phone" }> => {
+  const existingUser = await db.query.usersTable.findFirst({
+    where: or(
+      eq(usersTable.email, user.email),
+      user.phone ? eq(usersTable.phone, user.phone) : undefined
+    ),
+  });
 
-    if(existingUser){
-        return null
+  if (existingUser) {
+    if (existingUser.email === user.email) {
+      return { conflict: "email" };
     }
+    if (user.phone && existingUser.phone === user.phone) {
+      return { conflict: "phone" };
+    }
+  }
 
- await db.insert(usersTable).values (user).returning();
- return "User Created Successfully😎"
-}
+  await db.insert(usersTable).values(user).returning();
+  return "User Created Successfully😎";
+};
+
 
 
 

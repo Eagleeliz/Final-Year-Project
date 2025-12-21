@@ -21,8 +21,8 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Backend running with TypeScript 🚀");
 });
 //Routers
-app.use('/api',weekRouter)
-app.use('/api',userRouter)
+app.use('/api/weeks',weekRouter)
+app.use('/api/users',userRouter)
 
 
 //404 handler

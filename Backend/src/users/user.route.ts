@@ -8,11 +8,12 @@ import {
 } from "./user.controller";
 
 const userRouter = Router();
-userRouter.get("/user", getAllUsersController);
-userRouter.post("/user", createUserController);
-userRouter.get("/user/:id", getUserByIdController);
-userRouter.put("/user/:id", updateUserController);
-userRouter.delete("/user/:id", deleteUserController);
 
+// All routes relative to /api/users
+userRouter.get("/", getAllUsersController);
+userRouter.post("/", createUserController);
+userRouter.get("/:id", getUserByIdController);
+userRouter.put("/:id", updateUserController);
+userRouter.delete("/:id", deleteUserController);
 
 export default userRouter;

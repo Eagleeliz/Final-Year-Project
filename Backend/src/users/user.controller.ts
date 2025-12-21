@@ -10,25 +10,32 @@ import {Request,response,Response} from "express";
 
 //create user controller
 
-export const createUserController =async(req:Request,res:Response)=>{
-    try{
-        const result = await createUserServices (req.body)
-    
-    if(!result){
-    return response.status(409).json({
-        message: "User with this email already exists"
-    });
-}
-return res.status(201).json({
-    message:result,
-});
-    } catch  (error) {
+export const createUserController = async (req: Request, res: Response) => {
+  try {
+    const result = await createUserServices(req.body);
+
+    // Check if result is the conflict object
+    if (typeof result === "object" && "conflict" in result) {
+      const conflictMessage =
+        result.conflict === "email"
+          ? "Email already exists"
+          : "Phone number already exists";
+
+      return res.status(409).json({ message: conflictMessage });
+    }
+
+    // Success
+    return res.status(201).json({ message: result });
+  } catch (error: any) {
+    console.error("Error creating user:", error);
     return res.status(500).json({
       message: "Failed to create user",
-      error,
+      error: error?.message || error,
     });
   }
 };
+
+
 //update user controller
 export const updateUserController = async (req: Request, res: Response) => {
   try {
