@@ -111,15 +111,15 @@ export const mothersTable = pgTable("mothers", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// ============================
+
 // Pregnancies Table
-// ============================
+
 
 export const pregnanciesTable = pgTable("pregnancies", {
   id: serial("id").primaryKey(),
-  motherId: integer("mother_id")
-    .references(() => mothersTable.id, { onDelete: "cascade" })
-    .notNull(),
+ userId: integer("user_id")
+  .references(() => usersTable.id, { onDelete: "cascade" })
+  .notNull(),
   lmpDate: date("lmp_date").notNull(), // Last Menstrual Period
   eddDate: date("edd_date").notNull(), // Estimated Due Date
   currentTrimester: integer("current_trimester").$type<1 | 2 | 3>(),
@@ -134,9 +134,8 @@ export const pregnanciesTable = pgTable("pregnancies", {
   updatedAt: timestamp("updated_at").defaultNow()
 });
 
-// ============================
 // Weekly Check-ins Table
-// ============================
+
 
 export const weeklyCheckinsTable = pgTable("weekly_checkins", {
   id: serial("id").primaryKey(),
@@ -371,9 +370,9 @@ export const mothersRelations = relations(mothersTable, ({ one, many }) => ({
 }));
 
 export const pregnanciesRelations = relations(pregnanciesTable, ({ one, many }) => ({
-  mother: one(mothersTable, {
-    fields: [pregnanciesTable.motherId],
-    references: [mothersTable.id]
+  user: one(usersTable, {               
+    fields: [pregnanciesTable.userId],  
+    references: [usersTable.id]
   }),
   checkins: many(weeklyCheckinsTable),
   emergencies: many(emergencyAlertsTable),

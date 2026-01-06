@@ -8,6 +8,13 @@
       "when": 1764700757483,
       "tag": "0000_dark_sentinels",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1767725686665,
+      "tag": "0001_loving_madame_web",
+      "breakpoints": true
     }
   ]
 }

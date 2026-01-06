@@ -4,6 +4,7 @@ import weekRouter from './src/Weeks/week.route'
 import cors from "cors";
 import dotenv from 'dotenv'
 import userRouter from "./src/users/user.route";
+import pregnancyRouter from "./src/pregnancy/pregnancy.route";
 
 dotenv.config() //loads the env file 
 
@@ -23,6 +24,7 @@ app.get("/", (req: Request, res: Response) => {
 //Routers
 app.use('/api/weeks',weekRouter)
 app.use('/api/users',userRouter)
+app.use('/api/pregnancy',pregnancyRouter)
 
 
 //404 handler
