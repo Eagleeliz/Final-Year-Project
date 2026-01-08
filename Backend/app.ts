@@ -5,6 +5,10 @@ import cors from "cors";
 import dotenv from 'dotenv'
 import userRouter from "./src/users/user.route";
 import pregnancyRouter from "./src/pregnancy/pregnancy.route";
+import guidanceRouter from "./src/guidance/guidance.route";
+import aiRouter from "./src/groqai/groq.route";
+
+
 
 dotenv.config() //loads the env file 
 
@@ -25,6 +29,8 @@ app.get("/", (req: Request, res: Response) => {
 app.use('/api/weeks',weekRouter)
 app.use('/api/users',userRouter)
 app.use('/api/pregnancy',pregnancyRouter)
+app.use('/api/guidance', guidanceRouter);
+app.use('/api/ai',aiRouter)
 
 
 //404 handler

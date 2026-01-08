@@ -3,19 +3,26 @@ import * as PregnancyController from "./pregnancy.controller";
 
 const pregnancyRouter = Router();
 
-// Create a pregnancy
+// ================= CREATE =================
+// POST /api/pregnancies
 pregnancyRouter.post("/", PregnancyController.createPregnancy);
 
-// Get all pregnancies for a user
+// ================= READ =================
+// GET /api/pregnancies → get ALL pregnancies (admin/system)
+pregnancyRouter.get("/", PregnancyController.getAllPregnancies);
+
+// GET /api/pregnancies/user/:userId → pregnancies by user
 pregnancyRouter.get("/user/:userId", PregnancyController.getPregnanciesByUser);
 
-// Get a single pregnancy by ID
+// GET /api/pregnancies/:id → single pregnancy
 pregnancyRouter.get("/:id", PregnancyController.getPregnancyById);
 
-// Update a pregnancy
+// ================= UPDATE =================
+// PUT /api/pregnancies/:id
 pregnancyRouter.put("/:id", PregnancyController.updatePregnancy);
 
-// Delete a pregnancy
+// ================= DELETE =================
+// DELETE /api/pregnancies/:id
 pregnancyRouter.delete("/:id", PregnancyController.deletePregnancy);
 
 export default pregnancyRouter;

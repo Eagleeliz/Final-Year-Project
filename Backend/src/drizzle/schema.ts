@@ -68,6 +68,18 @@ export const alertTypeEnum = pgEnum("alert_type", [
   "contractions",
   "other"
 ]);
+//weekly summary 
+export const pregnancyGuidanceTable = pgTable("pregnancy_guidance", {
+  id: serial("id").primaryKey(),
+  weekNumber: integer("week_number").notNull(),
+  title: varchar("title", { length: 100 }).notNull(),
+  summary: text("summary").notNull(),
+  tips: text("tips").notNull(),
+  source: varchar("source", { length: 200 }).notNull(),
+  link: varchar("link", { length: 500 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 // ============================
 // Users Table

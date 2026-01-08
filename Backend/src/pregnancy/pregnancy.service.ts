@@ -1,12 +1,12 @@
 import db from "../drizzle/db";
 import { pregnanciesTable } from "../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 // Create a pregnancy
 export const createPregnancy = async (data: any) => {
-  // Ensure only one active pregnancy per user
   if (!data.userId) throw new Error("userId is required");
 
+  // Ensure only one active pregnancy per user
   await db
     .update(pregnanciesTable)
     .set({ isActive: false })
@@ -20,22 +20,48 @@ export const createPregnancy = async (data: any) => {
   return pregnancy[0];
 };
 
-// Get all pregnancies for a user
-export const getPregnanciesByUserId = async (userId: number) => {
-  return db
-    .select()
-    .from(pregnanciesTable)
-    .where(eq(pregnanciesTable.userId, userId));
+// ✅ Get ALL pregnancies WITH user info
+export const getAllPregnancies = async () => {
+  return db.query.pregnanciesTable.findMany({
+    with: {
+      user: {
+        columns: {
+          passwordHash: false
+        }
+      }
+    },
+    orderBy: [desc(pregnanciesTable.createdAt)]
+  });
 };
 
-// Get a single pregnancy by its ID
-export const getPregnancyById = async (id: number) => {
-  const pregnancy = await db
-    .select()
-    .from(pregnanciesTable)
-    .where(eq(pregnanciesTable.id, id));
+// ✅ Get pregnancies for ONE user (with user info)
+export const getPregnanciesByUserId = async (userId: number) => {
+  return db.query.pregnanciesTable.findMany({
+    where: eq(pregnanciesTable.userId, userId),
+    with: {
+      user: {
+        columns: {
+          passwordHash: false
+        }
+      }
+    }
+  });
+};
 
-  return pregnancy[0];
+// Get a single pregnancy by ID (with user)
+export const getPregnancyById = async (id: number) => {
+  const pregnancy = await db.query.pregnanciesTable.findFirst({
+    where: eq(pregnanciesTable.id, id),
+    with: {
+      user: {
+        columns: {
+          passwordHash: false
+        }
+      }
+    }
+  });
+
+  return pregnancy;
 };
 
 // Update a pregnancy
