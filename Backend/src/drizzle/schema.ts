@@ -31,7 +31,6 @@ export const pregnancyOutcomeEnum = pgEnum("pregnancy_outcome", [
 ]);
 
 export const emergencySeverityEnum = pgEnum("emergency_severity", [
-  "low",
   "medium",
   "high",
   "critical"
@@ -194,22 +193,50 @@ export const weeklyCheckinsTable = pgTable("weekly_checkins", {
 
 export const emergencyAlertsTable = pgTable("emergency_alerts", {
   id: serial("id").primaryKey(),
-  motherId: integer("mother_id")
-    .references(() => mothersTable.id, { onDelete: "cascade" })
+
+  // Link to authenticated user (mother)
+  userId: integer("user_id")
+    .references(() => usersTable.id, { onDelete: "cascade" })
     .notNull(),
+
+  // Optional active pregnancy
   pregnancyId: integer("pregnancy_id")
     .references(() => pregnanciesTable.id),
+
   alertType: alertTypeEnum("alert_type").default("other"),
   severity: emergencySeverityEnum("severity").default("medium"),
   description: text("description"),
+
   locationLat: numeric("location_lat", { precision: 10, scale: 8 }),
   locationLong: numeric("location_long", { precision: 11, scale: 8 }),
+
   status: emergencyStatusEnum("status").default("pending"),
   respondedBy: integer("responded_by")
     .references(() => usersTable.id),
   responseNotes: text("response_notes"),
+
   createdAt: timestamp("created_at").defaultNow(),
   resolvedAt: timestamp("resolved_at")
+});
+
+
+
+// stores emergency contacts
+export const emergencyContactsTable = pgTable("emergency_contacts", {
+  id: serial("id").primaryKey(),
+
+  // Link contacts to user
+  userId: integer("user_id")
+    .references(() => usersTable.id, { onDelete: "cascade" })
+    .notNull(),
+
+  name: varchar("name", { length: 100 }).notNull(),
+  phoneNumber: varchar("phone_number", { length: 20 }).notNull(),
+  relationship: varchar("relationship", { length: 50 }),
+  isPrimary: boolean("is_primary").default(false),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
 });
 
 // ============================
@@ -364,12 +391,14 @@ export const usersRelations = relations(usersTable, ({ one, many }) => ({
     fields: [usersTable.id],
     references: [mothersTable.userId]
   }),
-  emergenciesResponded: many(emergencyAlertsTable, {
-    relationName: "responded_emergencies"
-  }),
+  pregnancies: many(pregnanciesTable),
+  emergencies: many(emergencyAlertsTable, { relationName: "user_emergencies" }),
+  emergencyContacts: many(emergencyContactsTable),
+  emergenciesResponded: many(emergencyAlertsTable, { relationName: "responded_emergencies" }),
   chatLogs: many(aiChatLogsTable),
   notifications: many(notificationsTable)
 }));
+
 
 export const mothersRelations = relations(mothersTable, ({ one, many }) => ({
   user: one(usersTable, {
@@ -382,25 +411,27 @@ export const mothersRelations = relations(mothersTable, ({ one, many }) => ({
 }));
 
 export const pregnanciesRelations = relations(pregnanciesTable, ({ one, many }) => ({
-  user: one(usersTable, {               
-    fields: [pregnanciesTable.userId],  
-    references: [usersTable.id]
-  }),
+  user: one(usersTable, { fields: [pregnanciesTable.userId], references: [usersTable.id] }),
   checkins: many(weeklyCheckinsTable),
   emergencies: many(emergencyAlertsTable),
   children: many(childrenTable)
 }));
 
+
 export const childrenRelations = relations(childrenTable, ({ one, many }) => ({
-  mother: one(mothersTable, {
-    fields: [childrenTable.motherId],
-    references: [mothersTable.id]
-  }),
-  pregnancy: one(pregnanciesTable, {
-    fields: [childrenTable.pregnancyId],
-    references: [pregnanciesTable.id]
-  }),
+  mother: one(mothersTable, { fields: [childrenTable.motherId], references: [mothersTable.id] }),
+  pregnancy: one(pregnanciesTable, { fields: [childrenTable.pregnancyId], references: [pregnanciesTable.id] }),
   milestones: many(childMilestonesTable)
+}));
+
+export const emergencyAlertsRelations = relations(emergencyAlertsTable, ({ one }) => ({
+  user: one(usersTable, { fields: [emergencyAlertsTable.userId], references: [usersTable.id] }),
+  pregnancy: one(pregnanciesTable, { fields: [emergencyAlertsTable.pregnancyId], references: [pregnanciesTable.id] }),
+  respondedByUser: one(usersTable, { fields: [emergencyAlertsTable.respondedBy], references: [usersTable.id] })
+}));
+
+export const emergencyContactsRelations = relations(emergencyContactsTable, ({ one }) => ({
+  user: one(usersTable, { fields: [emergencyContactsTable.userId], references: [usersTable.id] })
 }));
 
 // ============================
@@ -421,6 +452,9 @@ export type NewWeeklyCheckin = typeof weeklyCheckinsTable.$inferInsert;
 
 export type EmergencyAlert = typeof emergencyAlertsTable.$inferSelect;
 export type NewEmergencyAlert = typeof emergencyAlertsTable.$inferInsert;
+
+export type EmergencyContact = typeof emergencyContactsTable.$inferSelect;
+export type NewEmergencyContact = typeof emergencyContactsTable.$inferInsert;
 
 export type Child = typeof childrenTable.$inferSelect;
 export type NewChild = typeof childrenTable.$inferInsert;
