@@ -84,6 +84,7 @@ export const pregnancyGuidanceTable = pgTable("pregnancy_guidance", {
 // Users Table
 // ============================
 
+// Update your existing usersTable in schema.ts
 export const usersTable = pgTable("users", {
   id: serial("id").primaryKey(),
   email: varchar("email", { length: 255 }).unique().notNull(),
@@ -96,6 +97,16 @@ export const usersTable = pgTable("users", {
   subCounty: varchar("sub_county", { length: 100 }),
   village: varchar("village", { length: 100 }),
   userType: userTypeEnum("user_type").default("mother"),
+  
+  //  Email verification fields
+  isEmailVerified: boolean("is_email_verified").default(false),
+  emailVerificationToken: varchar("email_verification_token", { length: 255 }),
+  emailVerificationExpires: timestamp("email_verification_expires"),
+  
+  // Password reset fields
+  passwordResetToken: varchar("password_reset_token", { length: 255 }),
+  passwordResetExpires: timestamp("password_reset_expires"),
+  
   isActive: boolean("is_active").default(true),
   lastLogin: timestamp("last_login"),
   createdAt: timestamp("created_at").defaultNow(),

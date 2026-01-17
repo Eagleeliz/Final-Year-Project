@@ -7,6 +7,7 @@ import userRouter from "./src/users/user.route";
 import pregnancyRouter from "./src/pregnancy/pregnancy.route";
 import guidanceRouter from "./src/guidance/guidance.route";
 import aiRouter from "./src/groqai/groq.route";
+import { authRouter } from "./src/auth/auth.route";
 
 
 
@@ -31,6 +32,7 @@ app.use('/api/users',userRouter)
 app.use('/api/pregnancy',pregnancyRouter)
 app.use('/api/guidance', guidanceRouter);
 app.use('/api/ai',aiRouter)
+app.use('/api/auth',authRouter)
 
 
 //404 handler
