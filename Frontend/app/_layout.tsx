@@ -11,13 +11,44 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-
+  
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
+         {/* 1. FIRST SCREEN: Welcome Page*/}
+        <Stack.Screen name="welcome" options={{ headerShown: false }} />
+
+          {/* 2. SECOND: Login screen */}
+        <Stack.Screen name="login" options={{ title: 'Sign In' ,
+         headerBackTitle: 'Back' }} />
+
+           {/* 3. SECOND: Register screen */}
+              <Stack.Screen 
+          name="register" 
+          options={{
+            title: 'Create Account',
+            headerBackTitle: 'Back'
+          }} 
+           />
+
+           {/* 4. FOURTH: Main app with tabs (after login) */}
+        <Stack.Screen 
+          name="(tabs)" 
+          options={{ 
+            headerShown: false  // No header because tabs have their own
+          }} 
+        />
+        
+          {/* 5. Modal screen (optional) */}
+        <Stack.Screen 
+          name="modal" 
+          options={{ 
+            presentation: 'modal', 
+            title: 'Modal' 
+          }} 
+        />
+
+                 </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
   );
