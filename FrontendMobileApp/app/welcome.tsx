@@ -7,6 +7,13 @@ export default function WelcomeScreen() {
   const router = useRouter();
 
   // Add these functions to fix TypeScript errors
+
+    const OnboardingScreen = () => {
+    // @ts-ignore - Temporarily ignore TypeScript error
+    router.push("/OnboardingScreen");
+  };
+
+
   const goToLogin = () => {
     // @ts-ignore - Temporarily ignore TypeScript error
     router.push("/login");

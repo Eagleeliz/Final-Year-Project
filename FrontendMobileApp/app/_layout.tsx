@@ -18,6 +18,11 @@ export default function RootLayout() {
          {/* 1. FIRST SCREEN: Welcome Page*/}
         <Stack.Screen name="welcome" options={{ headerShown: false }} />
 
+
+           {/* 2. SECOND: Onboarding screen */}
+        <Stack.Screen name="OnboardingScreen" options={{ title: 'Sign In' ,
+         headerBackTitle: 'Back' }} />
+         
           {/* 2. SECOND: Login screen */}
         <Stack.Screen name="login" options={{ title: 'Sign In' ,
          headerBackTitle: 'Back' }} />
