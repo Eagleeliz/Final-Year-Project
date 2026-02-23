@@ -57,7 +57,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       verificationExpires
     );
 
-    const verificationUrl = `http://localhost:5000/api/auth/verify-email/${verificationToken}`;
+    const verificationUrl = `http://localhost:5173/verify-email?token=${verificationToken}`;
 
     res.status(201).json({
       message: "User created. Please verify your email.",
@@ -137,7 +137,14 @@ export const loginUser = async (req: Request, res: Response) => {
 // Verify email with token
 export const verifyEmail = async (req: Request, res: Response) => {
   try {
-    const { token } = req.params;
+    // Check params first (/:token), then check query (?token=)
+    const token = req.params.token || req.query.token as string;
+
+    if (!token) {
+      res.status(400).json({ error: "Verification token is required" });
+      return;
+    }
+
     const isVerified = await verifyEmailService(token);
 
     if (!isVerified) {

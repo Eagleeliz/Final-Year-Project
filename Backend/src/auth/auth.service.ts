@@ -12,7 +12,7 @@ export interface UserInsert {
   firstName?: string;
   lastName?: string;
   county?: string;
-  userType?: 'mother' | 'health_worker' | 'admin';
+  userType?: 'mother' | 'health_worker' | 'admin' | 'policy_maker';
   isEmailVerified?: boolean;
   isActive?: boolean;
 }
@@ -27,7 +27,7 @@ export interface UserSelect {
   county: string | null;
   subCounty: string | null;
   village: string | null;
-  userType: 'mother' | 'health_worker' | 'admin';
+  userType: 'mother' | 'health_worker' | 'admin' | 'policy_maker';
   isEmailVerified: boolean;
   emailVerificationToken: string | null;
   emailVerificationExpires: Date | null;

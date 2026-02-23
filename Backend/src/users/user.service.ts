@@ -1,100 +1,150 @@
-import {desc,eq,or } from "drizzle-orm";
-import db from  "../drizzle/db"
-import {User,NewUser,usersTable} from "../drizzle/schema"
+import db from "../drizzle/db";
+import { usersTable, User } from "../drizzle/schema";
+import { eq, and, or, gt, desc, isNotNull } from "drizzle-orm";
 
-//create a user
+// --- TYPES ---
+export interface UserInsert extends Partial<User> {
+    email: string;
+    passwordHash: string;
+}
+
+// --- GENERAL CRUD SERVICES ---
+
+// Create User (with conflict checking)
 export const createUserServices = async (user: User): Promise<string | { conflict: "email" | "phone" }> => {
-  const existingUser = await db.query.usersTable.findFirst({
-    where: or(
-      eq(usersTable.email, user.email),
-      user.phone ? eq(usersTable.phone, user.phone) : undefined
-    ),
-  });
+    const existingUser = await db.query.usersTable.findFirst({
+        where: or(
+            eq(usersTable.email, user.email),
+            user.phone ? eq(usersTable.phone, user.phone) : undefined
+        ),
+    });
 
-  if (existingUser) {
-    if (existingUser.email === user.email) {
-      return { conflict: "email" };
+    if (existingUser) {
+        if (existingUser.email === user.email) return { conflict: "email" };
+        if (user.phone && existingUser.phone === user.phone) return { conflict: "phone" };
     }
-    if (user.phone && existingUser.phone === user.phone) {
-      return { conflict: "phone" };
-    }
-  }
 
-  await db.insert(usersTable).values(user).returning();
-  return "User Created Successfully😎";
+    await db.insert(usersTable).values(user);
+    return "User Created Successfully 😎";
 };
 
+// Get All Users (Sorted by newest first)
+export const getAllUsersService = async (limitNum: number = 50) => {
+    return await db.query.usersTable.findMany({
+        columns: { passwordHash: false },
+        orderBy: [desc(usersTable.createdAt)],
+        limit: limitNum,
+    });
+};
 
+// Get User By ID
+export const getUserByIdService = async (id: number) => {
+    return await db.query.usersTable.findFirst({
+        where: eq(usersTable.id, id),
+    });
+};
 
+// Get User By Email
+export const getUserByEmailService = async (email: string) => {
+    return await db.query.usersTable.findFirst({
+        where: eq(usersTable.email, email),
+    });
+};
 
-// //update User
-export const updateUserService = async (
-  userId: number,               // number type
-  updatedData: Partial<User>
-): Promise<string | null> => {
-
-  // Check if user exists
-  const existingUser = await db.query.usersTable.findFirst({
-    where: eq(usersTable.id, userId),
-  });
-
-  if (!existingUser) return null;
-
-  // Update user
-  await db.update(usersTable)
-    .set(updatedData)
-    .where(eq(usersTable.id, userId))
-    .returning();
-
-  return "User Updated Successfully 😎";
+// Update User
+export const updateUserService = async (userId: number, updatedData: Partial<User>) => {
+    const result = await db.update(usersTable)
+        .set({ ...updatedData, updatedAt: new Date() })
+        .where(eq(usersTable.id, userId))
+        .returning();
+    return result.length > 0 ? "User Updated Successfully 😎" : null;
 };
 
 // Delete User
-export const deleteUserService = async(userId:number):Promise<string | null> => {
-
-  //check i fthe user exist
-  const existingUser= await db.query.usersTable.findFirst({
-    where: eq(usersTable.id,userId)
-  });
- if(!existingUser) return null; //user not found
-
- //delete user
- await db.delete(usersTable).where(eq(usersTable.id,userId));
- return "User deleted successfully 😎"
-
-
-}
-;
-
-//get user by id
-
-export const userByIdService = async (userId:number) =>{
-
-  //check if user exists:
-  const existingUser= await db.query.usersTable.findFirst({
-    where: eq(usersTable.id ,userId ),
-    columns:{
-      passwordHash:false
-    }
-  });
-  if(!existingUser){
-     return null;
-  }
-
-  //get user
-return (existingUser)
-}
-
-//get all users
-
-export const getAllUsersService = async () => {
-  return await db.query.usersTable.findMany({
-    columns: {
-      passwordHash: false, // 🔐 hide passwords
-    },
-    orderBy: [desc(usersTable.createdAt)], // newest first
-  });
+export const deleteUserService = async (userId: number) => {
+    const result = await db.delete(usersTable)
+        .where(eq(usersTable.id, userId))
+        .returning();
+    return result.length > 0 ? "User deleted successfully 😎" : null;
 };
 
+// --- AUTH & SECURITY SERVICES ---
 
+// Register User (Specialized for Auth flow)
+export const registerUserService = async (user: UserInsert): Promise<{ id: number }> => {
+    const [newUser] = await db.insert(usersTable).values({
+        ...user,
+        isEmailVerified: false,
+        isActive: true,
+    }).returning({ id: usersTable.id });
+    return { id: newUser.id };
+};
 
+// Set Email Verification Token
+export const setEmailVerificationTokenService = async (userId: number, token: string, expiresAt: Date) => {
+    await db.update(usersTable)
+        .set({ 
+            emailVerificationToken: token, 
+            emailVerificationExpires: expiresAt 
+        })
+        .where(eq(usersTable.id, userId));
+};
+
+// Verify Email
+export const verifyEmailService = async (token: string): Promise<boolean> => {
+    const user = await db.query.usersTable.findFirst({
+        where: eq(usersTable.emailVerificationToken, token),
+    });
+
+    if (!user || user.isEmailVerified) return false;
+    if (user.emailVerificationExpires && new Date() > user.emailVerificationExpires) return false;
+
+    const result = await db.update(usersTable)
+        .set({ 
+            isEmailVerified: true, 
+            emailVerificationToken: null, 
+            emailVerificationExpires: null 
+        })
+        .where(eq(usersTable.id, user.id))
+        .returning();
+
+    return result.length > 0;
+};
+
+// Set Password Reset Token
+export const setPasswordResetTokenService = async (email: string, token: string, expiresAt: Date) => {
+    const result = await db.update(usersTable)
+        .set({ 
+            passwordResetToken: token, 
+            passwordResetExpires: expiresAt 
+        })
+        .where(eq(usersTable.email, email))
+        .returning();
+    return result.length > 0;
+};
+
+// Reset Password with Token
+export const resetPasswordWithTokenService = async (token: string, newPasswordHash: string): Promise<boolean> => {
+    const [user] = await db.select()
+        .from(usersTable)
+        .where(
+            and(
+                eq(usersTable.passwordResetToken, token),
+                // 🔥 THE FIX: Changed 'lt' to 'gt'
+                gt(usersTable.passwordResetExpires, new Date()) 
+            )
+        )
+        .limit(1);
+
+    if (!user) return false;
+
+    await db.update(usersTable)
+        .set({ 
+            passwordHash: newPasswordHash, 
+            passwordResetToken: null, 
+            passwordResetExpires: null 
+        })
+        .where(eq(usersTable.id, user.id));
+
+    return true;
+};
