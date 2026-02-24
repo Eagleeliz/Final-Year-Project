@@ -14,6 +14,8 @@ import { createUserValidator, userLogInValidator } from "../validation/user.vali
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { sendNotificationEmail } from "../middlewares/GoogleMailer";
+import { updateUserService } from "./auth.service";
 
 // Register user with email verification
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
@@ -59,10 +61,24 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
     const verificationUrl = `http://localhost:5173/verify-email?token=${verificationToken}`;
 
+    await sendNotificationEmail(
+      user.email,
+      "Verify Your Email",
+      `
+      Welcome to BabyCentre Care 💛<br/><br/>
+      Please verify your email by clicking the link below:<br/><br/>
+      <a href="${verificationUrl}" style="color:#14b8a6;font-weight:bold;">
+        Verify Email
+      </a><br/><br/>
+      This link expires in 24 hours.
+      `,
+      undefined,
+      "welcome"
+    );
+
     res.status(201).json({
       message: "User created. Please verify your email.",
-      userId: result.id,
-      verificationUrl: verificationUrl,
+      userId: result.id
     });
 
   } catch (error: any) {
@@ -71,7 +87,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-// LOGIN USER - requires email verification
+// LOGIN USER - Updated with Profile Completion Check
 export const loginUser = async (req: Request, res: Response) => {
   try {
     const parseResult = userLogInValidator.safeParse(req.body);
@@ -93,7 +109,6 @@ export const loginUser = async (req: Request, res: Response) => {
       return;
     }
 
-    // Check if email is verified
     if (!userExists.isEmailVerified) {
       res.status(403).json({ 
         error: "Email not verified. Please verify your email first.",
@@ -116,6 +131,15 @@ export const loginUser = async (req: Request, res: Response) => {
       exp: Math.floor(Date.now() / 1000) + (60 * 60)
     }, secret);
 
+    // 🔥 PROFILE COMPLETION CHECK
+    // Based on your schema, registration captures: email, phone, name, county.
+    // We check for the "Stage 2" fields: dateOfBirth, subCounty, village.
+    const isProfileComplete = !!(
+      userExists.dateOfBirth && 
+      userExists.subCounty && 
+      userExists.village
+    );
+
     res.status(200).json({ 
       token,
       userId: userExists.id,
@@ -126,7 +150,8 @@ export const loginUser = async (req: Request, res: Response) => {
       phone: userExists.phone,
       county: userExists.county,
       isActive: userExists.isActive,
-      isEmailVerified: userExists.isEmailVerified
+      isEmailVerified: userExists.isEmailVerified,
+      isProfileComplete: isProfileComplete // Frontend will use this to redirect
     });
 
   } catch (error: any) {
@@ -137,7 +162,6 @@ export const loginUser = async (req: Request, res: Response) => {
 // Verify email with token
 export const verifyEmail = async (req: Request, res: Response) => {
   try {
-    // Check params first (/:token), then check query (?token=)
     const token = req.params.token || req.query.token as string;
 
     if (!token) {
@@ -148,13 +172,17 @@ export const verifyEmail = async (req: Request, res: Response) => {
     const isVerified = await verifyEmailService(token);
 
     if (!isVerified) {
-      res.status(400).json({ error: "Invalid or expired token" });
+      res.status(400).json({ error: "Token is invalid or has already been used." });
       return;
     }
 
     res.status(200).json({ message: "Email verified successfully" });
 
   } catch (error: any) {
+    if (error.message.includes("already verified")) {
+       res.status(200).json({ message: "Email is already verified. You can now log in." });
+       return;
+    }
     res.status(400).json({ error: error.message });
   }
 };
@@ -162,14 +190,12 @@ export const verifyEmail = async (req: Request, res: Response) => {
 // Password reset request
 export const passwordReset = async (req: Request, res: Response): Promise<void> => {
   try {
-    // 🔥 ADD THIS CHECK FIRST:
     if (!req.body || typeof req.body !== 'object') {
       res.status(400).json({ error: "Invalid request body" });
       return;
     }
 
     const { email } = req.body;
-
     if (!email) {
       res.status(400).json({ error: "Email is required" });
       return;
@@ -182,7 +208,7 @@ export const passwordReset = async (req: Request, res: Response): Promise<void> 
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); 
 
     const tokenSet = await setPasswordResetTokenService(email, resetToken, expiresAt);
     
@@ -208,7 +234,6 @@ export const passwordReset = async (req: Request, res: Response): Promise<void> 
 // Reset password with token
 export const resetPassword = async (req: Request, res: Response) => {
   try {
-    // 🔥 ADD THIS CHECK:
     if (!req.body || typeof req.body !== 'object') {
       res.status(400).json({ error: "Invalid request body" });
       return;
@@ -239,7 +264,7 @@ export const resetPassword = async (req: Request, res: Response) => {
   }
 };
 
-// Keep old updatePassword for compatibility
+// Update Password (old JWT style)
 export const updatePassword = async (req: Request, res: Response) => {
   try {
     const { token } = req.params;
@@ -293,6 +318,8 @@ export const getUserProfile = async (req: Request, res: Response) => {
       lastName: user.lastName,
       phone: user.phone,
       county: user.county,
+      subCounty: user.subCounty, // Added for completeness
+      village: user.village,     // Added for completeness
       userType: user.userType,
       isEmailVerified: user.isEmailVerified,
       createdAt: user.createdAt
@@ -300,5 +327,31 @@ export const getUserProfile = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const completeProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId; // Get ID from JWT middleware
+    const { dateOfBirth, subCounty, village } = req.body;
+
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    // Call your service to update the user record
+    // Note: Ensure your service/database schema supports these fields
+    await updateUserService(Number(userId), {
+  // Remove "new Date()" and pass the string directly
+  dateOfBirth: dateOfBirth, 
+  subCounty,
+  village,
+});
+
+    res.status(200).json({ message: "Profile completed successfully" });
+  } catch (error: any) {
+    console.error("Complete Profile Error:", error.message);
+    res.status(500).json({ error: "Failed to update profile" });
   }
 };

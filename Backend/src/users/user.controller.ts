@@ -3,7 +3,7 @@ import {Request,response,Response} from "express";
   createUserServices,
   updateUserService,
   deleteUserService,
-  userByIdService,
+  getUserByIdService,
   getAllUsersService,
 } from "./user.service";
 
@@ -90,7 +90,7 @@ export const getUserByIdController = async (req: Request, res: Response) => {
   try {
     const userId = Number(req.params.id);
 
-    const user = await userByIdService(userId);
+    const user = await getUserByIdService(userId);
 
     if (!user) {
       return res.status(404).json({

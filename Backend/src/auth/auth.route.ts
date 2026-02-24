@@ -7,8 +7,10 @@ import {
   resetPassword, // Add this new function
   updatePassword, // Keep for backward compatibility
   verifyEmail,    // Add email verification
-  getUserProfile 
+  getUserProfile, 
+  completeProfile
 } from "./auth.controller";
+import { authMiddleware, motherOnly } from "../middlewares/bearAuth";
 
 export const authRouter = Router();
 
@@ -24,5 +26,8 @@ authRouter.post('/password-reset', passwordReset);
 authRouter.post('/reset-password/:token', resetPassword); // New endpoint
 authRouter.post('/reset/:token', updatePassword); // Keep old endpoint
 
-// User profile routes (protected)
-authRouter.get('/profile', getUserProfile);
+
+authRouter.patch('/complete-profile', authMiddleware(), completeProfile);
+
+// User profile route
+authRouter.get('/profile', authMiddleware(), getUserProfile);

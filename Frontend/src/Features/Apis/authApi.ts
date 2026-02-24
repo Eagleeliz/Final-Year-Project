@@ -10,7 +10,8 @@ const apiClient = axios.create({
   },
 });
 
-// 2. Token Interceptor: Automatically adds JWT to protected requests (like /profile)
+// 2. Token Interceptor: Automatically adds JWT to protected requests
+// This ensures that methods like getProfile and completeProfile always have the token
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token && config.headers) {
@@ -36,7 +37,16 @@ export const authApi = {
    */
   login: async (credentials: { email: string; password: string }) => {
     const response = await apiClient.post('/login', credentials);
-    return response.data; // Returns { token, userId, email, userType, ... }
+    return response.data; // Returns { token, userId, email, userType, isProfileComplete... }
+  },
+
+  /**
+   * Finalize profile setup with DOB and Location details
+   * Controller: completeProfile (Backend PATCH /complete-profile)
+   */
+  completeProfile: async (profileData: { dateOfBirth: string; subCounty: string; village: string }) => {
+    const response = await apiClient.patch('/complete-profile', profileData);
+    return response.data;
   },
 
   /**

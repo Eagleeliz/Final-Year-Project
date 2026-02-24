@@ -18,6 +18,7 @@ export interface UserInsert {
 }
 
 export interface UserSelect {
+  dateOfBirth: string | null;
   id: number;
   email: string;
   phone: string | null;
@@ -101,6 +102,21 @@ export const setEmailVerificationTokenService = async (
       updatedAt: new Date()
     })
     .where(eq(usersTable.id, userId));
+}
+
+
+
+// ON: Update any user fields
+export const updateUserService = async (id: number, data: Partial<UserSelect>): Promise<boolean> => {
+  const result = await db.update(usersTable)
+    .set({ 
+      ...data, 
+      updatedAt: new Date() 
+    })
+    .where(eq(usersTable.id, id))
+    .returning({ id: usersTable.id });
+
+  return result.length > 0;
 }
 
 //  Verify email with token

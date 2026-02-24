@@ -11,6 +11,10 @@ export interface User {
   userType: 'mother' | 'health_worker' | 'admin' | 'policy_maker';
   isActive: boolean;
   isEmailVerified: boolean;
+
+  dateOfBirth?: string;
+  subCounty?: string;
+  village?: string;
 }
 
 interface AuthState {
