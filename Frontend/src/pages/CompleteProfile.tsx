@@ -43,7 +43,7 @@ const CompleteProfile = () => {
         },
       });
 
-      setTimeout(() => navigate("/Dashboard"), 1000);
+      setTimeout(() => navigate("/dashboard"), 1000);
 
     } catch (err: any) {
       const errMsg = err.response?.data?.error || "Failed to update profile.";

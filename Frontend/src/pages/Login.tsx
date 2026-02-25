@@ -23,14 +23,14 @@ const LoginPage = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // 1. Start Redux Loading State
+    // 1. Start Redux Loading State (Triggers "Verifying..." spinner)
     dispatch(authStart());
     
     try {
-      // 2. Execute Axios Login via your authApi helper
+      // 2. Execute Login API Call
       const data = await authApi.login({ email, password });
 
-      // 3. Update Redux (Maps backend names to your Slice structure)
+      // 3. Update Redux (Automatically sets isLoading to false)
       dispatch(setCredentials({
         user: {
           id: data.userId,
@@ -44,13 +44,14 @@ const LoginPage = () => {
           isEmailVerified: data.isEmailVerified
         },
         token: data.token,
-        requireProfileCompletion: !data.isProfileComplete 
+        // Custom Instruction logic: Admins bypass completion, Mothers may need it
+        requireProfileCompletion: data.userType === 'mother' && !data.isProfileComplete 
       }));
 
-      // 4. Persistence
+      // 4. Token Persistence
       localStorage.setItem('token', data.token);
 
-      // 5. Beautiful Success Notification
+      // 5. Success Notification
       toast.success(`Welcome back, ${data.firstName}!`, {
         duration: 4000,
         style: {
@@ -68,19 +69,19 @@ const LoginPage = () => {
       });
 
       // 6. Role-Based Navigation Logic
-      // Timeout allows the user to actually see the success toast before the screen flips
+      // Timeout allows the user to see the success toast before redirecting
       setTimeout(() => {
         if (data.userType === 'admin' || data.userType === 'policy_maker') {
           navigate("/AdminDashboard");
         } else if (!data.isProfileComplete) {
           navigate("/complete-profile");
         } else {
-          navigate("/Dashboard");
+          // If profile is already complete, go straight to dashboard
+          navigate("/dashboard");
         }
       }, 800);
 
     } catch (err: any) {
-      // Axios error parsing
       const errorMessage = err.response?.data?.error || "Invalid credentials. Please try again.";
       dispatch(authError(errorMessage));
       
@@ -97,15 +98,13 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-[#fcfdfe] flex flex-col font-sans antialiased">
-      {/* Required for toast notifications to appear */}
       <Toaster position="top-right" />
-      
       <Navbar />
 
       <main className="flex flex-1 pt-16 flex-col md:flex-row">
         
-        {/* Left Section: Immersive Brand Visuals */}
-        <section className="hidden md:flex md:w-1/2 relative bg-slate-900 items-center justify-center">
+        {/* Left Section: Visual Brand Identity */}
+        <section className="hidden md:flex md:w-1/2 relative bg-slate-900 items-center justify-center overflow-hidden">
           <img 
             src="https://images.unsplash.com/photo-1555252333-9f8e92e65ee9?q=80&w=1500" 
             alt="Motherhood Journey" 
@@ -123,14 +122,14 @@ const LoginPage = () => {
               AI-driven health insights today.
             </p>
             <div className="mt-12 flex gap-4">
-               <div className="h-1 w-20 bg-teal-400 rounded-full" style={{ backgroundColor: aquaText }}></div>
+               <div className="h-1 w-20 rounded-full" style={{ backgroundColor: aquaText }}></div>
                <div className="h-1 w-8 bg-white/20 rounded-full"></div>
                <div className="h-1 w-8 bg-white/20 rounded-full"></div>
             </div>
           </div>
         </section>
 
-        {/* Right Section: Interactive Login Form */}
+        {/* Right Section: Form */}
         <section className="flex-1 flex items-center justify-center p-6 lg:p-24 bg-white">
           <div className="w-full max-w-md">
             <header className="mb-12">
@@ -142,18 +141,20 @@ const LoginPage = () => {
               </p>
             </header>
 
-            <form onSubmit={handleLogin} className="space-y-8">
+            <form onSubmit={handleLogin} className="space-y-8" name="loginForm">
               <div className="space-y-2">
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">
                   Email Address
                 </label>
                 <input
                   type="email"
+                  name="email"
+                  autoComplete="username" // Helps browser autofill
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full px-6 py-5 rounded-[22px] border-2 border-slate-50 bg-slate-50 text-slate-900 font-bold transition-all focus:bg-white focus:border-[#002e33] focus:ring-4 focus:ring-[#002e33]/5 outline-none"
+                  className="w-full px-6 py-5 rounded-[22px] border-2 border-slate-50 bg-slate-50 text-slate-900 font-bold transition-all focus:bg-white focus:border-[#002e33] focus:ring-4 focus:ring-[#002e33]/5 outline-none shadow-sm"
                 />
               </div>
 
@@ -168,11 +169,13 @@ const LoginPage = () => {
                 </div>
                 <input
                   type="password"
+                  name="password"
+                  autoComplete="current-password" // Helps browser autofill
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-6 py-5 rounded-[22px] border-2 border-slate-50 bg-slate-50 text-slate-900 font-bold transition-all focus:bg-white focus:border-[#002e33] focus:ring-4 focus:ring-[#002e33]/5 outline-none"
+                  className="w-full px-6 py-5 rounded-[22px] border-2 border-slate-50 bg-slate-50 text-slate-900 font-bold transition-all focus:bg-white focus:border-[#002e33] focus:ring-4 focus:ring-[#002e33]/5 outline-none shadow-sm"
                 />
               </div>
 
@@ -195,11 +198,11 @@ const LoginPage = () => {
 
             <footer className="mt-16 pt-8 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
               <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">
-                New to BabyCentre?
+                New to MamaCare?
               </p>
               <Link 
                 to="/register" 
-                className="text-sm font-black uppercase tracking-tighter hover:scale-105 transition-transform"
+                className="text-sm font-black uppercase tracking-tighter hover:scale-105 transition-transform underline underline-offset-4"
                 style={{ color: midnightTeal }}
               >
                 Create Account
@@ -207,7 +210,6 @@ const LoginPage = () => {
             </footer>
           </div>
         </section>
-
       </main>
     </div>
   );

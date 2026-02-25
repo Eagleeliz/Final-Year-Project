@@ -45,6 +45,11 @@ const authSlice = createSlice({
       state.isLoading = true;
       state.error = null;
     },
+    // 1. ADDED: This stops the "Generating account..." spinner in Register.tsx
+    registerSuccess: (state) => {
+      state.isLoading = false; 
+      state.error = null;
+    },
 
     // 3. SET CREDENTIALS
     // Logic included to auto-bypass profile completion for non-mothers
@@ -74,6 +79,7 @@ const authSlice = createSlice({
     // 4. COMPLETE PROFILE: Called when a Mother finishes onboarding
     completeProfile: (state) => {
       state.requireProfileCompletion = false;
+      state.isLoading = false;
     },
 
     // 5. UPDATE DATA: For profile edits
@@ -81,6 +87,7 @@ const authSlice = createSlice({
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
       }
+      state.isLoading = false;  // FIX: Stops spinners during profile updates
     },
 
     // 6. CLEAR CREDENTIALS: Logout logic
@@ -89,12 +96,13 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.requireProfileCompletion = false;
+      state.isLoading = false; // Always reset on logout
       state.error = null;
       // Note: Redux Persist will clear the storage when it sees this state change
     },
 
     authError: (state, action: PayloadAction<string>) => {
-      state.isLoading = false;
+      state.isLoading = false;// Stops spinners when an error occurs
       state.error = action.payload;
     }
   },
@@ -106,7 +114,8 @@ export const {
   updateUserData, 
   completeProfile, 
   authStart, 
-  authError 
+  authError,
+  registerSuccess 
 } = authSlice.actions;
 
 export default authSlice.reducer;
