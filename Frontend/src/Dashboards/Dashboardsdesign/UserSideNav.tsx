@@ -15,7 +15,6 @@ interface NavProps {
 }
 
 const UserSideNav = ({ onNavItemClick }: NavProps) => {
-  // MamaCare Colors
   const aqua = "#86d9e1";
 
   const navItems = [
@@ -30,38 +29,33 @@ const UserSideNav = ({ onNavItemClick }: NavProps) => {
 
   return (
     <nav className="flex flex-col h-full py-6">
+      {/* Nav Links Section */}
       <div className="flex-1 space-y-1">
         {navItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
             onClick={onNavItemClick}
-            className={({ isActive }) => `
-              flex items-center px-4 py-3.5 rounded-xl transition-all duration-200 group
-              ${isActive 
-                ? 'bg-[#ffffff10] text-white' 
-                : 'text-gray-400 hover:text-white hover:bg-[#ffffff05]'}
-            `}
+            className={({ isActive }) =>
+              `flex items-center px-4 py-3.5 rounded-xl transition-all duration-200 group
+               ${isActive 
+                 ? 'bg-[#ffffff10] text-white font-bold' 
+                 : 'text-white hover:bg-[#ffffff05] font-medium'}`
+            }
           >
-            {({ isActive }) => (
-              <>
-                <item.icon 
-                  size={22} 
-                  className="mr-4 transition-colors" 
-                  style={{ color: isActive ? aqua : 'inherit' }} 
-                  strokeWidth={isActive ? 2.5 : 2}
-                />
-                <span className={`text-sm tracking-wide ${isActive ? 'font-bold' : 'font-medium'}`}>
-                  {item.name}
-                </span>
-                {isActive && (
-                   <div 
-                     className="ml-auto w-1.5 h-1.5 rounded-full" 
-                     style={{ backgroundColor: aqua }}
-                   />
-                )}
-              </>
-            )}
+            {/* Icon */}
+            <item.icon 
+              size={22} 
+              className="mr-4 transition-colors"
+              style={{ color: 'inherit' }} 
+              strokeWidth={2}
+            />
+
+            {/* Link Text */}
+            <span className="text-sm tracking-wide">{item.name}</span>
+
+            {/* Optional Active Indicator */}
+            {/* This can stay outside if you want a small dot */}
           </NavLink>
         ))}
       </div>
@@ -69,7 +63,7 @@ const UserSideNav = ({ onNavItemClick }: NavProps) => {
       {/* Logout Section */}
       <div className="mt-auto pt-6 border-t border-white/10">
         <button 
-          className="flex items-center w-full px-4 py-3 text-gray-500 hover:text-rose-400 transition-colors group"
+          className="flex items-center w-full px-4 py-3 text-white hover:text-rose-400 transition-colors group"
           onClick={() => {/* Add your logout logic here */}}
         >
           <LogOut size={20} className="mr-4 group-hover:-translate-x-1 transition-transform" />
