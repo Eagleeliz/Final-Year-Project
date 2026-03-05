@@ -14,6 +14,7 @@ import CompleteProfile from "./pages/CompleteProfile";
 // NEW IMPORTS
 import UserLayout from "./Dashboards/Dashboardsdesign/UserLayout"; 
 import DashboardHome from "./Dashboards/UserDashboard/DashboardHome";
+import HealthMonitoring from "./Dashboards/UserDashboard/HealthMonitoring"
 // import ProfilePage from "./pages/dashboard/ProfilePage";
 
 function App() {
@@ -39,7 +40,7 @@ function App() {
         < Route index element={<DashboardHome />} /> 
         
         {/* /dashboard/health-monitoring */}
-        <Route path="health-monitoring" element={<div>Health Monitoring Page</div>} />
+        <Route path="health-monitoring" element={<HealthMonitoring />} />
         
         {/* /dashboard/journey */}
         <Route path="journey" element={<div>Pregnancy Journey Page</div>} />

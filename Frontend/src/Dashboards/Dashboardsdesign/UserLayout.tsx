@@ -2,82 +2,62 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import UserSideNav from "./UserSideNav";
-import Navbar from "../../components/Navbar"; // Import your main Navbar
+import Navbar from "../../components/Navbar";
 
 const UserLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // MamaCare Brand Colors
-  const midnightTeal = "#002e33";
-  const aquaText = "#86d9e1";
-
   return (
-    <div className="min-h-screen flex flex-col bg-[#f4f7f7] font-sans">
+    // 1. h-screen + overflow-hidden prevents the WHOLE window from scrolling
+    <div className="h-screen flex flex-col overflow-hidden bg-gray-100">
 
-      {/* TOP NAVBAR - Reuses global Navbar */}
-      <Navbar />
+      {/* Top Navbar - Make sure your Navbar component has a fixed height (e.g., h-16) */}
+      <div className="z-50 border-b border-gray-200 bg-white">
+        <Navbar />
+      </div>
 
-      {/* MAIN CONTAINER WITH SIDEBAR AND CONTENT */}
-      <div className="flex flex-1 pt-16 lg:pt-20"> {/* pt matches Navbar height */}
+      <div className="flex flex-1 overflow-hidden relative">
 
-        {/* DESKTOP SIDEBAR - Fixed below navbar */}
-        <aside 
-          style={{ backgroundColor: midnightTeal }}
-          className="hidden lg:flex flex-col w-72 fixed left-0 top-16 lg:top-20 bottom-0 z-50 border-r border-white/10"
-        >
-          <div className="p-8">
-            <h1 style={{ color: aquaText }} className="text-2xl font-black tracking-tight">
-              MamaCare<span className="text-white">.</span>
-            </h1>
-          </div>
-          <div className="flex-1 px-4">
-            <UserSideNav />
-          </div>
+        {/* Desktop Sidebar - Fixed to the side */}
+        <aside className="hidden lg:flex flex-col w-64 bg-[#002e33] border-r border-white/10 shrink-0">
+          <UserSideNav />
         </aside>
 
-        {/* MOBILE SIDEBAR DRAWER */}
+        {/* Mobile Sidebar (Drawer logic remains the same) */}
         {sidebarOpen && (
           <>
-            {/* Overlay */}
-            <div 
-              className="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-md lg:hidden" 
-              onClick={() => setSidebarOpen(false)} 
+            <div
+              className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+              onClick={() => setSidebarOpen(false)}
             />
-
-            {/* Sidebar Panel */}
-            <aside 
-              style={{ backgroundColor: midnightTeal }}
-              className="fixed top-0 left-0 z-[1001] w-3/4 max-w-xs h-full shadow-2xl lg:hidden transform transition-transform duration-300 border-r border-white/10 overflow-y-auto"
-            >
-              <button 
-                onClick={() => setSidebarOpen(false)}
-                className="absolute top-4 right-4 z-[1002] p-2 text-[#64748b] hover:text-[#f97316] transition-colors"
-              >
-                <X size={24} />
-              </button>
+            <aside className="fixed top-0 left-0 w-3/4 max-w-xs h-full bg-[#002e33] z-50 shadow-xl lg:hidden">
+              <div className="flex justify-end p-4">
+                <button onClick={() => setSidebarOpen(false)}>
+                  <X size={24} className="text-white" />
+                </button>
+              </div>
               <UserSideNav onNavItemClick={() => setSidebarOpen(false)} />
             </aside>
           </>
         )}
 
-        {/* MAIN CONTENT AREA - Offset for navbar and sidebar */}
-        <main className="flex-1 lg:ml-72 w-full min-h-screen">
-          <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-            {/* Dashboard content renders here */}
+        {/* Main Content - 2. overflow-y-auto makes ONLY this part scrollable */}
+        <main className="flex-1 overflow-y-auto w-full bg-gray-50">
+          {/* 3. Reduced top padding to fix the "too much space" issue */}
+          <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-full">
             <Outlet />
           </div>
         </main>
 
-        {/* MOBILE SIDEBAR TOGGLE BUTTON */}
+        {/* Mobile Toggle Button */}
         {!sidebarOpen && (
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden fixed bottom-6 right-6 z-[999] p-4 bg-[#f97316] text-white rounded-full shadow-[0_0_20px_rgba(249,115,22,0.4)] border border-[#f97316]/50 active:scale-90 transition-all"
+            className="lg:hidden fixed bottom-6 right-6 bg-[#002e33] text-white p-4 rounded-full shadow-lg z-30"
           >
-            <Menu size={24} strokeWidth={3} />
+            <Menu size={24} />
           </button>
         )}
-
       </div>
     </div>
   );

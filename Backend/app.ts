@@ -29,7 +29,7 @@ app.get("/", (req: Request, res: Response) => {
 //Routers
 app.use('/api/weeks',weekRouter)
 app.use('/api/users',userRouter)
-app.use('/api/pregnancy',pregnancyRouter)
+app.use('/api/pregnancies',pregnancyRouter)
 app.use('/api/guidance', guidanceRouter);
 app.use('/api/ai',aiRouter)
 app.use('/api/auth',authRouter)
