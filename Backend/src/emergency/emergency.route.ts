@@ -1,1 +1,29 @@
+import { Router } from "express";
+import {
+  getEmergencyContactController,
+  createEmergencyContactController,
+  updateEmergencyContactController,
+  deleteEmergencyContactController,
+  createEmergencyAlertController,
+  getAlertsByUserController,
+  updateAlertStatusController,
+} from "./emergency.controller";
+import { authMiddleware } from "../middlewares/bearAuth";
+import { getAllAlertsController } from "./emergency.controller";
 
+const emergencyRouter = Router();
+
+// ── Emergency Contact Routes ──────────────────────────────────
+emergencyRouter.get("/contact/:userId",    authMiddleware(), getEmergencyContactController);
+emergencyRouter.post("/contact",           authMiddleware(), createEmergencyContactController);
+emergencyRouter.put("/contact/:id",        authMiddleware(), updateEmergencyContactController);
+emergencyRouter.delete("/contact/:id",     authMiddleware(), deleteEmergencyContactController);
+
+// ── Emergency Alert Routes ────────────────────────────────────
+emergencyRouter.post("/alert",             authMiddleware(), createEmergencyAlertController);
+emergencyRouter.get("/alerts/:userId",     authMiddleware(), getAlertsByUserController);
+emergencyRouter.patch("/alert/:id/status", authMiddleware(), updateAlertStatusController);
+
+emergencyRouter.get("/alerts/all", authMiddleware(), getAllAlertsController);
+
+export default emergencyRouter;

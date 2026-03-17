@@ -8,6 +8,9 @@ import pregnancyRouter from "./src/pregnancy/pregnancy.route";
 import guidanceRouter from "./src/guidance/guidance.route";
 import aiRouter from "./src/groqai/groq.route";
 import { authRouter } from "./src/auth/auth.route";
+import clinicReminderRouter from "./src/ClinicReminders/clinicReminder.route";
+import childRouter from "./src/child/child.route";
+import emergencyRouter from "./src/emergency/emergency.route";
 
 
 
@@ -33,6 +36,9 @@ app.use('/api/pregnancies',pregnancyRouter)
 app.use('/api/guidance', guidanceRouter);
 app.use('/api/ai',aiRouter)
 app.use('/api/auth',authRouter)
+app.use("/api/clinic-reminders", clinicReminderRouter);
+app.use("/api/emergency", emergencyRouter); 
+app.use("/api/children", childRouter);
 
 
 //404 handler

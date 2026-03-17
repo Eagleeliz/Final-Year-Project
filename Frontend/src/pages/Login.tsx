@@ -50,6 +50,7 @@ const LoginPage = () => {
 
       // 4. Token Persistence
       localStorage.setItem('token', data.token);
+      localStorage.setItem('userId', data.userId.toString())
 
       // 5. Success Notification
       toast.success(`Welcome back, ${data.firstName}!`, {
@@ -72,7 +73,7 @@ const LoginPage = () => {
       // Timeout allows the user to see the success toast before redirecting
       setTimeout(() => {
         if (data.userType === 'admin' || data.userType === 'policy_maker') {
-          navigate("/AdminDashboard");
+  navigate("/admin");
         } else if (!data.isProfileComplete) {
           navigate("/complete-profile");
         } else {

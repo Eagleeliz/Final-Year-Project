@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Activity, ShieldAlert, Weight, Baby, PlusCircle, CheckCircle2, AlertCircle } from 'lucide-react';
 import { weeklyCheckinApi } from '../../Features/Apis/WeeklyCheckinAPI';
+import { pregnancyApi } from '../../Features/Apis/PregnancyAPI';
 
 interface HealthFormData {
   pregnancy_id: number | null;
@@ -52,29 +53,46 @@ const HealthMonitoring = () => {
     general_notes: ""
   });
 
-  // Fetch pregnancy profile
+  // Fetch active pregnancy using pregnancyApi.getActive(userId)
+  // userId is saved to localStorage at login — hits GET /api/pregnancies/active/:userId
   useEffect(() => {
     const getActivePregnancy = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const userId = Number(localStorage.getItem("userId"));
+        if (!userId) {
+          setError("Please log in again.");
+          return;
+        }
 
-        const response = await fetch("/api/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`
+        const response = await pregnancyApi.getActive(userId);
+        // unwrap both { success, data: {...} } and plain object shapes
+        const pregnancy = response?.data ?? response;
+
+        if (pregnancy?.id) {
+          // auto-fill pregnancy_id and calculate current week from lmpDate
+          const lmpDate = pregnancy.lmpDate;
+          let weekNumber: number | "" = "";
+
+          if (lmpDate) {
+            const diffDays = Math.floor(
+              (new Date().getTime() - new Date(lmpDate).getTime()) / (1000 * 60 * 60 * 24)
+            );
+            const calculated = Math.min(Math.max(Math.floor(diffDays / 7) + 1, 1), 40);
+            weekNumber = calculated as any;
           }
-        });
 
-        const data = await response.json();
-
-        if (data?.pregnancy?.id) {
           setFormData(prev => ({
             ...prev,
-            pregnancy_id: data.pregnancy.id
+            pregnancy_id: pregnancy.id,
+            week_number: weekNumber,
           }));
         }
-      } catch (err) {
-        console.error("Failed to load pregnancy profile:", err);
-        setError("Could not load pregnancy profile.");
+      } catch (err: any) {
+        // 404 = no active pregnancy, not a real error
+        if (err?.response?.status !== 404) {
+          console.error("Failed to load pregnancy profile:", err);
+          setError("Could not load pregnancy profile.");
+        }
       }
     };
 
@@ -163,15 +181,21 @@ const HealthMonitoring = () => {
         </span>
       </div>
       <div className="flex gap-2">
-        {[1,2,3,4,5].map(num => (
+        {[1, 2, 3, 4, 5].map(num => (
           <button
             key={num}
             type="button"
             onClick={() => setFormData({ ...formData, [field]: num })}
             className={`flex-1 py-4 rounded-xl font-black transition-all border-2 ${
-              formData[field] !== null && formData[field]! >= num ? "text-white shadow-md" : "border-gray-50 bg-gray-50 text-gray-400"
+              formData[field] !== null && formData[field]! >= num
+                ? "text-white shadow-md"
+                : "border-gray-50 bg-gray-50 text-gray-400"
             }`}
-            style={formData[field] !== null && formData[field]! >= num ? { backgroundColor: aquaText, borderColor: aquaText } : {}}
+            style={
+              formData[field] !== null && formData[field]! >= num
+                ? { backgroundColor: aquaText, borderColor: aquaText }
+                : {}
+            }
           >
             {num}
           </button>
@@ -189,7 +213,9 @@ const HealthMonitoring = () => {
               <CheckCircle2 size={80} strokeWidth={1.5} />
             </div>
           </div>
-          <h2 className="text-4xl font-black uppercase tracking-tighter" style={{ color: midnightTeal }}>Data Synced</h2>
+          <h2 className="text-4xl font-black uppercase tracking-tighter" style={{ color: midnightTeal }}>
+            Data Synced
+          </h2>
           <button
             onClick={() => window.location.href = '/dashboard'}
             className="w-full py-6 rounded-[2.5rem] font-black uppercase tracking-widest shadow-xl"
@@ -214,23 +240,30 @@ const HealthMonitoring = () => {
       </header>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
-        {/* LEFT SIDE */}
+
+        {/* ── LEFT SIDE ────────────────────────────────────────── */}
         <div className="lg:col-span-8 space-y-8">
+
           {/* Biometric Vitals */}
           <section className="bg-white p-8 md:p-10 rounded-[3rem] shadow-sm border border-gray-100">
             <div className="flex items-center gap-3 mb-8">
               <div className="p-3 rounded-2xl bg-[#002e33]/5 text-[#002e33]">
                 <Activity size={24} />
               </div>
-              <h3 className="font-black text-xl uppercase tracking-tight" style={{ color: midnightTeal }}>Biometric Vitals</h3>
+              <h3 className="font-black text-xl uppercase tracking-tight" style={{ color: midnightTeal }}>
+                Biometric Vitals
+              </h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+              {/* Blood Pressure */}
               <div className="space-y-4">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Blood Pressure Reading</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+                  Blood Pressure Reading
+                </label>
                 <div className="flex items-center gap-4">
                   <div className="flex-1 space-y-2">
                     <p className="text-[10px] text-center font-bold text-gray-300">SYS</p>
-                    <input 
+                    <input
                       type="number"
                       placeholder="Enter SYS"
                       className="w-full p-5 rounded-2xl border-2 text-black font-black text-2xl text-center outline-none placeholder:text-xs placeholder:text-gray-400"
@@ -242,7 +275,7 @@ const HealthMonitoring = () => {
                   <span className="text-gray-200 font-thin text-4xl mt-6">/</span>
                   <div className="flex-1 space-y-2">
                     <p className="text-[10px] text-center font-bold text-gray-300">DIA</p>
-                    <input 
+                    <input
                       type="number"
                       placeholder="Enter DIA"
                       className="w-full p-5 rounded-2xl border-2 text-black font-black text-2xl text-center outline-none placeholder:text-xs placeholder:text-gray-400"
@@ -253,10 +286,14 @@ const HealthMonitoring = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Weight */}
               <div className="space-y-4 pt-6">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Weight (KG)</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+                  Weight (KG)
+                </label>
                 <div className="relative">
-                  <input 
+                  <input
                     type="number"
                     step="0.1"
                     placeholder="Enter Weight"
@@ -273,7 +310,7 @@ const HealthMonitoring = () => {
             </div>
           </section>
 
-          {/* Scales */}
+          {/* Nausea + Fatigue Scales */}
           <section className="bg-white p-8 md:p-10 rounded-[3rem] shadow-sm border border-gray-100">
             <div className="flex flex-col md:flex-row gap-10">
               {renderScale("Nausea Intensity", "nausea_level")}
@@ -285,16 +322,18 @@ const HealthMonitoring = () => {
           <section className="bg-white p-8 md:p-10 rounded-[3rem] shadow-sm border border-gray-100">
             <div className="flex items-center gap-3 mb-8">
               <ShieldAlert className="text-red-500" size={24} />
-              <h3 className="font-black text-xl uppercase tracking-tight" style={{ color: midnightTeal }}>Clinical Observations</h3>
+              <h3 className="font-black text-xl uppercase tracking-tight" style={{ color: midnightTeal }}>
+                Clinical Observations
+              </h3>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {[ 
+              {[
                 { id: 'vaginal_bleeding', label: 'Vaginal Bleeding', urgent: true },
-                { id: 'blurred_vision', label: 'Blurred Vision', urgent: true },
-                { id: 'back_pain', label: 'Back Pain', urgent: false },
-                { id: 'headache', label: 'Headache', urgent: false },
-                { id: 'dizziness', label: 'Dizziness', urgent: false },
-                { id: 'swelling', label: 'Swelling', urgent: false },
+                { id: 'blurred_vision',   label: 'Blurred Vision',   urgent: true },
+                { id: 'back_pain',        label: 'Back Pain',        urgent: false },
+                { id: 'headache',         label: 'Headache',         urgent: false },
+                { id: 'dizziness',        label: 'Dizziness',        urgent: false },
+                { id: 'swelling',         label: 'Swelling',         urgent: false },
               ].map(item => {
                 const fieldKey = item.id as keyof HealthFormData;
                 const isActive = formData[fieldKey];
@@ -304,13 +343,24 @@ const HealthMonitoring = () => {
                     type="button"
                     onClick={() => handleToggle(fieldKey)}
                     className={`flex flex-col items-center justify-center p-6 rounded-[2rem] font-black text-[10px] uppercase tracking-widest transition-all border-2 gap-3 ${
-                      isActive 
-                        ? (item.urgent ? 'bg-red-600 border-red-600 text-white shadow-lg' : 'text-white shadow-lg') 
+                      isActive
+                        ? item.urgent
+                          ? 'bg-red-600 border-red-600 text-white shadow-lg'
+                          : 'text-white shadow-lg'
                         : 'bg-gray-50 border-transparent text-gray-400 hover:border-gray-200'
                     }`}
-                    style={isActive ? (item.urgent ? { backgroundColor:'#dc2626', borderColor:'#dc2626' } : { backgroundColor: midnightTeal, borderColor: midnightTeal }) : {}}
+                    style={
+                      isActive
+                        ? item.urgent
+                          ? { backgroundColor: '#dc2626', borderColor: '#dc2626' }
+                          : { backgroundColor: midnightTeal, borderColor: midnightTeal }
+                        : {}
+                    }
                   >
-                    <PlusCircle size={18} className={isActive ? 'rotate-45 transition-transform' : 'transition-transform'} />
+                    <PlusCircle
+                      size={18}
+                      className={isActive ? 'rotate-45 transition-transform' : 'transition-transform'}
+                    />
                     {item.label}
                   </button>
                 );
@@ -319,18 +369,24 @@ const HealthMonitoring = () => {
           </section>
         </div>
 
-        {/* RIGHT SIDE */}
+        {/* ── RIGHT SIDE ───────────────────────────────────────── */}
         <div className="lg:col-span-4 space-y-8">
+
+          {/* Fetal Activity */}
           <section className="bg-white p-8 rounded-[3rem] shadow-sm border border-gray-100 space-y-8">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-2xl bg-[#86d9e1]/10 text-[#002e33]">
                 <Baby size={24} />
               </div>
-              <h3 className="font-black text-lg uppercase tracking-tight" style={{ color: midnightTeal }}>Fetal Activity</h3>
+              <h3 className="font-black text-lg uppercase tracking-tight" style={{ color: midnightTeal }}>
+                Fetal Activity
+              </h3>
             </div>
             <div className="space-y-4">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Kick Count (Per Hour)</label>
-              <input 
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                Kick Count (Per Hour)
+              </label>
+              <input
                 type="number"
                 placeholder="Enter Kick Count"
                 className="w-full p-5 rounded-2xl border-2 text-black font-black text-2xl outline-none placeholder:text-xs placeholder:text-gray-400"
@@ -338,21 +394,22 @@ const HealthMonitoring = () => {
                 value={formData.fetal_movements_count}
                 onChange={(e) => handleNumberChange("fetal_movements_count", e.target.value)}
               />
-              <textarea 
+              <textarea
                 placeholder="Fetal movement notes..."
                 className="w-full p-5 rounded-2xl bg-gray-50 border-none text-black font-medium text-sm h-32 outline-none placeholder:text-xs placeholder:text-gray-400"
                 value={formData.fetal_movement_notes}
-                onChange={(e) => setFormData({...formData, fetal_movement_notes: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, fetal_movement_notes: e.target.value })}
               />
             </div>
           </section>
 
+          {/* General Notes + Submit */}
           <div className="space-y-4">
-            <textarea 
+            <textarea
               placeholder="General notes or other symptoms..."
               className="w-full p-6 rounded-[2.5rem] bg-white border border-gray-100 shadow-sm text-black font-medium text-sm h-40 outline-none placeholder:text-xs placeholder:text-gray-400"
               value={formData.general_notes}
-              onChange={(e) => setFormData({...formData, general_notes: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, general_notes: e.target.value })}
             />
 
             {error && (
@@ -362,7 +419,7 @@ const HealthMonitoring = () => {
               </div>
             )}
 
-            <button 
+            <button
               type="submit"
               disabled={loading}
               className="w-full py-7 rounded-[2.5rem] font-black uppercase tracking-[0.3em] shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
@@ -372,6 +429,7 @@ const HealthMonitoring = () => {
             </button>
           </div>
         </div>
+
       </form>
     </div>
   );

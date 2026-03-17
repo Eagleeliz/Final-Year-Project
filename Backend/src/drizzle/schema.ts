@@ -254,10 +254,11 @@ export const emergencyContactsTable = pgTable("emergency_contacts", {
 // Children Table
 // ============================
 
+// ✅ Fixed — uses usersTable directly
 export const childrenTable = pgTable("children", {
   id: serial("id").primaryKey(),
-  motherId: integer("mother_id")
-    .references(() => mothersTable.id, { onDelete: "cascade" })
+  userId: integer("user_id")           // ← renamed
+    .references(() => usersTable.id, { onDelete: "cascade" })
     .notNull(),
   pregnancyId: integer("pregnancy_id")
     .references(() => pregnanciesTable.id),
@@ -402,14 +403,44 @@ export const usersRelations = relations(usersTable, ({ one, many }) => ({
     fields: [usersTable.id],
     references: [mothersTable.userId]
   }),
+
   pregnancies: many(pregnanciesTable),
   emergencies: many(emergencyAlertsTable, { relationName: "user_emergencies" }),
   emergencyContacts: many(emergencyContactsTable),
   emergenciesResponded: many(emergencyAlertsTable, { relationName: "responded_emergencies" }),
   chatLogs: many(aiChatLogsTable),
-  notifications: many(notificationsTable)
+  notifications: many(notificationsTable),
+
+
+  clinicReminders: many(clinicRemindersTable)
 }));
 
+export const clinicRemindersTable = pgTable("clinic_reminders", {
+  id: serial("id").primaryKey(),
+
+  userId: integer("user_id")
+    .references(() => usersTable.id, { onDelete: "cascade" })
+    .notNull(),
+
+  pregnancyId: integer("pregnancy_id")
+    .references(() => pregnanciesTable.id),
+
+  facilityId: integer("facility_id")
+    .references(() => healthcareFacilitiesTable.id),
+
+  title: varchar("title", { length: 200 }).notNull(),
+
+  reminderType: varchar("reminder_type", { length: 100 }),
+
+  appointmentDate: timestamp("appointment_date").notNull(),
+
+  notes: text("notes"),
+
+  status: varchar("status", { length: 50 }).default("pending"),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
 
 export const mothersRelations = relations(mothersTable, ({ one, many }) => ({
   user: one(usersTable, {
@@ -422,16 +453,29 @@ export const mothersRelations = relations(mothersTable, ({ one, many }) => ({
 }));
 
 export const pregnanciesRelations = relations(pregnanciesTable, ({ one, many }) => ({
-  user: one(usersTable, { fields: [pregnanciesTable.userId], references: [usersTable.id] }),
+  user: one(usersTable, { 
+    fields: [pregnanciesTable.userId], 
+    references: [usersTable.id] 
+  }),
+
   checkins: many(weeklyCheckinsTable),
   emergencies: many(emergencyAlertsTable),
-  children: many(childrenTable)
+  children: many(childrenTable),
+
+
+  clinicReminders: many(clinicRemindersTable)
 }));
 
 
 export const childrenRelations = relations(childrenTable, ({ one, many }) => ({
-  mother: one(mothersTable, { fields: [childrenTable.motherId], references: [mothersTable.id] }),
-  pregnancy: one(pregnanciesTable, { fields: [childrenTable.pregnancyId], references: [pregnanciesTable.id] }),
+  user: one(usersTable, {        // ← now points to usersTable
+    fields: [childrenTable.userId],
+    references: [usersTable.id]
+  }),
+  pregnancy: one(pregnanciesTable, { 
+    fields: [childrenTable.pregnancyId], 
+    references: [pregnanciesTable.id] 
+  }),
   milestones: many(childMilestonesTable)
 }));
 
@@ -445,9 +489,26 @@ export const emergencyContactsRelations = relations(emergencyContactsTable, ({ o
   user: one(usersTable, { fields: [emergencyContactsTable.userId], references: [usersTable.id] })
 }));
 
+export const clinicRemindersRelations = relations(clinicRemindersTable, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [clinicRemindersTable.userId],
+    references: [usersTable.id],
+  }),
+
+  pregnancy: one(pregnanciesTable, {
+    fields: [clinicRemindersTable.pregnancyId],
+    references: [pregnanciesTable.id],
+  }),
+
+  facility: one(healthcareFacilitiesTable, {
+    fields: [clinicRemindersTable.facilityId],
+    references: [healthcareFacilitiesTable.id],
+  }),
+}));
 // ============================
 // Type Definitions (Optional but helpful)
 // ============================
+
 
 export type User = typeof usersTable.$inferSelect;
 export type NewUser = typeof usersTable.$inferInsert;
@@ -484,3 +545,7 @@ export type NewHealthTip = typeof healthTipsTable.$inferInsert;
 
 export type HealthcareFacility = typeof healthcareFacilitiesTable.$inferSelect;
 export type NewHealthcareFacility = typeof healthcareFacilitiesTable.$inferInsert;
+
+
+export type ClinicReminder = typeof clinicRemindersTable.$inferSelect;
+export type NewClinicReminder = typeof clinicRemindersTable.$inferInsert;
