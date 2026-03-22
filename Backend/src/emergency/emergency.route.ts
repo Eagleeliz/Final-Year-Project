@@ -8,7 +8,7 @@ import {
   getAlertsByUserController,
   updateAlertStatusController,
 } from "./emergency.controller";
-import { authMiddleware } from "../middlewares/bearAuth";
+import { authMiddleware,adminOnly} from "../middlewares/bearAuth";
 import { getAllAlertsController } from "./emergency.controller";
 
 const emergencyRouter = Router();
@@ -24,6 +24,6 @@ emergencyRouter.post("/alert",             authMiddleware(), createEmergencyAler
 emergencyRouter.get("/alerts/:userId",     authMiddleware(), getAlertsByUserController);
 emergencyRouter.patch("/alert/:id/status", authMiddleware(), updateAlertStatusController);
 
-emergencyRouter.get("/alerts/all", authMiddleware(), getAllAlertsController);
+emergencyRouter.get("/alerts/all", authMiddleware(), adminOnly, getAllAlertsController);
 
 export default emergencyRouter;

@@ -3,11 +3,20 @@ import { weeklyCheckinApi } from "./WeeklyCheckinAPI";
 import { pregnancyApi } from "./PregnancyAPI";
 
 // ── Helper: clean token from localStorage ─────────────────────
-// Token gets stored with extra quotes — strip them before use
 const getCleanToken = (): string | null => {
-  const token = localStorage.getItem("token");
-  if (!token) return null;
-  return token.replace(/^"|"$/g, "").trim();
+  const storedToken = localStorage.getItem("token");
+
+  if (!storedToken) return null;
+
+  let token: string;
+
+  try {
+    token = JSON.parse(storedToken);
+  } catch {
+    token = storedToken.replace(/^"|"$/g, "").trim();
+  }
+
+  return token;
 };
 
 // ── Base clients ──────────────────────────────────────────────
@@ -22,17 +31,28 @@ const emergencyClient = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Auto-attach clean token to all clients
+// ── Attach token interceptor ──────────────────────────────────
 const attachToken = (client: any) => {
+  console.log("Interceptor attached ✅");
+
   client.interceptors.request.use((config: any) => {
+    console.log("Interceptor running 🔥");
+
     const token = getCleanToken();
-    if (token && config.headers) {
+    console.log("TOKEN:", token);
+
+    // ensure headers exist
+    config.headers = config.headers || {};
+
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   });
 };
 
+// Apply interceptor
 [usersClient, emergencyClient].forEach(attachToken);
 
 // ── Types ─────────────────────────────────────────────────────
@@ -91,22 +111,18 @@ export interface AdminCheckin {
 export const adminApi = {
 
   // ── Users ───────────────────────────────────────────────────
-  // GET /api/users
   getAllUsers: async (): Promise<AdminUser[]> => {
     const response = await usersClient.get("");
     return response.data?.data ?? response.data;
   },
 
   // ── Pregnancies ─────────────────────────────────────────────
-  // Reuses your existing pregnancyApi.getAll()
-  // GET /api/pregnancies
   getAllPregnancies: async (): Promise<AdminPregnancy[]> => {
     const response = await pregnancyApi.getAll();
     return response?.data ?? response;
   },
 
   // ── Emergency Alerts ────────────────────────────────────────
-  // GET /api/emergency/alerts/all
   getAllAlerts: async (): Promise<AdminEmergencyAlert[]> => {
     const response = await emergencyClient.get("/alerts/all");
     return response.data?.data ?? response.data;
@@ -122,8 +138,6 @@ export const adminApi = {
   },
 
   // ── Weekly Check-ins ─────────────────────────────────────────
-  // Reuses your existing weeklyCheckinApi.getAll()
-  // GET /api/weeks
   getAllCheckins: async (): Promise<AdminCheckin[]> => {
     const response = await weeklyCheckinApi.getAll();
     return response?.data ?? response;

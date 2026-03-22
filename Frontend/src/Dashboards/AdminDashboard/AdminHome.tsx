@@ -6,7 +6,7 @@ import {
   type AdminEmergencyAlert,
   type AdminCheckin,
   type AdminPregnancy,
-} from "../../Features/Apis/AdminApi";
+} from "../../Features/Apis/adminApi";
 import {
   Users, Baby, ShieldAlert, Activity,
   AlertTriangle, CheckCircle, Clock, XCircle,

@@ -25,7 +25,6 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       res.status(400).json({ error: parseResult.error.issues });
       return;
     }
-
     const user = parseResult.data;
 
     const existingUser = await getUserByEmailService(user.email);

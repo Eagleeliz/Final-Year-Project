@@ -90,7 +90,11 @@ export const emergencyAlertApi = {
     const response = await apiClient.post("/alert", data);
     return response.data.data;
   },
-
+  // GET /api/emergency/alerts/all — admin only
+getAllAlerts: async (): Promise<EmergencyAlert[]> => {
+  const response = await apiClient.get("/alerts/all");
+  return response.data?.data ?? response.data;
+},
   // GET /api/emergency/alerts/:userId — alert history
   getByUser: async (userId: number): Promise<EmergencyAlert[]> => {
     const response = await apiClient.get(`/alerts/${userId}`);

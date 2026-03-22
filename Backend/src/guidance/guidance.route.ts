@@ -3,21 +3,29 @@ import {
   seedGuidanceController,
   getAllGuidanceController,
   getGuidanceByWeekController,
+  createGuidanceController,
+  updateGuidanceController,
+  deleteGuidanceController,
 } from "./guidance.controller";
 
 const guidanceRouter = Router();
 
-
-
-// ⚠️ Run ONCE (admin / dev only)
+// Run ONCE — seed all 40 weeks
 guidanceRouter.post("/seedi", seedGuidanceController);
 
-// Get all pregnancy guidance (Week 1–40)
+// GET all weeks 1–40
 guidanceRouter.get("/week/all", getAllGuidanceController);
 
-
-
-// Get guidance for a specific week
+// GET specific week
 guidanceRouter.get("/week/:weekNumber", getGuidanceByWeekController);
+
+// POST — create new guidance (admin)
+guidanceRouter.post("/", createGuidanceController);
+
+// PUT — update guidance by id (admin)
+guidanceRouter.put("/:id", updateGuidanceController);
+
+// DELETE — delete guidance by id (admin)
+guidanceRouter.delete("/:id", deleteGuidanceController);
 
 export default guidanceRouter;
