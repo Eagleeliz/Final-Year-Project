@@ -94,10 +94,10 @@ export const usersTable = pgTable("users", {
   lastName: varchar("last_name", { length: 100 }),
   dateOfBirth: date("date_of_birth"),
   county: varchar("county", { length: 100 }),
-  subCounty: varchar("sub_county", { length: 100 }),
-  village: varchar("village", { length: 100 }),
+  constituency: varchar("constituency", { length: 100 }),
+   ward: varchar("ward", { length: 100 }), 
   userType: userTypeEnum("user_type").default("mother"),
-  
+   profileImage: varchar("profile_image", { length: 500 }),
   //  Email verification fields
   isEmailVerified: boolean("is_email_verified").default(false),
   emailVerificationToken: varchar("email_verification_token", { length: 255 }),

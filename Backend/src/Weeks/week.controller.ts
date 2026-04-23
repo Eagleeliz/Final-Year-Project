@@ -149,7 +149,9 @@ export const createWeeklyCheckinController = async (req: Request, res: Response)
     const data = req.body;
     
     // Basic validation
-    if (!data.pregnancyId || !data.weekNumber) {
+// Better validation
+if (data.pregnancyId == null || data.weekNumber == null || data.weekNumber === "") {
+
       res.status(400).json({
         success: false,
         message: "pregnancyId and weekNumber are required"

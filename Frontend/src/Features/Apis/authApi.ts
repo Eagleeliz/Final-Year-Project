@@ -1,89 +1,117 @@
-import axios from 'axios';
+import axios from "axios";
+import { store } from "../store";
+import { logout } from "../Auth/AuthSlice";
 
-// 1. Base Configuration
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = "http://localhost:5000/api/auth";
 
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
-// 2. Token Interceptor: Automatically adds JWT to protected requests
-// This ensures that methods like getProfile and completeProfile always have the token
+// ✅ Attach token to EVERY request
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token && config.headers) {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// 3. API Methods matching your AuthController
-export const authApi = {
-  /**
-   * Register a new user
-   * Controller: registerUser
-   */
-  register: async (userData: any) => {
-    const response = await apiClient.post('/register', userData);
-    return response.data;
-  },
-
-  /**
-   * Login user and receive JWT + Profile
-   * Controller: loginUser
-   */
-  login: async (credentials: { email: string; password: string }) => {
-    const response = await apiClient.post('/login', credentials);
-    return response.data; // Returns { token, userId, email, userType, isProfileComplete... }
-  },
-
-  /**
-   * Finalize profile setup with DOB and Location details
-   * Controller: completeProfile (Backend PATCH /complete-profile)
-   */
-  completeProfile: async (profileData: { dateOfBirth: string; subCounty: string; village: string }) => {
-    const response = await apiClient.patch('/complete-profile', profileData);
-    return response.data;
-  },
-
-  /**
-   * Verify email via the token sent to user's email
-   * Controller: verifyEmail
-   */
-  verifyEmail: async (token: string) => {
-    const response = await apiClient.get(`/verify-email/${token}`);
-    return response.data;
-  },
-
-  /**
-   * Request a password reset link
-   * Controller: passwordReset
-   */
-  requestPasswordReset: async (email: string) => {
-    const response = await apiClient.post('/password-reset', { email });
-    return response.data;
-  },
-
-  /**
-   * Reset password using the token from email
-   * Controller: resetPassword
-   */
-  resetPassword: async (token: string, password: string) => {
-    const response = await apiClient.post(`/reset-password/${token}`, { password });
-    return response.data;
-  },
-
-  /**
-   * Get current user profile (requires valid token)
-   * Controller: getUserProfile
-   */
-  getProfile: async () => {
-    const response = await apiClient.get('/profile');
-    return response.data;
+// ✅ Auto-logout on expired/invalid token — skip change-password endpoint
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const isChangePassword = error.config?.url?.includes("/change-password");
+    if (error.response?.status === 401 && !isChangePassword) {
+      localStorage.clear();
+      store.dispatch(logout());
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
   }
+);
+
+export const authApi = {
+  // REGISTER
+  register: async (userData: any) => {
+    const response = await apiClient.post("/register", userData);
+    return response.data;
+  },
+
+  // LOGIN
+  login: async (credentials: { email: string; password: string }) => {
+    const response = await apiClient.post("/login", credentials);
+    return response.data;
+  },
+
+  // OTP
+  verifyOtp: async (data: { email: string; otp: string }) => {
+    const response = await apiClient.post("/verify-otp", data);
+    return response.data;
+  },
+
+  resendOtp: async (data: { email: string }) => {
+    const response = await apiClient.post("/resend-otp", data);
+    return response.data;
+  },
+
+  // PASSWORD RESET
+  forgotPassword: async (email: string) => {
+    const response = await apiClient.post("/forgot-password", { email });
+    return response.data;
+  },
+
+  resetPassword: async (data: {
+    email: string;
+    otp: string;
+    newPassword: string;
+  }) => {
+    const response = await apiClient.post("/reset-password", data);
+    return response.data;
+  },
+
+  // PROFILE
+  getProfile: async () => {
+    const response = await apiClient.get("/profile");
+    return response.data;
+  },
+
+  // UPLOAD IMAGE
+  uploadProfileImage: async (userId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    const response = await axios.post(
+      `${API_URL}/upload-image/${userId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    return response.data;
+  },
+
+  // CHANGE PASSWORD
+  changePassword: async (data: {
+    userId: number;
+    currentPassword: string;
+    newPassword: string;
+  }) => {
+    const response = await apiClient.post("/change-password", data);
+    return response.data;
+  },
+
+  // UPDATE PROFILE
+  completeProfile: async (data: any) => {
+    const response = await apiClient.put("/complete-profile", data);
+    return response.data;
+  },
 };
 
 export default authApi;

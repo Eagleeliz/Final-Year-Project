@@ -79,41 +79,66 @@ export const createWeeklyCheckinService = async (
   data: NewWeeklyCheckin
 ): Promise<WeeklyCheckin> => {
   try {
-    // Check if pregnancy exists
-    const [pregnancy] = await db.select()
+    // 🔹 Validate required fields
+    if (data.pregnancyId == null) {
+      throw new Error("pregnancyId is required");
+    }
+
+    if (data.weekNumber == null) {
+  throw new Error("weekNumber is required");
+}
+
+    // 🔹 Ensure weekNumber is a valid number
+    const weekNumber = Number(data.weekNumber);
+
+    if (isNaN(weekNumber)) {
+      throw new Error("weekNumber must be a valid number");
+    }
+
+    // Replace with clean number
+    data.weekNumber = weekNumber;
+
+    // 🔹 Check if pregnancy exists
+    const [pregnancy] = await db
+      .select()
       .from(pregnanciesTable)
       .where(eq(pregnanciesTable.id, data.pregnancyId))
       .limit(1);
-    
+
     if (!pregnancy) {
       throw new Error("Pregnancy not found");
     }
-    
-    // Check for duplicate week check-in
+
+    // 🔹 Check for duplicate check-in
     const existing = await getWeeklyCheckinByWeekService(
       data.pregnancyId,
       data.weekNumber
     );
-    
+
     if (existing) {
       throw new Error(`Check-in already exists for week ${data.weekNumber}`);
     }
-    
-    // Perform risk assessment
+
+    // 🔹 Perform risk assessment
     const riskAssessment = assessRisk(data);
+
     const checkinData = {
       ...data,
       riskFlag: riskAssessment.level === "high",
       riskReason: riskAssessment.reasons.join(", ")
     };
-    
-    const [checkin] = await db.insert(weeklyCheckinsTable)
+
+    // 🔹 Insert into DB
+    const [checkin] = await db
+      .insert(weeklyCheckinsTable)
       .values(checkinData)
       .returning();
-    
+
     return checkin;
-  } catch (error) {
-    throw new Error(`Failed to create check-in: ${error}`);
+
+  } catch (error: any) {
+    // ✅ Do NOT wrap the error (preserves original message)
+    throw error;
   }
 };
 

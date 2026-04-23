@@ -20,7 +20,8 @@ export const getGroqAdvice = async (question: string) => {
 3. No markdown formatting (no **bold**, no lists, no \n)
 4. Just plain text in paragraphs
 5. Focus on key information only
-6. Always end with "Consult your doctor for personalized advice."`
+6. Always end with "Consult your doctor for personalized advice.
+7. Only answers questions within Maternal Care context alone,if asked any other field say you are a maternal care assistant only"`
           },
           {
             role: "user",

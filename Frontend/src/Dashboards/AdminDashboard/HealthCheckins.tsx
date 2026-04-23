@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { weeklyCheckinApi } from "../../Features/Apis/WeeklyCheckinAPI";
 import {
-  Activity, RefreshCw, Search,
-  AlertTriangle, Eye, Trash2, X,
+  Activity, Search,
+  AlertTriangle, Eye, Trash2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
@@ -10,7 +10,7 @@ import withReactContent from "sweetalert2-react-content";
 
 const MySwal = withReactContent(Swal);
 
-// ── Types ─────────────────────────────────────────────────────
+const midnightTeal = "#0B3B3F";
 
 interface Checkin {
   id: number;
@@ -38,8 +38,6 @@ interface Checkin {
   createdAt?: string;
 }
 
-// ── Helpers ───────────────────────────────────────────────────
-
 const formatDate = (dateStr?: string) => {
   if (!dateStr) return "—";
   return new Date(dateStr).toLocaleDateString("en-KE", {
@@ -63,14 +61,12 @@ const BoolBadge = ({ value, label }: { value?: boolean; label: string }) => {
   );
 };
 
-// ── Main Page ─────────────────────────────────────────────────
-
 const HealthCheckins = () => {
-  const [checkins, setCheckins]         = useState<Checkin[]>([]);
-  const [filtered, setFiltered]         = useState<Checkin[]>([]);
-  const [loading, setLoading]           = useState(true);
-  const [search, setSearch]             = useState("");
-  const [filterRisk, setFilterRisk]     = useState("all");
+  const [checkins, setCheckins]             = useState<Checkin[]>([]);
+  const [filtered, setFiltered]             = useState<Checkin[]>([]);
+  const [loading, setLoading]               = useState(true);
+  const [search, setSearch]                 = useState("");
+  const [filterRisk, setFilterRisk]         = useState("all");
   const [viewingCheckin, setViewingCheckin] = useState<Checkin | null>(null);
 
   useEffect(() => { fetchCheckins(); }, []);
@@ -79,9 +75,7 @@ const HealthCheckins = () => {
     try {
       setLoading(true);
       const response = await weeklyCheckinApi.getAll();
-      const data = Array.isArray(response)
-        ? response
-        : response?.data ?? [];
+      const data = Array.isArray(response) ? response : response?.data ?? [];
       setCheckins(data);
       setFiltered(data);
     } catch {
@@ -91,13 +85,10 @@ const HealthCheckins = () => {
     }
   };
 
-  // ── Filter
   useEffect(() => {
     let result = [...checkins];
-    if (filterRisk === "risk")
-      result = result.filter((c) => c.riskFlag === true);
-    if (filterRisk === "normal")
-      result = result.filter((c) => !c.riskFlag);
+    if (filterRisk === "risk")   result = result.filter((c) => c.riskFlag === true);
+    if (filterRisk === "normal") result = result.filter((c) => !c.riskFlag);
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -110,19 +101,18 @@ const HealthCheckins = () => {
     setFiltered(result);
   }, [search, filterRisk, checkins]);
 
-  // ── Delete
   const handleDelete = (checkin: Checkin) => {
     MySwal.fire({
       title: "Delete this check-in?",
       text: `Week ${checkin.weekNumber} check-in for Pregnancy #${checkin.pregnancyId} will be removed.`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonColor: midnightTeal,
+      cancelButtonColor: "#6B7280",
       confirmButtonText: "Yes, delete",
       cancelButtonText: "Cancel",
-      background: "#002e33",
-      color: "#ffffff",
+      background: "#FFFFFF",
+      color: midnightTeal,
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -136,7 +126,6 @@ const HealthCheckins = () => {
     });
   };
 
-  // ── Stats
   const totalRisk   = checkins.filter((c) => c.riskFlag).length;
   const totalNormal = checkins.filter((c) => !c.riskFlag).length;
   const highNausea  = checkins.filter((c) => (c.nauseaLevel ?? 0) >= 4).length;
@@ -145,7 +134,10 @@ const HealthCheckins = () => {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="w-10 h-10 border-2 border-[#002e33] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <div
+            className="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3"
+            style={{ borderColor: "#E6F7F9", borderTopColor: midnightTeal }}
+          />
           <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">
             Loading check-ins...
           </p>
@@ -163,27 +155,19 @@ const HealthCheckins = () => {
           <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">
             Health Monitoring
           </p>
-          <h1 className="text-3xl font-black" style={{ color: "#002e33" }}>
+          <h1 className="text-3xl font-black" style={{ color: midnightTeal }}>
             Health Check-ins
           </h1>
           <p className="text-gray-400 text-sm mt-1">
             All weekly health check-ins across MamaCare
           </p>
         </div>
-        <button
-          onClick={fetchCheckins}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold hover:opacity-80 transition-all"
-          style={{ background: "#002e33", color: "#86d9e1" }}
-        >
-          <RefreshCw size={14} />
-          Refresh
-        </button>
       </header>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Check-ins", value: checkins.length, color: "#002e33" },
+          { label: "Total Check-ins", value: checkins.length, color: midnightTeal },
           { label: "Risk Flagged",    value: totalRisk,        color: "#e53e3e" },
           { label: "Normal",          value: totalNormal,      color: "#2e6b38" },
           { label: "High Nausea",     value: highNausea,       color: "#dd6b20" },
@@ -226,8 +210,8 @@ const HealthCheckins = () => {
               onClick={() => setFilterRisk(f.value)}
               className="px-3 py-2 rounded-xl text-xs font-bold transition-all"
               style={{
-                background: filterRisk === f.value ? "#002e33" : "#f1f5f9",
-                color: filterRisk === f.value ? "#86d9e1" : "#64748b",
+                background: filterRisk === f.value ? midnightTeal : "#f1f5f9",
+                color: filterRisk === f.value ? "white" : "#64748b",
               }}
             >
               {f.label}
@@ -247,17 +231,17 @@ const HealthCheckins = () => {
             <p className="text-gray-400 text-sm font-bold">No check-ins found</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
+                <tr className="bg-gray-200">
                   {[
                     "Pregnancy", "Week", "Vitals", "Nausea",
                     "Fatigue", "Symptoms", "Risk", "Date", "Actions",
                   ].map((h) => (
                     <th
                       key={h}
-                      className="px-6 py-3 text-left text-xs font-black uppercase tracking-widest text-gray-400"
+                      className="px-6 py-3 text-left text-xs font-black uppercase tracking-widest text-black"
                     >
                       {h}
                     </th>
@@ -279,9 +263,7 @@ const HealthCheckins = () => {
                         <div className="flex items-center gap-3">
                           <div
                             className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                            style={{
-                              background: checkin.riskFlag ? "#fdecea" : "#e8f5f6",
-                            }}
+                            style={{ background: checkin.riskFlag ? "#fdecea" : "#e8f5f6" }}
                           >
                             {checkin.riskFlag
                               ? <AlertTriangle size={16} className="text-red-500" />
@@ -389,9 +371,7 @@ const HealthCheckins = () => {
 
                       {/* Date */}
                       <td className="px-6 py-4">
-                        <p className="text-sm text-gray-500">
-                          {formatDate(checkin.createdAt)}
-                        </p>
+                        <p className="text-sm text-gray-500">{formatDate(checkin.createdAt)}</p>
                       </td>
 
                       {/* Actions */}
@@ -399,23 +379,17 @@ const HealthCheckins = () => {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => setViewingCheckin(checkin)}
-                            className="p-2 rounded-xl hover:bg-blue-50 transition-colors group"
-                            title="View details"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:opacity-80"
+                            style={{ background: midnightTeal, color: "white" }}
                           >
-                            <Eye
-                              size={16}
-                              className="text-gray-300 group-hover:text-blue-500 transition-colors"
-                            />
+                            <Eye size={13} /> View
                           </button>
                           <button
                             onClick={() => handleDelete(checkin)}
-                            className="p-2 rounded-xl hover:bg-red-50 transition-colors group"
-                            title="Delete"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:opacity-80"
+                            style={{ background: midnightTeal, color: "white" }}
                           >
-                            <Trash2
-                              size={16}
-                              className="text-gray-300 group-hover:text-red-500 transition-colors"
-                            />
+                            <Trash2 size={13} /> Delete
                           </button>
                         </div>
                       </td>
@@ -433,16 +407,10 @@ const HealthCheckins = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
 
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-black" style={{ color: "#002e33" }}>
+            <div className="mb-6">
+              <h2 className="text-xl font-black" style={{ color: midnightTeal }}>
                 Check-in Details
               </h2>
-              <button
-                onClick={() => setViewingCheckin(null)}
-                className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors"
-              >
-                <X size={16} className="text-gray-400" />
-              </button>
             </div>
 
             {/* Risk banner */}
@@ -461,21 +429,21 @@ const HealthCheckins = () => {
             {/* Details grid */}
             <div className="space-y-2">
               {[
-                { label: "Pregnancy ID",    value: `#${viewingCheckin.pregnancyId}` },
-                { label: "Week Number",     value: `Week ${viewingCheckin.weekNumber}` },
-                { label: "Check-in Date",   value: formatDate(viewingCheckin.checkinDate) },
-                { label: "Blood Pressure",  value: viewingCheckin.bloodPressureSystolic ? `${viewingCheckin.bloodPressureSystolic}/${viewingCheckin.bloodPressureDiastolic} mmHg` : "—" },
-                { label: "Weight",          value: viewingCheckin.weight ? `${viewingCheckin.weight} kg` : "—" },
-                { label: "Temperature",     value: viewingCheckin.temperature ? `${viewingCheckin.temperature} °C` : "—" },
-                { label: "Nausea Level",    value: viewingCheckin.nauseaLevel ? `${viewingCheckin.nauseaLevel}/5` : "—" },
-                { label: "Fatigue Level",   value: viewingCheckin.fatigueLevel ? `${viewingCheckin.fatigueLevel}/5` : "—" },
-                { label: "Fetal Movements", value: viewingCheckin.fetalMovementsCount ?? "—" },
-                { label: "Back Pain",       value: viewingCheckin.backPain ? "Yes" : "No" },
-                { label: "Headache",        value: viewingCheckin.headache ? "Yes" : "No" },
-                { label: "Dizziness",       value: viewingCheckin.dizziness ? "Yes" : "No" },
-                { label: "Swelling",        value: viewingCheckin.swelling ? "Yes" : "No" },
-                { label: "Vaginal Bleeding",value: viewingCheckin.vaginalBleeding ? "Yes" : "No" },
-                { label: "Blurred Vision",  value: viewingCheckin.blurredVision ? "Yes" : "No" },
+                { label: "Pregnancy ID",     value: `#${viewingCheckin.pregnancyId}` },
+                { label: "Week Number",      value: `Week ${viewingCheckin.weekNumber}` },
+                { label: "Check-in Date",    value: formatDate(viewingCheckin.checkinDate) },
+                { label: "Blood Pressure",   value: viewingCheckin.bloodPressureSystolic ? `${viewingCheckin.bloodPressureSystolic}/${viewingCheckin.bloodPressureDiastolic} mmHg` : "—" },
+                { label: "Weight",           value: viewingCheckin.weight ? `${viewingCheckin.weight} kg` : "—" },
+                { label: "Temperature",      value: viewingCheckin.temperature ? `${viewingCheckin.temperature} °C` : "—" },
+                { label: "Nausea Level",     value: viewingCheckin.nauseaLevel ? `${viewingCheckin.nauseaLevel}/5` : "—" },
+                { label: "Fatigue Level",    value: viewingCheckin.fatigueLevel ? `${viewingCheckin.fatigueLevel}/5` : "—" },
+                { label: "Fetal Movements",  value: viewingCheckin.fetalMovementsCount ?? "—" },
+                { label: "Back Pain",        value: viewingCheckin.backPain ? "Yes" : "No" },
+                { label: "Headache",         value: viewingCheckin.headache ? "Yes" : "No" },
+                { label: "Dizziness",        value: viewingCheckin.dizziness ? "Yes" : "No" },
+                { label: "Swelling",         value: viewingCheckin.swelling ? "Yes" : "No" },
+                { label: "Vaginal Bleeding", value: viewingCheckin.vaginalBleeding ? "Yes" : "No" },
+                { label: "Blurred Vision",   value: viewingCheckin.blurredVision ? "Yes" : "No" },
               ].map((row) => (
                 <div
                   key={row.label}
@@ -512,10 +480,12 @@ const HealthCheckins = () => {
 
             <button
               onClick={() => setViewingCheckin(null)}
-              className="w-full mt-6 py-3 rounded-xl font-black text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all"
+              className="w-full mt-6 py-3 rounded-xl font-black text-sm transition-all hover:opacity-80"
+              style={{ background: midnightTeal, color: "white" }}
             >
               Close
             </button>
+
           </div>
         </div>
       )}

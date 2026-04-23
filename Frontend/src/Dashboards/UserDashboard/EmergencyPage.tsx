@@ -14,21 +14,26 @@ import {
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 
+// ── Color tokens ──────────────────────────────────────────────
+const midnightTeal = "#0B3B3F";
+const aquaText     = "#7FD1E0";
+const aquaLight    = "#E6F7F9";
+const warmGray     = "#F8F9FA";
+
 // ── Alert Types ───────────────────────────────────────────────
 
 const ALERT_TYPES = [
-  { id: "bleeding",          label: "Bleeding",           emoji: "🩸", severity: "critical" },
-  { id: "water_break",       label: "Water Break",        emoji: "💧", severity: "critical" },
-  { id: "contractions",      label: "Contractions",       emoji: "🔄", severity: "critical" },
-  { id: "severe_pain",       label: "Severe Pain",        emoji: "😣", severity: "high"     },
-  { id: "high_fever",        label: "High Fever",         emoji: "🌡️", severity: "high"     },
-  { id: "severe_headache",   label: "Severe Headache",    emoji: "🤕", severity: "high"     },
-  { id: "blurred_vision",    label: "Blurred Vision",     emoji: "👁️", severity: "high"     },
-  { id: "reduced_movements", label: "Reduced Movements",  emoji: "👶", severity: "medium"   },
-  { id: "other",             label: "Other",              emoji: "❓", severity: "medium"   },
+  { id: "bleeding",          label: "Bleeding",          emoji: "🩸", severity: "critical" },
+  { id: "water_break",       label: "Water Break",       emoji: "💧", severity: "critical" },
+  { id: "contractions",      label: "Contractions",      emoji: "🔄", severity: "critical" },
+  { id: "severe_pain",       label: "Severe Pain",       emoji: "😣", severity: "high"     },
+  { id: "high_fever",        label: "High Fever",        emoji: "🌡️", severity: "high"     },
+  { id: "severe_headache",   label: "Severe Headache",   emoji: "🤕", severity: "high"     },
+  { id: "blurred_vision",    label: "Blurred Vision",    emoji: "👁️", severity: "high"     },
+  { id: "reduced_movements", label: "Reduced Movements", emoji: "👶", severity: "medium"   },
+  { id: "other",             label: "Other",             emoji: "❓", severity: "medium"   },
 ];
 
-// Auto-set severity to highest selected
 const getHighestSeverity = (selected: string[]): "critical" | "high" | "medium" => {
   const severities = selected.map(
     (id) => ALERT_TYPES.find((t) => t.id === id)?.severity ?? "medium"
@@ -38,7 +43,6 @@ const getHighestSeverity = (selected: string[]): "critical" | "high" | "medium" 
   return "medium";
 };
 
-// Get most severe alert type from selected
 const getMostSevereType = (selected: string[]): string => {
   const order = ["bleeding", "water_break", "contractions",
     "severe_pain", "high_fever", "severe_headache",
@@ -47,19 +51,19 @@ const getMostSevereType = (selected: string[]): string => {
 };
 
 const severityColors: Record<string, { bg: string; color: string; label: string }> = {
-  critical: { bg: "rgba(231,76,60,0.2)",    color: "#e74c3c", label: "CRITICAL" },
-  high:     { bg: "rgba(244,184,160,0.2)",  color: "#f4b8a0", label: "HIGH"     },
-  medium:   { bg: "rgba(134,217,225,0.2)",  color: "#86d9e1", label: "MEDIUM"   },
+  critical: { bg: "#FEE2E2", color: "#DC2626", label: "CRITICAL" },
+  high:     { bg: "#FEF3C7", color: "#D97706", label: "HIGH"     },
+  medium:   { bg: aquaLight,  color: midnightTeal, label: "MEDIUM" },
 };
 
 // ── Helpers ───────────────────────────────────────────────────
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case "resolved":  return { bg: "rgba(168,213,162,0.15)", color: "#a8d5a2" };
-    case "responded": return { bg: "rgba(134,217,225,0.15)", color: "#86d9e1" };
-    case "notified":  return { bg: "rgba(244,184,160,0.15)", color: "#f4b8a0" };
-    default:          return { bg: "rgba(231,76,60,0.15)",   color: "#e74c3c" };
+    case "resolved":  return { bg: "#DCFCE7", color: "#16A34A" };
+    case "responded": return { bg: aquaLight,  color: midnightTeal };
+    case "notified":  return { bg: "#FEF3C7", color: "#D97706" };
+    default:          return { bg: "#FEE2E2", color: "#DC2626" };
   }
 };
 
@@ -85,7 +89,8 @@ interface AlertCardProps {
 }
 
 const AlertCard: React.FC<AlertCardProps> = ({ alert }) => {
-  const statusStyle = getStatusColor(alert.status);
+  const statusStyle   = getStatusColor(alert.status);
+  const severityStyle = severityColors[alert.severity] ?? severityColors.medium;
 
   const openLocation = () => {
     if (alert.locationLat && alert.locationLong) {
@@ -96,15 +101,10 @@ const AlertCard: React.FC<AlertCardProps> = ({ alert }) => {
     }
   };
 
-  const severityStyle = severityColors[alert.severity] ?? severityColors.medium;
-
   return (
     <div
-      className="p-4 rounded-2xl"
-      style={{
-        background: "rgba(255,255,255,0.03)",
-        border: "1px solid rgba(255,255,255,0.06)",
-      }}
+      className="p-4 rounded-2xl border"
+      style={{ background: "#FFFFFF", borderColor: "#E5E7EB" }}
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
@@ -115,23 +115,21 @@ const AlertCard: React.FC<AlertCardProps> = ({ alert }) => {
             {getStatusIcon(alert.status)}
           </div>
           <div>
-            <p className="text-sm font-bold text-white capitalize">
+            <p className="text-sm font-bold capitalize" style={{ color: midnightTeal }}>
               {alert.alertType.replace(/_/g, " ")} Alert
             </p>
-            <p className="text-xs text-white/40">
+            <p className="text-xs text-gray-400">
               {alert.createdAt ? formatDate(alert.createdAt) : "—"}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Severity badge */}
           <span
             className="text-xs font-black px-2 py-1 rounded-full"
             style={{ background: severityStyle.bg, color: severityStyle.color }}
           >
             {severityStyle.label}
           </span>
-          {/* Status badge */}
           <span
             className="text-xs font-bold px-3 py-1 rounded-full capitalize flex items-center gap-1"
             style={{ background: statusStyle.bg, color: statusStyle.color }}
@@ -142,19 +140,17 @@ const AlertCard: React.FC<AlertCardProps> = ({ alert }) => {
         </div>
       </div>
 
-      {/* Description — all selected symptoms */}
       {alert.description && (
-        <p className="text-xs text-white/50 mb-2 capitalize">
+        <p className="text-xs text-gray-400 mb-2 capitalize">
           Symptoms: {alert.description.replace(/_/g, " ")}
         </p>
       )}
 
-      {/* Location button */}
       {alert.locationLat && alert.locationLong && (
         <button
           onClick={openLocation}
           className="text-xs flex items-center gap-1 hover:opacity-70"
-          style={{ color: "#86d9e1", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+          style={{ color: aquaText, background: "none", border: "none", padding: 0, cursor: "pointer" }}
         >
           <MapPin size={10} /> View location
         </button>
@@ -179,52 +175,54 @@ const SymptomModal: React.FC<SymptomModalProps> = ({ onConfirm, onCancel }) => {
     );
   };
 
-  const severity = selected.length > 0 ? getHighestSeverity(selected) : null;
+  const severity      = selected.length > 0 ? getHighestSeverity(selected) : null;
   const severityStyle = severity ? severityColors[severity] : null;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.7)" }}
+      style={{ background: "rgba(0,0,0,0.5)" }}
     >
       <div
-        className="w-full max-w-md rounded-3xl p-6"
-        style={{ background: "#002e33", border: "1px solid rgba(255,255,255,0.1)" }}
+        className="w-full max-w-md rounded-3xl p-6 bg-white shadow-xl"
+        style={{ border: "1px solid #E5E7EB" }}
       >
         {/* Modal header */}
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-black text-white">What is your emergency?</h2>
+          <h2 className="text-lg font-black" style={{ color: midnightTeal }}>
+            What is your emergency?
+          </h2>
           <button
             onClick={onCancel}
             className="w-8 h-8 rounded-xl flex items-center justify-center hover:opacity-70"
-            style={{ background: "rgba(255,255,255,0.08)" }}
+            style={{ background: warmGray }}
           >
-            <X size={16} style={{ color: "rgba(255,255,255,0.5)" }} />
+            <X size={16} style={{ color: "#9CA3AF" }} />
           </button>
         </div>
-        <p className="text-xs text-white/40 mb-5">Select all that apply</p>
+        <p className="text-xs text-gray-400 mb-5">Select all that apply</p>
 
         {/* Symptom grid */}
         <div className="grid grid-cols-3 gap-2 mb-5">
           {ALERT_TYPES.map((type) => {
             const isSelected = selected.includes(type.id);
-            const typeColor = severityColors[type.severity];
+            const typeColor  = severityColors[type.severity];
             return (
               <button
                 key={type.id}
                 onClick={() => toggle(type.id)}
                 className="flex flex-col items-center justify-center p-3 rounded-2xl text-center transition-all"
                 style={{
-                  background: isSelected ? typeColor.bg : "rgba(255,255,255,0.05)",
+                  background: isSelected ? typeColor.bg : warmGray,
                   border: isSelected
                     ? `1px solid ${typeColor.color}`
-                    : "1px solid rgba(255,255,255,0.08)",
+                    : "1px solid #E5E7EB",
                 }}
               >
                 <span style={{ fontSize: "20px" }}>{type.emoji}</span>
                 <span
                   className="text-xs font-bold mt-1 leading-tight"
-                  style={{ color: isSelected ? typeColor.color : "rgba(255,255,255,0.5)" }}
+                  style={{ color: isSelected ? typeColor.color : "#6B7280" }}
                 >
                   {type.label}
                 </span>
@@ -237,15 +235,18 @@ const SymptomModal: React.FC<SymptomModalProps> = ({ onConfirm, onCancel }) => {
         {severityStyle && severity && (
           <div
             className="rounded-2xl px-4 py-3 mb-5 flex items-center justify-between"
-            style={{ background: severityStyle.bg, border: `1px solid ${severityStyle.color}40` }}
+            style={{
+              background: severityStyle.bg,
+              border: `1px solid ${severityStyle.color}40`,
+            }}
           >
             <div>
-              <p className="text-xs text-white/50">Auto severity</p>
+              <p className="text-xs text-gray-400">Auto severity</p>
               <p className="font-black text-sm" style={{ color: severityStyle.color }}>
                 {severityStyle.label}
               </p>
             </div>
-            <p className="text-xs text-white/40 max-w-[60%] text-right">
+            <p className="text-xs text-gray-400">
               {selected.length} symptom{selected.length > 1 ? "s" : ""} selected
             </p>
           </div>
@@ -256,7 +257,7 @@ const SymptomModal: React.FC<SymptomModalProps> = ({ onConfirm, onCancel }) => {
           <button
             onClick={onCancel}
             className="flex-1 py-3 rounded-xl font-bold text-sm"
-            style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)" }}
+            style={{ background: warmGray, color: "#6B7280" }}
           >
             Cancel
           </button>
@@ -264,7 +265,7 @@ const SymptomModal: React.FC<SymptomModalProps> = ({ onConfirm, onCancel }) => {
             onClick={() => selected.length > 0 && onConfirm(selected)}
             disabled={selected.length === 0}
             className="flex-1 py-3 rounded-xl font-black text-sm transition-all disabled:opacity-30"
-            style={{ background: "#e74c3c", color: "white" }}
+            style={{ background: "#DC2626", color: "white" }}
           >
             Send Alert
           </button>
@@ -292,7 +293,6 @@ const EmergencyPage: React.FC = () => {
   const [sosLoading, setSosLoading]             = useState(false);
   const [showSymptomModal, setShowSymptomModal] = useState(false);
 
-  // Fetch contact
   useEffect(() => {
     const run = async () => {
       try {
@@ -309,7 +309,6 @@ const EmergencyPage: React.FC = () => {
     if (userId) run();
   }, [userId]);
 
-  // Fetch alerts
   useEffect(() => {
     const run = async () => {
       try {
@@ -324,7 +323,6 @@ const EmergencyPage: React.FC = () => {
     if (userId) run();
   }, [userId]);
 
-  // SOS click — open symptom modal
   const handleSOSClick = () => {
     if (!contact) {
       toast.error("Please add an emergency contact first!");
@@ -333,13 +331,10 @@ const EmergencyPage: React.FC = () => {
     setShowSymptomModal(true);
   };
 
-  // After symptoms selected — send alert
   const handleConfirmSOS = async (selectedSymptoms: string[]) => {
     setShowSymptomModal(false);
     setSosLoading(true);
-
     try {
-      // Get GPS location
       const getLocation = (): Promise<{ lat: number; lng: number } | null> =>
         new Promise((resolve) => {
           if (!navigator.geolocation) { resolve(null); return; }
@@ -350,20 +345,13 @@ const EmergencyPage: React.FC = () => {
           );
         });
 
-      const location = await getLocation();
-
-      // Get most severe type and auto severity
-      const alertType = getMostSevereType(selectedSymptoms);
-      const severity  = getHighestSeverity(selectedSymptoms);
-
-      // All selected symptoms saved in description
+      const location    = await getLocation();
+      const alertType   = getMostSevereType(selectedSymptoms);
+      const severity    = getHighestSeverity(selectedSymptoms);
       const description = selectedSymptoms.join(", ");
 
       const newAlert = await emergencyAlertApi.create({
-        userId,
-        alertType,
-        severity,
-        description,
+        userId, alertType, severity, description,
         locationLat: location?.lat,
         locationLong: location?.lng,
       });
@@ -371,17 +359,9 @@ const EmergencyPage: React.FC = () => {
       setAlerts((prev) => [newAlert, ...prev]);
 
       const severityStyle = severityColors[severity];
-      toast.success(
-        `${severityStyle.label} alert sent to ${contact?.name}!`,
-        {
-          duration: 5000,
-          style: {
-            background: "#002e33",
-            color: severityStyle.color,
-            border: `1px solid ${severityStyle.color}40`,
-          },
-        }
-      );
+      toast.success(`${severityStyle.label} alert sent to ${contact?.name}!`, {
+        duration: 5000,
+      });
     } catch {
       toast.error("Failed to send alert. Please call your contact directly.");
     } finally {
@@ -389,7 +369,6 @@ const EmergencyPage: React.FC = () => {
     }
   };
 
-  // Save contact
   const handleSaveContact = async () => {
     if (!contactForm.name.trim() || !contactForm.phoneNumber.trim()) {
       toast.error("Name and phone number are required.");
@@ -413,7 +392,6 @@ const EmergencyPage: React.FC = () => {
     }
   };
 
-  // Delete contact
   const handleDeleteContact = async () => {
     if (!contact) return;
     const result = await Swal.fire({
@@ -421,11 +399,11 @@ const EmergencyPage: React.FC = () => {
       text: "You won't be able to send SOS alerts without a contact.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#e74c3c",
-      cancelButtonColor: "#3085d6",
+      confirmButtonColor: "#DC2626",
+      cancelButtonColor: "#6B7280",
       confirmButtonText: "Yes, delete",
-      background: "#002e33",
-      color: "#ffffff",
+      background: "#FFFFFF",
+      color: midnightTeal,
     });
     if (!result.isConfirmed) return;
     try {
@@ -437,7 +415,6 @@ const EmergencyPage: React.FC = () => {
     }
   };
 
-  // Start editing
   const startEdit = () => {
     if (!contact) return;
     setContactForm({
@@ -449,12 +426,7 @@ const EmergencyPage: React.FC = () => {
     setShowContactForm(true);
   };
 
-  // Call contact
-  const handleCall = () => {
-    if (contact) window.open(`tel:${contact.phoneNumber}`);
-  };
-
-  // Open maps
+  const handleCall    = () => { if (contact) window.open(`tel:${contact.phoneNumber}`); };
   const openMapsSearch = () => {
     window.open(
       `https://www.google.com/maps/search/hospitals+in+${user?.county}+Kenya`,
@@ -463,9 +435,8 @@ const EmergencyPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen font-sans" style={{ background: "#001e22", color: "white" }}>
+    <div className="min-h-screen font-sans" style={{ background: warmGray, color: midnightTeal }}>
 
-      {/* Symptom Modal */}
       {showSymptomModal && (
         <SymptomModal
           onConfirm={handleConfirmSOS}
@@ -477,29 +448,22 @@ const EmergencyPage: React.FC = () => {
 
         {/* Header */}
         <header className="mb-8">
-          <div className="flex items-center gap-3 mb-1">
-            <ShieldAlert size={20} style={{ color: "#e74c3c" }} />
-            <span className="text-xs font-bold uppercase tracking-widest text-white/40">
-              Emergency
-            </span>
+          <div className="flex items-center gap-3 mb-2">
+            <ShieldAlert size={28} style={{ color: "#DC2626" }} />
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ color: midnightTeal }}>
+              Emergency Services
+            </h1>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-white">
-            Emergency Services
-          </h1>
-          <p className="text-white/40 mt-1">
+          <p className="text-gray-400 text-base">
             Quick access to emergency help and nearby facilities.
           </p>
         </header>
 
         {/* SOS Button */}
         <div
-          className="rounded-3xl p-8 mb-8 text-center"
-          style={{
-            background: "rgba(231,76,60,0.06)",
-            border: "1px solid rgba(231,76,60,0.2)",
-          }}
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8 text-center"
         >
-          <p className="text-white/50 text-sm mb-6">
+          <p className="text-gray-400 text-sm mb-6">
             {contact
               ? `Alert will be sent to ${contact.name} (${contact.phoneNumber})`
               : "Add an emergency contact below to enable SOS"}
@@ -508,7 +472,7 @@ const EmergencyPage: React.FC = () => {
             onClick={handleSOSClick}
             disabled={sosLoading || !contact}
             className="w-40 h-40 rounded-full font-black text-xl uppercase tracking-widest mx-auto flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
-            style={{ background: "#e74c3c", color: "white" }}
+            style={{ background: "#DC2626", color: "white" }}
           >
             {sosLoading ? (
               <Loader2 size={32} className="animate-spin" />
@@ -520,255 +484,247 @@ const EmergencyPage: React.FC = () => {
             )}
           </button>
           {!contact && (
-            <p className="text-xs text-white/30 mt-4">
+            <p className="text-xs text-gray-400 mt-4">
               SOS disabled — no emergency contact saved
             </p>
           )}
         </div>
 
         {/* Emergency Contact */}
-        <div
-          className="rounded-3xl p-6 mb-8"
-          style={{
-            background: "rgba(134,217,225,0.04)",
-            border: "1px solid rgba(134,217,225,0.15)",
-          }}
-        >
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: "rgba(134,217,225,0.15)" }}
-              >
-                <Phone size={18} style={{ color: "#86d9e1" }} />
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+          <div className="px-6 py-5 border-b border-gray-100" style={{ backgroundColor: aquaLight }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-white">
+                  <Phone size={22} style={{ color: midnightTeal }} />
+                </div>
+                <h2 className="font-bold text-xl" style={{ color: midnightTeal }}>
+                  Emergency Contact
+                </h2>
               </div>
-              <h2 className="font-bold text-white">Emergency Contact</h2>
+              {!contact && !showContactForm && (
+                <button
+                  onClick={() => { setShowContactForm(true); setEditingContact(false); }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-80"
+                  style={{ background: midnightTeal, color: aquaText }}
+                >
+                  <Plus size={16} /> Add Contact
+                </button>
+              )}
             </div>
-            {!contact && !showContactForm && (
-              <button
-                onClick={() => { setShowContactForm(true); setEditingContact(false); }}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-80"
-                style={{ background: "rgba(134,217,225,0.15)", color: "#86d9e1" }}
-              >
-                <Plus size={16} /> Add Contact
-              </button>
-            )}
           </div>
 
-          {loadingContact ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 size={24} className="animate-spin" style={{ color: "#86d9e1" }} />
-            </div>
-          ) : showContactForm ? (
-            <div className="space-y-4">
-              <input
-                placeholder="Full name *"
-                value={contactForm.name}
-                onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                className="w-full p-3 rounded-xl text-white text-sm outline-none"
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                }}
-              />
-              <input
-                placeholder="Phone number * (e.g. +254712345678)"
-                value={contactForm.phoneNumber}
-                onChange={(e) => setContactForm({ ...contactForm, phoneNumber: e.target.value })}
-                className="w-full p-3 rounded-xl text-white text-sm outline-none"
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                }}
-              />
-              <input
-                placeholder="Relationship (e.g. Husband, Mother)"
-                value={contactForm.relationship}
-                onChange={(e) => setContactForm({ ...contactForm, relationship: e.target.value })}
-                className="w-full p-3 rounded-xl text-white text-sm outline-none"
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                }}
-              />
-              <div className="flex gap-3">
-                <button
-                  onClick={handleSaveContact}
-                  className="flex-1 py-3 rounded-xl font-bold text-sm transition-all hover:opacity-80"
-                  style={{ background: "#86d9e1", color: "#002e33" }}
-                >
-                  {editingContact ? "Update Contact" : "Save Contact"}
-                </button>
-                <button
-                  onClick={() => { setShowContactForm(false); setEditingContact(false); }}
-                  className="w-12 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                  style={{ background: "rgba(255,255,255,0.06)" }}
-                >
-                  <X size={16} style={{ color: "rgba(255,255,255,0.5)" }} />
-                </button>
+          <div className="p-6">
+            {loadingContact ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 size={24} className="animate-spin" style={{ color: aquaText }} />
               </div>
-            </div>
-          ) : contact ? (
-            <div
-              className="flex items-center justify-between p-4 rounded-2xl"
-              style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
-              }}
-            >
-              <div className="flex items-center gap-4">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg"
-                  style={{ background: "rgba(134,217,225,0.15)", color: "#86d9e1" }}
-                >
-                  {contact.name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <p className="font-bold text-white">{contact.name}</p>
-                  <p className="text-sm" style={{ color: "#86d9e1" }}>
-                    {contact.phoneNumber}
-                  </p>
-                  {contact.relationship && (
-                    <p className="text-xs text-white/40">{contact.relationship}</p>
-                  )}
+            ) : showContactForm ? (
+              <div className="space-y-4">
+                <input
+                  placeholder="Full name *"
+                  value={contactForm.name}
+                  onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border-2 text-sm outline-none focus:shadow-md"
+                  style={{ borderColor: "#E5E7EB", color: midnightTeal }}
+                />
+                <input
+                  placeholder="Phone number * (e.g. +254712345678)"
+                  value={contactForm.phoneNumber}
+                  onChange={(e) => setContactForm({ ...contactForm, phoneNumber: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border-2 text-sm outline-none focus:shadow-md"
+                  style={{ borderColor: "#E5E7EB", color: midnightTeal }}
+                />
+                <input
+                  placeholder="Relationship (e.g. Husband, Mother)"
+                  value={contactForm.relationship}
+                  onChange={(e) => setContactForm({ ...contactForm, relationship: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border-2 text-sm outline-none focus:shadow-md"
+                  style={{ borderColor: "#E5E7EB", color: midnightTeal }}
+                />
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleSaveContact}
+                    className="flex-1 py-3 rounded-xl font-bold text-sm transition-all hover:opacity-80"
+                    style={{ background: midnightTeal, color: aquaText }}
+                  >
+                    {editingContact ? "Update Contact" : "Save Contact"}
+                  </button>
+                  <button
+                    onClick={() => { setShowContactForm(false); setEditingContact(false); }}
+                    className="w-12 rounded-xl flex items-center justify-center transition-all hover:bg-gray-100"
+                    style={{ background: warmGray, border: "1px solid #E5E7EB" }}
+                  >
+                    <X size={16} style={{ color: "#9CA3AF" }} />
+                  </button>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleCall}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                  style={{ background: "rgba(168,213,162,0.15)", color: "#a8d5a2" }}
-                >
-                  <Phone size={16} />
-                </button>
-                <button
-                  onClick={startEdit}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                  style={{ background: "rgba(134,217,225,0.15)", color: "#86d9e1" }}
-                >
-                  <Pencil size={16} />
-                </button>
-                <button
-                  onClick={handleDeleteContact}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                  style={{ background: "rgba(231,76,60,0.15)", color: "#e74c3c" }}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <User size={32} className="mx-auto mb-3 opacity-30" />
-              <p className="text-white/40 text-sm">No emergency contact saved yet.</p>
-              <button
-                onClick={() => setShowContactForm(true)}
-                className="mt-4 px-6 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-80"
-                style={{ background: "rgba(134,217,225,0.15)", color: "#86d9e1" }}
+            ) : contact ? (
+              <div
+                className="flex items-center justify-between p-4 rounded-2xl"
+                style={{ background: warmGray, border: "1px solid #E5E7EB" }}
               >
-                Add Contact
-              </button>
-            </div>
-          )}
+                <div className="flex items-center gap-4">
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg"
+                    style={{ background: aquaLight, color: midnightTeal }}
+                  >
+                    {contact.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-bold" style={{ color: midnightTeal }}>{contact.name}</p>
+                    <p className="text-sm" style={{ color: aquaText }}>{contact.phoneNumber}</p>
+                    {contact.relationship && (
+                      <p className="text-xs text-gray-400">{contact.relationship}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleCall}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                    style={{ background: "#DCFCE7", color: "#16A34A" }}
+                  >
+                    <Phone size={16} />
+                  </button>
+                  <button
+                    onClick={startEdit}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                    style={{ background: "#FEF3C7", color: "#D97706" }}
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    onClick={handleDeleteContact}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                    style={{ background: "#FEE2E2", color: "#DC2626" }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                  style={{ background: aquaLight }}
+                >
+                  <User size={28} style={{ color: midnightTeal }} />
+                </div>
+                <p className="text-gray-400 text-sm">No emergency contact saved yet.</p>
+                <button
+                  onClick={() => setShowContactForm(true)}
+                  className="mt-4 px-6 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-80"
+                  style={{ background: midnightTeal, color: aquaText }}
+                >
+                  Add Contact
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Nearby Facilities */}
-        <div
-          className="rounded-3xl p-6 mb-8 overflow-hidden"
-          style={{
-            background: "rgba(134,217,225,0.04)",
-            border: "1px solid rgba(134,217,225,0.15)",
-          }}
-        >
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: "rgba(134,217,225,0.15)" }}
-              >
-                <MapPin size={18} style={{ color: "#86d9e1" }} />
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+          <div className="px-6 py-5 border-b border-gray-100" style={{ backgroundColor: aquaLight }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-white">
+                  <MapPin size={22} style={{ color: midnightTeal }} />
+                </div>
+                <div>
+                  <h2 className="font-bold text-xl" style={{ color: midnightTeal }}>
+                    Nearby Facilities
+                  </h2>
+                  <p className="text-xs text-gray-400">
+                    {user?.county
+                      ? `Hospitals in ${user.county}`
+                      : "Update your county in profile to see nearby hospitals"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="font-bold text-white">Nearby Facilities</h2>
-                <p className="text-xs text-white/40">
-                  {user?.county
-                    ? `Hospitals in ${user.county}`
-                    : "Update your county in profile to see nearby hospitals"}
-                </p>
-              </div>
+              {user?.county && (
+                <button
+                  onClick={openMapsSearch}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all hover:opacity-80"
+                  style={{ background: midnightTeal, color: aquaText }}
+                >
+                  <MapPin size={14} /> Open in Maps
+                </button>
+              )}
             </div>
-            {user?.county && (
-              <button
-                onClick={openMapsSearch}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all hover:opacity-80"
-                style={{ background: "rgba(134,217,225,0.15)", color: "#86d9e1" }}
-              >
-                <MapPin size={14} /> Open in Maps
-              </button>
-            )}
           </div>
 
-          {user?.county ? (
-            <div className="rounded-2xl overflow-hidden">
-              <iframe
-                title="Nearby Hospitals"
-                width="100%"
-                height="350"
-                style={{ border: 0, borderRadius: "16px" }}
-                loading="lazy"
-                allowFullScreen
-                src={`https://maps.google.com/maps?q=hospitals+maternity+in+${encodeURIComponent(user.county)}+Kenya&output=embed`}
-              />
-            </div>
-          ) : (
-            <div
-              className="rounded-2xl flex items-center justify-center py-16"
-              style={{ background: "rgba(255,255,255,0.03)" }}
-            >
-              <div className="text-center">
-                <MapPin size={32} className="mx-auto mb-3 opacity-30" />
-                <p className="text-white/40 text-sm">
-                  Go to Profile and set your county to see nearby hospitals.
-                </p>
+          <div className="p-6">
+            {user?.county ? (
+              <div className="rounded-2xl overflow-hidden">
+                <iframe
+                  title="Nearby Hospitals"
+                  width="100%"
+                  height="350"
+                  style={{ border: 0, borderRadius: "16px" }}
+                  loading="lazy"
+                  allowFullScreen
+                  src={`https://maps.google.com/maps?q=hospitals+maternity+in+${encodeURIComponent(user.county)}+Kenya&output=embed`}
+                />
               </div>
-            </div>
-          )}
+            ) : (
+              <div
+                className="rounded-2xl flex items-center justify-center py-16"
+                style={{ background: warmGray }}
+              >
+                <div className="text-center">
+                  <div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                    style={{ background: aquaLight }}
+                  >
+                    <MapPin size={28} style={{ color: midnightTeal }} />
+                  </div>
+                  <p className="text-gray-400 text-sm">
+                    Go to Profile and set your county to see nearby hospitals.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Alert History */}
-        <div
-          className="rounded-3xl p-6"
-          style={{
-            background: "rgba(134,217,225,0.04)",
-            border: "1px solid rgba(134,217,225,0.15)",
-          }}
-        >
-          <div className="flex items-center gap-3 mb-5">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: "rgba(231,76,60,0.15)" }}
-            >
-              <ShieldAlert size={18} style={{ color: "#e74c3c" }} />
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-100" style={{ backgroundColor: "#FEE2E2" }}>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-white">
+                <ShieldAlert size={22} style={{ color: "#DC2626" }} />
+              </div>
+              <h2 className="font-bold text-xl" style={{ color: "#DC2626" }}>
+                Alert History
+              </h2>
             </div>
-            <h2 className="font-bold text-white">Alert History</h2>
           </div>
 
-          {loadingAlerts ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 size={24} className="animate-spin" style={{ color: "#86d9e1" }} />
-            </div>
-          ) : alerts.length === 0 ? (
-            <div className="text-center py-8">
-              <ShieldAlert size={32} className="mx-auto mb-3 opacity-20" />
-              <p className="text-white/30 text-sm">No emergency alerts yet.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {alerts.map((alert) => (
-                <AlertCard key={alert.id} alert={alert} />
-              ))}
-            </div>
-          )}
+          <div className="p-6">
+            {loadingAlerts ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 size={24} className="animate-spin" style={{ color: aquaText }} />
+              </div>
+            ) : alerts.length === 0 ? (
+              <div className="text-center py-8">
+                <div
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                  style={{ background: "#FEE2E2" }}
+                >
+                  <ShieldAlert size={28} style={{ color: "#DC2626" }} />
+                </div>
+                <p className="text-gray-400 text-sm">No emergency alerts yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {alerts.map((alert) => (
+                  <AlertCard key={alert.id} alert={alert} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
       </div>

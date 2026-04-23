@@ -50,6 +50,13 @@
       "when": 1773549531143,
       "tag": "0006_brave_doctor_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1775828172237,
+      "tag": "0007_familiar_raider",
+      "breakpoints": true
     }
   ]
 }

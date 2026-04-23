@@ -34,7 +34,7 @@ const Navbar = () => {
 
         {/* Desktop Logo Section */}
         <h1 className="text-2xl font-bold" style={{ color: midnightTeal }}>
-          MamaCare AI
+          MamaCare 
         </h1>
 
         {/* Desktop Navigation Links */}
@@ -42,7 +42,7 @@ const Navbar = () => {
           <Link to="/" className="hover:text-[#002e33] transition-colors">Home</Link>
           <Link to="/about" className="hover:text-[#002e33] transition-colors">About</Link>
           <Link to="/howitworks" className="hover:text-[#002e33] transition-colors">How It Works</Link>
-          <Link to="/ai-public" className="hover:text-[#002e33] transition-colors">AI Assistant</Link>
+          <Link to="/duedatecalculator" className="hover:text-[#002e33] transition-colors">DueDate Calculator</Link>
           <Link to="/contact" className="hover:text-[#002e33] transition-colors">Contact</Link>
         </div>
 
@@ -84,7 +84,7 @@ const Navbar = () => {
                   <Link
                     to={
                       user?.userType === "admin"
-                        ? "/admin-dashboard"
+                        ? "/admin"
                         : "/dashboard"
                     }
                     onClick={() => setDropdownOpen(false)}

@@ -2,15 +2,16 @@ import { useEffect, useState } from "react";
 import { usersApi, type User, type UpdateUserPayload } from "../../Features/Apis/usersApi";
 import {
   Search, Trash2, CheckCircle,
-  XCircle, RefreshCw, AlertCircle, Pencil, X, Save,
+  XCircle, AlertCircle, Pencil, Save, ShieldCheck,
 } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
 const MySwal = withReactContent(Swal);
 
-// ── Helpers ───────────────────────────────────────────────────
+const midnightTeal = "#0B3B3F";
+const aquaLight    = "#E6F7F9";
 
 const formatDate = (dateStr?: string) => {
   if (!dateStr) return "—";
@@ -29,8 +30,6 @@ const getUserTypeColor = (userType: string) => {
   }
 };
 
-// ── Main Page ─────────────────────────────────────────────────
-
 const AllUsers = () => {
   const [users, setUsers]           = useState<User[]>([]);
   const [filtered, setFiltered]     = useState<User[]>([]);
@@ -38,7 +37,6 @@ const AllUsers = () => {
   const [search, setSearch]         = useState("");
   const [filterType, setFilterType] = useState<string>("all");
 
-  // Edit modal state
   const [editingUser, setEditingUser]     = useState<User | null>(null);
   const [editFirstName, setEditFirstName] = useState("");
   const [editLastName, setEditLastName]   = useState("");
@@ -47,11 +45,9 @@ const AllUsers = () => {
   const [editCounty, setEditCounty]       = useState("");
   const [editUserType, setEditUserType]   = useState("");
   const [editLoading, setEditLoading]     = useState(false);
+  const [verifyLoading, setVerifyLoading] = useState(false);
 
-  // ── Fetch all users
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  useEffect(() => { fetchUsers(); }, []);
 
   const fetchUsers = async () => {
     try {
@@ -66,14 +62,9 @@ const AllUsers = () => {
     }
   };
 
-  // ── Filter whenever search or filterType changes
   useEffect(() => {
     let result = [...users];
-
-    if (filterType !== "all") {
-      result = result.filter((u) => u.userType === filterType);
-    }
-
+    if (filterType !== "all") result = result.filter((u) => u.userType === filterType);
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -84,11 +75,9 @@ const AllUsers = () => {
           u.county?.toLowerCase().includes(q)
       );
     }
-
     setFiltered(result);
   }, [search, filterType, users]);
 
-  // ── Open edit modal
   const startEdit = (user: User) => {
     setEditingUser(user);
     setEditFirstName(user.firstName ?? "");
@@ -99,7 +88,6 @@ const AllUsers = () => {
     setEditUserType(user.userType ?? "mother");
   };
 
-  // ── Save edit
   const handleUpdate = async () => {
     if (!editingUser) return;
     setEditLoading(true);
@@ -112,20 +100,12 @@ const AllUsers = () => {
         county:    editCounty,
         userType:  editUserType as User["userType"],
       };
-
       await usersApi.updateUser(editingUser.id, payload);
-
-      // Update local state immediately
       setUsers((prev) =>
-        prev.map((u) =>
-          u.id === editingUser.id
-            ? { ...u, ...payload }
-            : u
-        )
+        prev.map((u) => u.id === editingUser.id ? { ...u, ...payload } : u)
       );
-
       setEditingUser(null);
-      toast.success("User updated successfully");
+      toast.success("User details updated successfully");
     } catch {
       toast.error("Failed to update user.");
     } finally {
@@ -133,24 +113,41 @@ const AllUsers = () => {
     }
   };
 
-  // ── Delete user
+  const handleVerify = async () => {
+    if (!editingUser) return;
+    setVerifyLoading(true);
+    try {
+      await usersApi.verifyUser(editingUser.id);
+      setUsers((prev) =>
+        prev.map((u) => u.id === editingUser.id ? { ...u, isEmailVerified: true } : u)
+      );
+      setEditingUser((prev) => prev ? { ...prev, isEmailVerified: true } : null);
+      toast.success(`${editingUser.firstName} ${editingUser.lastName} verified successfully`);
+    } catch {
+      toast.error("Failed to verify user.");
+    } finally {
+      setVerifyLoading(false);
+    }
+  };
+
   const handleDelete = (user: User) => {
     MySwal.fire({
       title: "Delete this user?",
       text: `${user.firstName} ${user.lastName} (${user.email}) will be permanently removed.`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonColor: midnightTeal,
+      cancelButtonColor: "#6B7280",
       confirmButtonText: "Yes, delete",
       cancelButtonText: "Cancel",
-      background: "#002e33",
-      color: "#ffffff",
+      background: "#FFFFFF",
+      color: midnightTeal,
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           await usersApi.deleteUser(user.id);
           setUsers((prev) => prev.filter((u) => u.id !== user.id));
+          setEditingUser(null);
           toast.success("User deleted successfully");
         } catch {
           toast.error("Failed to delete user.");
@@ -159,18 +156,19 @@ const AllUsers = () => {
     });
   };
 
-  // ── Stats
   const totalMothers    = users.filter((u) => u.userType === "mother").length;
   const totalAdmins     = users.filter((u) => u.userType === "admin").length;
   const totalVerified   = users.filter((u) => u.isEmailVerified).length;
   const totalUnverified = users.filter((u) => !u.isEmailVerified).length;
 
-  // ── Loading
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="w-10 h-10 border-2 border-[#002e33] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <div
+            className="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3"
+            style={{ borderColor: aquaLight, borderTopColor: midnightTeal }}
+          />
           <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">
             Loading users...
           </p>
@@ -188,24 +186,16 @@ const AllUsers = () => {
           <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">
             User Management
           </p>
-          <h1 className="text-3xl font-black" style={{ color: "#002e33" }}>
+          <h1 className="text-3xl font-black" style={{ color: midnightTeal }}>
             All Users
           </h1>
         </div>
-        <button
-          onClick={fetchUsers}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-80"
-          style={{ background: "#002e33", color: "#86d9e1" }}
-        >
-          <RefreshCw size={14} />
-          Refresh
-        </button>
       </header>
 
       {/* ── Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Users",  value: users.length,    color: "#002e33" },
+          { label: "Total Users",  value: users.length,    color: midnightTeal },
           { label: "Mothers",      value: totalMothers,    color: "#993556" },
           { label: "Verified",     value: totalVerified,   color: "#2e6b38" },
           { label: "Unverified",   value: totalUnverified, color: "#e53e3e" },
@@ -245,8 +235,8 @@ const AllUsers = () => {
               onClick={() => setFilterType(type)}
               className="px-3 py-2 rounded-xl text-xs font-bold transition-all capitalize"
               style={{
-                background: filterType === type ? "#002e33" : "#f1f5f9",
-                color: filterType === type ? "#86d9e1" : "#64748b",
+                background: filterType === type ? midnightTeal : "#f1f5f9",
+                color: filterType === type ? "white" : "#64748b",
               }}
             >
               {type === "all" ? "All" : type.replace("_", " ")}
@@ -292,7 +282,7 @@ const AllUsers = () => {
                         <div className="flex items-center gap-3">
                           <div
                             className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-black text-white shrink-0"
-                            style={{ background: "#002e33" }}
+                            style={{ background: midnightTeal }}
                           >
                             {user.firstName?.[0]?.toUpperCase() ?? "U"}
                           </div>
@@ -307,29 +297,20 @@ const AllUsers = () => {
 
                       {/* Email */}
                       <td className="px-6 py-4">
-                        <p className="text-sm text-gray-600 truncate max-w-[200px]">
-                          {user.email}
-                        </p>
-                        {user.phone && (
-                          <p className="text-xs text-gray-400">{user.phone}</p>
-                        )}
+                        <p className="text-sm text-gray-600 truncate max-w-[200px]">{user.email}</p>
+                        {user.phone && <p className="text-xs text-gray-400">{user.phone}</p>}
                       </td>
 
                       {/* County */}
                       <td className="px-6 py-4">
-                        <p className="text-sm text-gray-600">
-                          {user.county ?? "—"}
-                        </p>
+                        <p className="text-sm text-gray-600">{user.county ?? "—"}</p>
                       </td>
 
                       {/* User type badge */}
                       <td className="px-6 py-4">
                         <span
                           className="px-2 py-1 rounded-lg text-xs font-bold capitalize"
-                          style={{
-                            background: typeColor.bg,
-                            color: typeColor.color,
-                          }}
+                          style={{ background: typeColor.bg, color: typeColor.color }}
                         >
                           {user.userType?.replace("_", " ")}
                         </span>
@@ -352,9 +333,7 @@ const AllUsers = () => {
 
                       {/* Joined */}
                       <td className="px-6 py-4">
-                        <p className="text-sm text-gray-500">
-                          {formatDate(user.createdAt)}
-                        </p>
+                        <p className="text-sm text-gray-500">{formatDate(user.createdAt)}</p>
                       </td>
 
                       {/* Actions */}
@@ -362,23 +341,17 @@ const AllUsers = () => {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => startEdit(user)}
-                            className="p-2 rounded-xl hover:bg-blue-50 transition-colors group"
-                            title="Edit user"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:opacity-80"
+                            style={{ background: midnightTeal, color: "white" }}
                           >
-                            <Pencil
-                              size={16}
-                              className="text-gray-300 group-hover:text-blue-500 transition-colors"
-                            />
+                            <Pencil size={13} /> Edit
                           </button>
                           <button
                             onClick={() => handleDelete(user)}
-                            className="p-2 rounded-xl hover:bg-red-50 transition-colors group"
-                            title="Delete user"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:opacity-80"
+                            style={{ background: midnightTeal, color: "white" }}
                           >
-                            <Trash2
-                              size={16}
-                              className="text-gray-300 group-hover:text-red-500 transition-colors"
-                            />
+                            <Trash2 size={13} /> Delete
                           </button>
                         </div>
                       </td>
@@ -396,97 +369,60 @@ const AllUsers = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl">
 
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-black" style={{ color: "#002e33" }}>
+            <div className="mb-6">
+              <h2 className="text-xl font-black" style={{ color: midnightTeal }}>
                 Edit User
               </h2>
-              <button
-                onClick={() => setEditingUser(null)}
-                className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors"
-              >
-                <X size={16} className="text-gray-400" />
-              </button>
             </div>
 
-            {/* Avatar preview */}
+            {/* Avatar + verification status */}
             <div className="flex items-center gap-3 mb-6 p-4 bg-gray-50 rounded-2xl">
               <div
                 className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-black text-white shrink-0"
-                style={{ background: "#002e33" }}
+                style={{ background: midnightTeal }}
               >
                 {editFirstName?.[0]?.toUpperCase() ?? "U"}
               </div>
-              <div>
-                <p className="text-sm font-bold text-gray-800">
-                  {editFirstName} {editLastName}
-                </p>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-gray-800">{editFirstName} {editLastName}</p>
                 <p className="text-xs text-gray-400">ID #{editingUser.id}</p>
               </div>
+              {editingUser.isEmailVerified ? (
+                <div className="flex items-center gap-1 px-2 py-1 rounded-lg" style={{ background: "#edf7ee" }}>
+                  <CheckCircle size={13} className="text-green-600" />
+                  <span className="text-xs font-bold text-green-600">Verified</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 px-2 py-1 rounded-lg" style={{ background: "#FEE2E2" }}>
+                  <XCircle size={13} className="text-red-500" />
+                  <span className="text-xs font-bold text-red-500">Unverified</span>
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">
-              {/* First Name */}
-              <div>
-                <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 block">
-                  First Name
-                </label>
-                <input
-                  value={editFirstName}
-                  onChange={(e) => setEditFirstName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-[#002e33] outline-none text-sm font-bold text-gray-800 transition-colors"
-                />
-              </div>
+              {[
+                { label: "First Name", value: editFirstName, onChange: setEditFirstName },
+                { label: "Last Name",  value: editLastName,  onChange: setEditLastName },
+                { label: "Email",      value: editEmail,     onChange: setEditEmail },
+                { label: "Phone",      value: editPhone,     onChange: setEditPhone },
+                { label: "County",     value: editCounty,    onChange: setEditCounty },
+              ].map(({ label, value, onChange }) => (
+                <div key={label}>
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 block">
+                    {label}
+                  </label>
+                  <input
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border-2 outline-none text-sm font-bold text-gray-800 transition-colors"
+                    style={{ borderColor: "#E5E7EB" }}
+                    onFocus={e => (e.target.style.borderColor = midnightTeal)}
+                    onBlur={e => (e.target.style.borderColor = "#E5E7EB")}
+                  />
+                </div>
+              ))}
 
-              {/* Last Name */}
-              <div>
-                <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 block">
-                  Last Name
-                </label>
-                <input
-                  value={editLastName}
-                  onChange={(e) => setEditLastName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-[#002e33] outline-none text-sm font-bold text-gray-800 transition-colors"
-                />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 block">
-                  Email
-                </label>
-                <input
-                  value={editEmail}
-                  onChange={(e) => setEditEmail(e.target.value)}
-                  type="email"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-[#002e33] outline-none text-sm font-bold text-gray-800 transition-colors"
-                />
-              </div>
-
-              {/* Phone */}
-              <div>
-                <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 block">
-                  Phone
-                </label>
-                <input
-                  value={editPhone}
-                  onChange={(e) => setEditPhone(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-[#002e33] outline-none text-sm font-bold text-gray-800 transition-colors"
-                />
-              </div>
-
-              {/* County */}
-              <div>
-                <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 block">
-                  County
-                </label>
-                <input
-                  value={editCounty}
-                  onChange={(e) => setEditCounty(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-[#002e33] outline-none text-sm font-bold text-gray-800 transition-colors"
-                />
-              </div>
-
-              {/* User Type */}
               <div>
                 <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5 block">
                   User Type
@@ -494,7 +430,10 @@ const AllUsers = () => {
                 <select
                   value={editUserType}
                   onChange={(e) => setEditUserType(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-[#002e33] outline-none text-sm font-bold text-gray-800 transition-colors"
+                  className="w-full px-4 py-3 rounded-xl border-2 outline-none text-sm font-bold text-gray-800 transition-colors"
+                  style={{ borderColor: "#E5E7EB" }}
+                  onFocus={e => (e.target.style.borderColor = midnightTeal)}
+                  onBlur={e => (e.target.style.borderColor = "#E5E7EB")}
                 >
                   <option value="mother">Mother</option>
                   <option value="admin">Admin</option>
@@ -504,24 +443,41 @@ const AllUsers = () => {
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={handleUpdate}
-                disabled={editLoading}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-black text-sm disabled:opacity-50 transition-all"
-                style={{ background: "#002e33", color: "#86d9e1" }}
-              >
-                <Save size={14} />
-                {editLoading ? "Saving..." : "Save Changes"}
-              </button>
-              <button
-                onClick={() => setEditingUser(null)}
-                className="flex-1 py-3 rounded-xl font-black text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all"
-              >
-                Cancel
-              </button>
+            {/* Modal buttons — all midnightTeal */}
+            <div className="flex flex-col gap-3 mt-6">
+              <div className="flex gap-3">
+                <button
+                  onClick={handleUpdate}
+                  disabled={editLoading}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-black text-sm disabled:opacity-50 transition-all hover:opacity-80"
+                  style={{ background: midnightTeal, color: "white" }}
+                >
+                  <Save size={14} />
+                  {editLoading ? "Saving..." : "Save Changes"}
+                </button>
+                <button
+                  onClick={() => setEditingUser(null)}
+                  className="flex-1 py-3 rounded-xl font-black text-sm transition-all hover:opacity-80"
+                  style={{ background: midnightTeal, color: "white" }}
+                >
+                  Cancel
+                </button>
+              </div>
+
+              {/* Verify — only for unverified users */}
+              {!editingUser.isEmailVerified && (
+                <button
+                  onClick={handleVerify}
+                  disabled={verifyLoading}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-black text-sm disabled:opacity-50 transition-all hover:opacity-80"
+                  style={{ background: midnightTeal, color: "white" }}
+                >
+                  <ShieldCheck size={14} />
+                  {verifyLoading ? "Verifying..." : "Verify User Email"}
+                </button>
+              )}
             </div>
+
           </div>
         </div>
       )}

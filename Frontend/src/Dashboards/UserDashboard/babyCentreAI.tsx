@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { groqApi } from "../../Features/Apis/babyCentreAIAPI";
-import { Bot, User, Send, Loader2, Sparkles } from "lucide-react";
+import { Bot, User, Loader2, Sparkles } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────
 
@@ -10,6 +10,12 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
 }
+
+// ── Color tokens ──────────────────────────────────────────────
+const midnightTeal = "#0B3B3F";
+const aquaText     = "#7FD1E0";
+const aquaLight    = "#E6F7F9";
+const warmGray     = "#F8F9FA";
 
 // ── ChatBubble ────────────────────────────────────────────────
 
@@ -20,8 +26,8 @@ const ChatBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
       <div
         className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
         style={{
-          background: isUser ? "#86d9e1" : "rgba(134,217,225,0.15)",
-          color: isUser ? "#002e33" : "#86d9e1",
+          background: isUser ? midnightTeal : aquaLight,
+          color: isUser ? aquaText : midnightTeal,
         }}
       >
         {isUser ? <User size={14} /> : <Bot size={14} />}
@@ -29,8 +35,9 @@ const ChatBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
       <div
         className="max-w-[80%] px-4 py-3 text-sm leading-relaxed"
         style={{
-          background: isUser ? "#86d9e1" : "rgba(255,255,255,0.06)",
-          color: isUser ? "#002e33" : "rgba(255,255,255,0.85)",
+          background: isUser ? midnightTeal : "#FFFFFF",
+          color: isUser ? "#FFFFFF" : midnightTeal,
+          border: isUser ? "none" : `1px solid #E5E7EB`,
           borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
         }}
       >
@@ -52,16 +59,14 @@ const BabyCentreAI: React.FC = () => {
       timestamp: new Date(),
     },
   ]);
-  const [input, setInput]       = useState("");
+  const [input, setInput]         = useState("");
   const [aiLoading, setAiLoading] = useState(false);
-  const chatEndRef              = useRef<HTMLDivElement>(null);
+  const chatEndRef                = useRef<HTMLDivElement>(null);
 
-  // Auto scroll to bottom on new message
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Send message to Groq AI
   const handleSend = async () => {
     const question = input.trim();
     if (!question || aiLoading) return;
@@ -96,7 +101,6 @@ const BabyCentreAI: React.FC = () => {
     }
   };
 
-  // Send on Enter key
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -107,58 +111,61 @@ const BabyCentreAI: React.FC = () => {
   return (
     <div
       className="min-h-screen font-sans"
-      style={{ background: "#001e22", color: "white" }}
+      style={{ background: warmGray, color: midnightTeal }}
     >
       <div className="max-w-3xl mx-auto px-4 py-8 md:py-10">
 
         {/* ── Header */}
         <header className="mb-8">
-          <div className="flex items-center gap-3 mb-1">
-            <Sparkles size={20} style={{ color: "#86d9e1" }} />
-            <span className="text-xs font-bold uppercase tracking-widest text-white/40">
+          <div className="flex items-center gap-3 mb-2">
+            <Sparkles size={20} style={{ color: aquaText }} />
+            <span
+              className="text-xs font-bold uppercase tracking-widest"
+              style={{ color: midnightTeal, opacity: 0.5 }}
+            >
               BabyCentre AI
             </span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-white">
+          <h1
+            className="text-3xl md:text-4xl font-black"
+            style={{ color: midnightTeal }}
+          >
             Your AI Health Companion
           </h1>
-          <p className="text-white/40 mt-1">
+          <p className="text-gray-400 mt-1">
             Ask anything about pregnancy, postnatal care, newborns or child development.
           </p>
         </header>
 
         {/* ── Chat Window */}
         <div
-          className="flex flex-col rounded-3xl overflow-hidden"
+          className="flex flex-col rounded-3xl overflow-hidden bg-white shadow-sm"
           style={{
-            background: "rgba(134,217,225,0.04)",
-            border: "1px solid rgba(134,217,225,0.15)",
+            border: "1px solid #E5E7EB",
             minHeight: "600px",
           }}
         >
           {/* Chat header bar */}
           <div
             className="px-5 py-4 flex items-center gap-3"
-            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+            style={{
+              background: aquaLight,
+              borderBottom: "1px solid #E5E7EB",
+            }}
           >
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: "rgba(134,217,225,0.15)" }}
+              style={{ background: "white" }}
             >
-              <Bot size={20} style={{ color: "#86d9e1" }} />
+              <Bot size={20} style={{ color: midnightTeal }} />
             </div>
             <div>
-              <p className="text-sm font-bold text-white">MamaCare AI</p>
-              <p className="text-xs text-white/30">
+              <p className="text-sm font-bold" style={{ color: midnightTeal }}>
+                MamaCare AI
+              </p>
+              <p className="text-xs text-gray-400">
                 Powered by Groq · Always consult your doctor
               </p>
-            </div>
-            <div className="ml-auto flex items-center gap-1.5">
-              <span
-                className="w-2 h-2 rounded-full animate-pulse"
-                style={{ background: "#a8d5a2" }}
-              />
-              <span className="text-xs text-white/30">Online</span>
             </div>
           </div>
 
@@ -173,23 +180,20 @@ const BabyCentreAI: React.FC = () => {
               <div className="flex gap-3">
                 <div
                   className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ background: "rgba(134,217,225,0.15)" }}
+                  style={{ background: aquaLight }}
                 >
-                  <Bot size={14} style={{ color: "#86d9e1" }} />
+                  <Bot size={14} style={{ color: midnightTeal }} />
                 </div>
                 <div
-                  className="px-4 py-3 flex items-center gap-2"
-                  style={{
-                    background: "rgba(255,255,255,0.06)",
-                    borderRadius: "18px 18px 18px 4px",
-                  }}
+                  className="px-4 py-3 flex items-center gap-2 bg-white border border-gray-200"
+                  style={{ borderRadius: "18px 18px 18px 4px" }}
                 >
                   <Loader2
                     size={14}
                     className="animate-spin"
-                    style={{ color: "#86d9e1" }}
+                    style={{ color: aquaText }}
                   />
-                  <span className="text-xs text-white/40">
+                  <span className="text-xs text-gray-400">
                     MamaCare AI is thinking...
                   </span>
                 </div>
@@ -198,10 +202,10 @@ const BabyCentreAI: React.FC = () => {
             <div ref={chatEndRef} />
           </div>
 
-          {/* Suggested questions — only shown before first user message */}
+          {/* Suggested questions */}
           {messages.length === 1 && (
             <div className="px-5 pb-4">
-              <p className="text-xs text-white/30 mb-2">Try asking:</p>
+              <p className="text-xs text-gray-400 mb-2">Try asking:</p>
               <div className="flex flex-wrap gap-2">
                 {[
                   "What should I eat in first trimester?",
@@ -215,9 +219,9 @@ const BabyCentreAI: React.FC = () => {
                     onClick={() => setInput(q)}
                     className="text-xs px-3 py-1.5 rounded-xl transition-all hover:opacity-80"
                     style={{
-                      background: "rgba(134,217,225,0.08)",
-                      color: "#86d9e1",
-                      border: "1px solid rgba(134,217,225,0.2)",
+                      background: aquaLight,
+                      color: midnightTeal,
+                      border: `1px solid ${aquaText}40`,
                     }}
                   >
                     {q}
@@ -230,11 +234,11 @@ const BabyCentreAI: React.FC = () => {
           {/* Input area */}
           <div
             className="px-4 py-4"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+            style={{ borderTop: "1px solid #E5E7EB" }}
           >
             <div
               className="flex gap-3 items-end rounded-2xl px-4 py-3"
-              style={{ background: "rgba(255,255,255,0.06)" }}
+              style={{ background: warmGray, border: "1px solid #E5E7EB" }}
             >
               <textarea
                 value={input}
@@ -242,22 +246,22 @@ const BabyCentreAI: React.FC = () => {
                 onKeyDown={handleKeyDown}
                 placeholder="Ask MamaCare AI anything..."
                 rows={1}
-                className="flex-1 bg-transparent text-white text-sm outline-none resize-none placeholder:text-white/30"
-                style={{ maxHeight: "100px" }}
+                className="flex-1 bg-transparent text-sm outline-none resize-none placeholder:text-gray-400"
+                style={{ color: midnightTeal, maxHeight: "100px" }}
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || aiLoading}
-                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-30"
+                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-30 hover:scale-105 active:scale-95"
                 style={{
-                  background: input.trim() ? "#86d9e1" : "rgba(134,217,225,0.2)",
-                  color: "#002e33",
+                  background: input.trim() ? midnightTeal : "#E5E7EB",
+                  color: "#FFFFFF",
                 }}
               >
-                <Send size={14} />
+                <span style={{ fontSize: "16px", fontWeight: "bold" }}>↑</span>
               </button>
             </div>
-            <p className="text-xs text-white/20 text-center mt-2">
+            <p className="text-xs text-gray-400 text-center mt-2">
               AI responses are for general guidance only. Always consult your healthcare provider.
             </p>
           </div>

@@ -7,10 +7,9 @@ import About from "./pages/About";
 import HIWorks from "./pages/HIWorks";
 import Contact from "./pages/Contact";
 import { Register } from "./pages/Register";
-import VerifyEmailNotice from "./pages/VerifyEmailNotice";
-import VerifyEmail from "./pages/VerifyEmail";
+
 import Login from "./pages/Login";
-import CompleteProfile from "./pages/CompleteProfile";
+
 
 // ── User Dashboard
 import UserLayout from "./Dashboards/Dashboardsdesign/UserLayout";
@@ -33,8 +32,44 @@ import ManageHealthTips from "./Dashboards/AdminDashboard/ManageHealthTips";
 import ManageGuidance from "./Dashboards/AdminDashboard/ManageGuidance";
 import ManageFacilities from "./Dashboards/AdminDashboard/ManageFacilities";
 import Analytics from "./Dashboards/AdminDashboard/Analytics";
+import DueDateCalculator from "./pages/DueDateCalculator";
+import { EnterOtp } from "./pages/EnterOtp";
+import ForgotPassword from "./pages/ForgotPassword";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { logout } from "./Features/Auth/AuthSlice";
+import { jwtDecode } from "jwt-decode";
 
 function App() {
+   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const { exp } = jwtDecode<{ exp: number }>(token);
+      const msUntilExpiry = exp * 1000 - Date.now();
+
+      if (msUntilExpiry <= 0) {
+        localStorage.clear();
+        dispatch(logout());
+        window.location.href = "/login";
+        return;
+      }
+
+      const timer = setTimeout(() => {
+        localStorage.clear();
+        dispatch(logout());
+        window.location.href = "/login";
+      }, msUntilExpiry);
+
+      return () => clearTimeout(timer);
+    } catch {
+      localStorage.clear();
+      dispatch(logout());
+    }
+  }, [dispatch]);
   return (
     <>
       <Toaster position="top-right" richColors />
@@ -45,13 +80,15 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/howitworks" element={<HIWorks />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/duedatecalculator" element={<DueDateCalculator />} />
 
         {/* ── Auth Pages */}
         <Route path="/register" element={<Register />} />
-        <Route path="/verify-email-notice" element={<VerifyEmailNotice />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
+  
+        <Route path="/enter-otp" element={<EnterOtp />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/complete-profile" element={<CompleteProfile />} />
+        <Route path="/forgot" element={<ForgotPassword/>} />
+
 
         {/* ── User Dashboard */}
         <Route path="/dashboard" element={<UserLayout />}>
@@ -73,10 +110,10 @@ function App() {
           <Route path="pregnancies" element={<AllPregnancies />} />
           <Route path="emergencies" element={<EmergencyAlerts />} />
           <Route path="checkins" element={<HealthCheckins />} />
-          <Route path="health-tips" element={<ManageHealthTips />} />
+         
           <Route path="guidance" element={<ManageGuidance />} />
           <Route path="facilities" element={<ManageFacilities />} />
-          <Route path="analytics" element={<Analytics />} />
+        
         </Route>
 
         {/* ── Catch-all */}
@@ -87,3 +124,6 @@ function App() {
 }
 
 export default App;
+
+
+

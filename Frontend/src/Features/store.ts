@@ -1,14 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import storage from "redux-persist/lib/storage";
 import { persistReducer, persistStore } from "redux-persist";
-
-// Updated import to match your 'Auth' folder structure
-import authReducer from "./Auth/AuthSlice"; 
+import authReducer from "./Auth/AuthSlice";
 
 const authPersistConfig = {
     key: 'auth',
     storage,
-    whitelist: ['user', 'token', 'isAuthenticated', 'requireProfileCompletion']
+    whitelist: ['user', 'token', 'isAuthenticated']  // ✅ removed requireProfileCompletion
 };
 
 const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
@@ -19,7 +17,7 @@ export const store = configureStore({
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
-            serializableCheck: false 
+            serializableCheck: false
         }),
 });
 

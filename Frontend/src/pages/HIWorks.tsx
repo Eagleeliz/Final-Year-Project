@@ -1,5 +1,5 @@
 import Navbar from "../components/Navbar"
-import Services from "./Home/Services"
+import Services from "./Home/WhyChooseUs"
 
 
 const HIWorks = () => {

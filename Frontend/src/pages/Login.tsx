@@ -1,59 +1,52 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { authApi } from '../Features/Apis/authApi'; 
+import { authApi } from '../Features/Apis/authApi';
 import { setCredentials, authStart, authError } from '../Features/Auth/AuthSlice';
 import Navbar from '../components/Navbar';
 import toast, { Toaster } from 'react-hot-toast';
+import { Eye, EyeOff } from 'lucide-react';
 
 const LoginPage = () => {
-  // Brand Guidelines
   const midnightTeal = "#002e33";
   const aquaText = "#86d9e1";
 
-  // Local State for inputs
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
-  // Redux hooks
+  const [showPassword, setShowPassword] = useState(false);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isLoading } = useSelector((state: any) => state.auth);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // 1. Start Redux Loading State (Triggers "Verifying..." spinner)
     dispatch(authStart());
-    
+
     try {
-      // 2. Execute Login API Call
       const data = await authApi.login({ email, password });
 
-      // 3. Update Redux (Automatically sets isLoading to false)
       dispatch(setCredentials({
         user: {
-          id: data.userId,
-          email: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          phone: data.phone,
-          county: data.county,
-          userType: data.userType,
-          isActive: data.isActive,
-          isEmailVerified: data.isEmailVerified
+          id: data.user.id,
+          email: data.user.email,
+          firstName: data.user.firstName,
+          lastName: data.user.lastName,
+          phone: data.user.phone,
+          county: data.user.county,
+          constituency: data.user.constituency,
+          ward: data.user.ward,
+          userType: data.user.userType,
+          isActive: true,
+          isEmailVerified: true
         },
         token: data.token,
-        // Custom Instruction logic: Admins bypass completion, Mothers may need it
-        requireProfileCompletion: data.userType === 'mother' && !data.isProfileComplete 
       }));
 
-      // 4. Token Persistence
       localStorage.setItem('token', data.token);
-      localStorage.setItem('userId', data.userId.toString())
+      localStorage.setItem('userId', data.user.id.toString());
 
-      // 5. Success Notification
-      toast.success(`Welcome back, ${data.firstName}!`, {
+      toast.success(`Welcome back, ${data.user.firstName}!`, {
         duration: 4000,
         style: {
           borderRadius: '16px',
@@ -69,15 +62,10 @@ const LoginPage = () => {
         },
       });
 
-      // 6. Role-Based Navigation Logic
-      // Timeout allows the user to see the success toast before redirecting
       setTimeout(() => {
-        if (data.userType === 'admin' || data.userType === 'policy_maker') {
-  navigate("/admin");
-        } else if (!data.isProfileComplete) {
-          navigate("/complete-profile");
+        if (data.user.userType === 'admin' || data.user.userType === 'policy_maker') {
+          navigate("/admin");
         } else {
-          // If profile is already complete, go straight to dashboard
           navigate("/dashboard");
         }
       }, 800);
@@ -85,7 +73,7 @@ const LoginPage = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || "Invalid credentials. Please try again.";
       dispatch(authError(errorMessage));
-      
+
       toast.error(errorMessage, {
         style: {
           borderRadius: '16px',
@@ -98,119 +86,223 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfdfe] flex flex-col font-sans antialiased">
+    <div className="min-h-screen flex flex-col font-sans antialiased">
       <Toaster position="top-right" />
       <Navbar />
 
-      <main className="flex flex-1 pt-16 flex-col md:flex-row">
-        
-        {/* Left Section: Visual Brand Identity */}
-        <section className="hidden md:flex md:w-1/2 relative bg-slate-900 items-center justify-center overflow-hidden">
-          <img 
-            src="https://images.unsplash.com/photo-1555252333-9f8e92e65ee9?q=80&w=1500" 
-            alt="Motherhood Journey" 
-            className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#002e33]/80" />
-          
-          <div className="relative z-10 p-16 max-w-xl">
-            <h1 className="text-7xl font-black text-white leading-[0.9] uppercase tracking-tighter mb-6">
-              Safe <br/> 
-              <span style={{ color: aquaText }}>Motherhood.</span>
-            </h1>
-            <p className="text-xl text-slate-100 font-medium leading-relaxed max-w-md opacity-90">
-              Your intelligent partner for every milestone. Join 10,000+ mothers receiving 
-              AI-driven health insights today.
-            </p>
-            <div className="mt-12 flex gap-4">
-               <div className="h-1 w-20 rounded-full" style={{ backgroundColor: aquaText }}></div>
-               <div className="h-1 w-8 bg-white/20 rounded-full"></div>
-               <div className="h-1 w-8 bg-white/20 rounded-full"></div>
+      <main className="flex flex-1  flex-col md:flex-row">
+
+        {/* ── Left: Form Panel ── */}
+        <div
+          className="flex-1 flex items-center justify-center p-6 md:p-10 overflow-y-auto"
+          style={{
+            background: "linear-gradient(160deg, #e8f9fb 0%, #f0fdfe 25%, #f7fffe 55%, #e4f8fa 80%, #edfbfc 100%)",
+          }}
+        >
+          <div className="w-full max-w-md">
+
+            {/* Heading + subtitle - above card */}
+            <div className="text-center mb-6">
+              <h2 className="text-4xl font-black tracking-tight mb-1" style={{ color: midnightTeal }}>
+                Welcome back
+              </h2>
+              <p className="text-sm text-gray-400">
+                New to MamaCare?{" "}
+                <Link to="/register" className="font-black hover:underline" style={{ color: midnightTeal }}>
+                  Create account
+                </Link>
+              </p>
+            </div>
+
+            <div
+              className="border border-[#86d9e1]/20 p-8 md:p-10 rounded-[32px] shadow-xl shadow-teal-900/10"
+              style={{ background: "linear-gradient(160deg, #ffffff 0%, #f5fdfe 60%, #edfbfc 100%)" }}
+            >
+              {/* Badge only inside card */}
+              <div className="mb-8">
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-4"
+                  style={{
+                    background: "rgba(0,46,51,0.07)",
+                    border: "1px solid rgba(0,46,51,0.15)",
+                  }}
+                >
+                  <div
+                    className="w-1.5 h-1.5 rounded-full animate-pulse"
+                    style={{ background: midnightTeal }}
+                  />
+                  <span
+                    className="text-[10px] font-black uppercase tracking-widest"
+                    style={{ color: midnightTeal }}
+                  >
+                    Secure Access 🔒
+                  </span>
+                </div>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleLogin} className="space-y-5" name="loginForm">
+                <div>
+                  <label className="text-[10px] uppercase font-black text-black mb-2 block tracking-widest">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    autoComplete="username"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="jane@example.com"
+                    className="w-full rounded-2xl p-4 border-2 border-transparent focus:border-[#86d9e1] focus:ring-2 focus:ring-[#86d9e1]/50 outline-none shadow-sm bg-white/70 text-gray-800 placeholder:text-gray-300 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-[10px] uppercase font-black text-black tracking-widest">
+                      Password
+                    </label>
+                    <Link
+                      to="/forgot"
+                      className="text-[10px] font-black uppercase tracking-widest hover:underline"
+                      style={{ color: midnightTeal }}
+                    >
+                      Forgot Password?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      autoComplete="current-password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full rounded-2xl p-4 border-2 border-transparent focus:border-[#86d9e1] focus:ring-2 focus:ring-[#86d9e1]/50 outline-none shadow-sm bg-white/70 text-gray-800 placeholder:text-gray-300 transition-all"
+                      style={{ paddingRight: "3rem" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(v => !v)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-0 transition-colors"
+                      style={{ background: "transparent", border: "none", color: showPassword ? aquaText : "#9ca3af" }}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-5 rounded-2xl font-black text-lg uppercase tracking-wide shadow-xl flex justify-center items-center gap-3 active:scale-95 transition-all disabled:opacity-50"
+                  style={{ backgroundColor: midnightTeal, color: aquaText }}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center gap-3">
+                      <span className="w-5 h-5 rounded-full border-2 border-[#86d9e1] border-t-transparent animate-spin" />
+                      Verifying...
+                    </span>
+                  ) : (
+                    'Sign In'
+                  )}
+                </button>
+              </form>
+
+              {/* Divider */}
+              <div className="mt-8 pt-6 border-t border-[#86d9e1]/20">
+                <p className="text-center text-xs text-gray-400">
+                  By signing in, you agree to our{" "}
+                  <Link to="/terms" className="underline hover:text-gray-600">Terms</Link>
+                  {" "}and{" "}
+                  <Link to="/privacy" className="underline hover:text-gray-600">Privacy Policy</Link>
+                </p>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* Right Section: Form */}
-        <section className="flex-1 flex items-center justify-center p-6 lg:p-24 bg-white">
-          <div className="w-full max-w-md">
-            <header className="mb-12">
-              <h2 className="text-4xl font-black tracking-tight mb-2" style={{ color: midnightTeal }}>
-                Sign In
-              </h2>
-              <p className="text-slate-400 font-bold text-sm uppercase tracking-[0.2em]">
-                Secure Access to MamaCare
-              </p>
-            </header>
+        {/* ── Right: Image Panel ── */}
+        <div
+          className="hidden md:flex md:w-1/2 items-start justify-center relative overflow-hidden pt-28"
+          style={{ backgroundColor: midnightTeal }}
+        >
+          <img
+            src="https://i.pinimg.com/1200x/75/c1/84/75c184e778eb6887ce20393b30f4e2f4.jpg"
+            className="absolute inset-0 w-full h-full object-cover opacity-40"
+            alt="Safe Motherhood"
+          />
 
-            <form onSubmit={handleLogin} className="space-y-8" name="loginForm">
-              <div className="space-y-2">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  autoComplete="username" // Helps browser autofill
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="w-full px-6 py-5 rounded-[22px] border-2 border-slate-50 bg-slate-50 text-slate-900 font-bold transition-all focus:bg-white focus:border-[#002e33] focus:ring-4 focus:ring-[#002e33]/5 outline-none shadow-sm"
-                />
-              </div>
+          {/* Overlay */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(0,46,51,0.5) 0%, rgba(0,61,69,0.3) 100%)",
+            }}
+          />
 
-              <div className="space-y-2">
-                <div className="flex justify-between items-center px-1">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                    Password
-                  </label>
-                  <Link to="/forgot" className="text-xs font-bold text-slate-400 hover:text-[#002e33] transition-colors">
-                    Forgot?
-                  </Link>
-                </div>
-                <input
-                  type="password"
-                  name="password"
-                  autoComplete="current-password" // Helps browser autofill
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-6 py-5 rounded-[22px] border-2 border-slate-50 bg-slate-50 text-slate-900 font-bold transition-all focus:bg-white focus:border-[#002e33] focus:ring-4 focus:ring-[#002e33]/5 outline-none shadow-sm"
-                />
-              </div>
+          {/* Content */}
+          <div className="relative z-10 text-white pt-6 px-12 pb-12 max-w-lg">
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-5 rounded-[22px] font-black text-lg tracking-wider uppercase shadow-2xl transition-all transform active:scale-[0.97] disabled:opacity-50 flex justify-center items-center gap-3"
-                style={{ backgroundColor: midnightTeal, color: aquaText }}
+            {/* Badge */}
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-6"
+              style={{
+                background: "rgba(134,217,225,0.15)",
+                border: "1px solid rgba(134,217,225,0.3)",
+              }}
+            >
+              <div
+                className="w-1.5 h-1.5 rounded-full animate-pulse"
+                style={{ background: aquaText }}
+              />
+              <span
+                className="text-xs font-bold uppercase tracking-widest"
+                style={{ color: aquaText }}
               >
-                {isLoading ? (
-                  <>
-                    <span className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></span>
-                    Verifying...
-                  </>
-                ) : (
-                  'Continue to Dashboard'
-                )}
-              </button>
-            </form>
+                Your Pregnancy Companion 🤍
+              </span>
+            </div>
 
-            <footer className="mt-16 pt-8 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">
-                New to MamaCare?
-              </p>
-              <Link 
-                to="/register" 
-                className="text-sm font-black uppercase tracking-tighter hover:scale-105 transition-transform underline underline-offset-4"
-                style={{ color: midnightTeal }}
+            {/* Heading */}
+            <h1 className="text-5xl font-black mb-4 leading-tight" style={{ color: "#fff" }}>
+              Every mother deserves{" "}
+              <span style={{ color: aquaText }}>safe care</span>
+            </h1>
+
+            {/* Description */}
+            <p
+              className="text-lg opacity-80 border-l-4 pl-4 leading-relaxed"
+              style={{ borderColor: aquaText }}
+            >
+              Join a platform built to support, inform, and empower you through every
+              stage of motherhood.
+            </p>
+
+            {/* Stats */}
+            <div className="mt-10 grid grid-cols-2 gap-4">
+              <div
+                className="p-4 rounded-2xl"
+                style={{ background: "rgba(134,217,225,0.1)", border: "1px solid rgba(134,217,225,0.2)" }}
               >
-                Create Account
-              </Link>
-            </footer>
+                <p className="text-3xl font-black" style={{ color: aquaText }}>10K+</p>
+                <p className="text-xs text-white/70 font-bold uppercase tracking-widest mt-1">Mothers Supported</p>
+              </div>
+              <div
+                className="p-4 rounded-2xl"
+                style={{ background: "rgba(134,217,225,0.1)", border: "1px solid rgba(134,217,225,0.2)" }}
+              >
+                <p className="text-3xl font-black" style={{ color: aquaText }}>47</p>
+                <p className="text-xs text-white/70 font-bold uppercase tracking-widest mt-1">Counties Covered</p>
+              </div>
+            </div>
+
           </div>
-        </section>
+        </div>
+
       </main>
     </div>
   );

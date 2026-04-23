@@ -1,33 +1,32 @@
-// src/auth/auth.routes.ts
 import { Router } from "express";
-import { 
-  registerUser, 
-  loginUser, 
-  passwordReset, 
-  resetPassword, // Add this new function
-  updatePassword, // Keep for backward compatibility
-  verifyEmail,    // Add email verification
-  getUserProfile, 
-  completeProfile
+import {
+  registerUser,
+  loginUser,
+  verifyOtp,
+  resendOtp,
+  forgotPassword,
+  resetPassword,
+  uploadProfileImage,
+  changePassword,
+  getProfile,        // ✅ add
+  completeProfile,   // ✅ add
 } from "./auth.controller";
-import { authMiddleware, motherOnly } from "../middlewares/bearAuth";
+import { upload } from "../middlewares/cloudinary";
+
+
+import { authMiddleware } from "../middlewares/bearAuth";
+
+
 
 export const authRouter = Router();
 
-// User authentication routes
-authRouter.post('/register', registerUser);
-authRouter.post('/login', loginUser);
-
-// Email verification
-authRouter.get('/verify-email/:token', verifyEmail); // ADD THIS
-
-// Password reset routes
-authRouter.post('/password-reset', passwordReset);
-authRouter.post('/reset-password/:token', resetPassword); // New endpoint
-authRouter.post('/reset/:token', updatePassword); // Keep old endpoint
-
-
-authRouter.patch('/complete-profile', authMiddleware(), completeProfile);
-
-// User profile route
-authRouter.get('/profile', authMiddleware(), getUserProfile);
+authRouter.post("/register", registerUser);
+authRouter.post("/login", loginUser);
+authRouter.post("/verify-otp", verifyOtp);
+authRouter.post("/resend-otp", resendOtp);
+authRouter.post("/forgot-password", forgotPassword);
+authRouter.post("/reset-password", resetPassword);
+authRouter.post("/upload-image/:userId", upload.single("image"), uploadProfileImage);
+authRouter.post("/change-password", changePassword);
+authRouter.get("/profile", authMiddleware(), getProfile);          // ✅
+authRouter.put("/complete-profile", authMiddleware(), completeProfile); // ✅

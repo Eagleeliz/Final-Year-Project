@@ -1,5 +1,4 @@
-import React from 'react';
-
+import { Link } from "react-router-dom";
 const HeroSection = () => {
   const midnightTeal = "#002e33";
   const aquaText = "#86d9e1";
@@ -62,12 +61,14 @@ const HeroSection = () => {
               Experience a smarter way to track your baby’s growth. From the first kick to the final push, 
             get AI-powered health insights tailored for the modern Kenyan mother.
             </p>
+            <Link to ="/login">
             <button 
               className="w-full py-4 rounded-full font-bold text-xl transition-transform hover:scale-105"
               style={{ backgroundColor: midnightTeal, color: aquaText }}
             >
               Get Started
             </button>
+            </Link>
           </div>
         </div>
       </div>

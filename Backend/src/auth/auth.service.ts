@@ -1,243 +1,124 @@
-// src/users/user.service.ts
-import  db  from "../drizzle/db";
-import { usersTable } from "../drizzle/schema";
-import { eq, and, lt } from "drizzle-orm";
-import { isNotNull} from "drizzle-orm";
+import db from "../drizzle/db";
+import { usersTable, User } from "../drizzle/schema";
+import { eq, and, or, gt, desc } from "drizzle-orm";
 
-// Types
-export interface UserInsert {
-  email: string;
-  phone?: string;
-  passwordHash: string;
-  firstName?: string;
-  lastName?: string;
-  county?: string;
-  userType?: 'mother' | 'health_worker' | 'admin' | 'policy_maker';
-  isEmailVerified?: boolean;
-  isActive?: boolean;
+// --- TYPES ---
+export interface UserInsert extends Partial<User> {
+    email: string;
+    passwordHash: string;
 }
 
-export interface UserSelect {
-  dateOfBirth: string | null;
-  id: number;
-  email: string;
-  phone: string | null;
-  passwordHash: string;
-  firstName: string | null;
-  lastName: string | null;
-  county: string | null;
-  subCounty: string | null;
-  village: string | null;
-  userType: 'mother' | 'health_worker' | 'admin' | 'policy_maker';
-  isEmailVerified: boolean;
-  emailVerificationToken: string | null;
-  emailVerificationExpires: Date | null;
-  passwordResetToken: string | null;
-  passwordResetExpires: Date | null;
-  isActive: boolean;
-  lastLogin: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// --- GENERAL CRUD SERVICES ---
 
-// Register user (updated)
-export const registerUserService = async (user: UserInsert): Promise<{id: number}> => {
-  const [newUser] = await db.insert(usersTable).values({
-    email: user.email,
-    phone: user.phone,
-    passwordHash: user.passwordHash,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    county: user.county,
-    userType: user.userType || 'mother',
-    isEmailVerified: false, // Default to false for new users
-  }).returning({ id: usersTable.id });
+export const createUserServices = async (user: User): Promise<string | { conflict: "email" | "phone" }> => {
+    const existingUser = await db.query.usersTable.findFirst({
+        where: or(
+            eq(usersTable.email, user.email),
+            user.phone ? eq(usersTable.phone, user.phone) : undefined
+        ),
+    });
 
-  return { id: newUser.id };
-}
-
-// Get user by email
-export const getUserByEmailService = async (email: string): Promise<UserSelect | undefined> => {
-  const user = await db.query.usersTable.findFirst({
-    where: eq(usersTable.email, email)
-  });
-  return user as UserSelect | undefined;
-}
-
-// Get user by ID
-export const getUserByIdService = async (id: number): Promise<UserSelect | undefined> => {
-  const user = await db.query.usersTable.findFirst({
-    where: eq(usersTable.id, id)
-  });
-  return user as UserSelect | undefined;
-}
-
-// Update user password
-export const updateUserPasswordService = async (email: string, newPasswordHash: string): Promise<string> => {
-  const result = await db.update(usersTable)
-    .set({ 
-      passwordHash: newPasswordHash,
-      updatedAt: new Date()
-    })
-    .where(eq(usersTable.email, email))
-    .returning();
-
-  if (result.length === 0) {
-    throw new Error("User not found or password update failed");
-  }
-  
-  return "Password updated successfully";
-}
-
-//  Set email verification token
-export const setEmailVerificationTokenService = async (
-  userId: number,
-  token: string,
-  expiresAt: Date
-): Promise<void> => {
-  await db.update(usersTable)
-    .set({ 
-      emailVerificationToken: token,
-      emailVerificationExpires: expiresAt,
-      updatedAt: new Date()
-    })
-    .where(eq(usersTable.id, userId));
-}
-
-
-
-// ON: Update any user fields
-export const updateUserService = async (id: number, data: Partial<UserSelect>): Promise<boolean> => {
-  const result = await db.update(usersTable)
-    .set({ 
-      ...data, 
-      updatedAt: new Date() 
-    })
-    .where(eq(usersTable.id, id))
-    .returning({ id: usersTable.id });
-
-  return result.length > 0;
-}
-
-//  Verify email with token
-export const verifyEmailService = async (token: string): Promise<boolean> => {
-  console.log("🔍 [DEBUG] Starting email verification...");
-  console.log("🔍 [DEBUG] Token received:", token);
-  console.log("🔍 [DEBUG] Token length:", token.length);
-
-  try {
-    // First, let's see if ANY user has this token
-    const allUsersWithTokens = await db.select()
-      .from(usersTable)
-      .where(eq(usersTable.emailVerificationToken, token));
-
-    console.log("🔍 [DEBUG] Users found with this token:", allUsersWithTokens.length);
-    
-    if (allUsersWithTokens.length > 0) {
-      const user = allUsersWithTokens[0];
-      console.log("🔍 [DEBUG] Found user:", user.email);
-      console.log("🔍 [DEBUG] User isEmailVerified:", user.isEmailVerified);
-      console.log("🔍 [DEBUG] Token expiry:", user.emailVerificationExpires);
-      console.log("🔍 [DEBUG] Current time:", new Date());
-      
-      // Check if already verified
-      if (user.isEmailVerified) {
-        console.log("❌ [DEBUG] User already verified");
-        return false;
-      }
-      
-      // Check if token expired
-      if (user.emailVerificationExpires && new Date() > user.emailVerificationExpires) {
-        console.log("❌ [DEBUG] Token expired");
-        return false;
-      }
-    } else {
-      console.log("❌ [DEBUG] No user found with this token");
-      // Let's check what tokens ARE in the database
-      const allTokens = await db.select({
-        email: usersTable.email,
-        token: usersTable.emailVerificationToken
-      })
-      .from(usersTable)
-      .where(isNotNull(usersTable.emailVerificationToken))
-      
-      console.log("🔍 [DEBUG] All tokens in DB:", allTokens);
-      return false;
+    if (existingUser) {
+        if (existingUser.email === user.email) return { conflict: "email" };
+        if (user.phone && existingUser.phone === user.phone) return { conflict: "phone" };
     }
 
-    // Try to update the user
-    const result = await db.update(usersTable)
-      .set({ 
-        isEmailVerified: true,
-        emailVerificationToken: null,
-        emailVerificationExpires: null,
-        updatedAt: new Date()
-      })
-      .where(eq(usersTable.emailVerificationToken, token))
-      .returning({ id: usersTable.id });
-
-    console.log("🔍 [DEBUG] Update result:", result.length > 0 ? "Success" : "Failed");
-    
-    return result.length > 0;
-
-  } catch (error: any) {
-    console.error("❌ [DEBUG] Error in verifyEmailService:", error.message);
-    console.error("❌ [DEBUG] Full error:", error);
-    return false;
-  }
+    await db.insert(usersTable).values(user);
+    return "User Created Successfully 😎";
 };
 
-//  Set password reset token
-export const setPasswordResetTokenService = async (
-  email: string,
-  token: string,
-  expiresAt: Date
-): Promise<boolean> => {
-  const result = await db.update(usersTable)
-    .set({ 
-      passwordResetToken: token,
-      passwordResetExpires: expiresAt,
-      updatedAt: new Date()
-    })
-    .where(eq(usersTable.email, email))
-    .returning({ id: usersTable.id });
+export const getAllUsersService = async (limitNum: number = 50) => {
+    return await db.query.usersTable.findMany({
+        columns: { passwordHash: false },
+        orderBy: [desc(usersTable.createdAt)],
+        limit: limitNum,
+    });
+};
 
-  return result.length > 0;
-}
+export const getUserByIdService = async (id: number) => {
+    return await db.query.usersTable.findFirst({
+        where: eq(usersTable.id, id),
+    });
+};
 
-// Reset password with token
-export const resetPasswordWithTokenService = async (
-  token: string,
-  newPasswordHash: string
-): Promise<boolean> => {
-  const [user] = await db.select()
-    .from(usersTable)
-    .where(
-      and(
-        eq(usersTable.passwordResetToken, token),
-        lt(usersTable.passwordResetExpires, new Date()) // Token not expired
-      )
-    )
-    .limit(1);
+export const getUserByEmailService = async (email: string) => {
+    return await db.query.usersTable.findFirst({
+        where: eq(usersTable.email, email),
+    });
+};
 
-  if (!user) {
-    return false;
-  }
+export const updateUserService = async (userId: number, updatedData: Partial<User>) => {
+    const result = await db.update(usersTable)
+        .set({ ...updatedData, updatedAt: new Date() })
+        .where(eq(usersTable.id, userId))
+        .returning();
+    return result.length > 0 ? "User Updated Successfully 😎" : null;
+};
 
-  await db.update(usersTable)
-    .set({ 
-      passwordHash: newPasswordHash,
-      passwordResetToken: null,
-      passwordResetExpires: null,
-      updatedAt: new Date()
-    })
-    .where(eq(usersTable.id, user.id));
+export const deleteUserService = async (userId: number) => {
+    const result = await db.delete(usersTable)
+        .where(eq(usersTable.id, userId))
+        .returning();
+    return result.length > 0 ? "User deleted successfully 😎" : null;
+};
 
-  return true;
-}
+// --- AUTH & SECURITY SERVICES ---
 
-//  Check if email is verified
-export const isEmailVerifiedService = async (email: string): Promise<boolean> => {
-  const user = await getUserByEmailService(email);
-  return user?.isEmailVerified || false;
-}
+export const registerUserService = async (user: UserInsert): Promise<{ id: number }> => {
+    const [newUser] = await db.insert(usersTable).values({
+        ...user,
+        isEmailVerified: false,
+        isActive: true,
+    }).returning({ id: usersTable.id });
+    return { id: newUser.id };
+};
+
+// ✅ Used for OTP — stores OTP in emailVerificationToken field
+export const setEmailVerificationTokenService = async (userId: number, token: string, expiresAt: Date) => {
+    await db.update(usersTable)
+        .set({
+            emailVerificationToken: token,
+            emailVerificationExpires: expiresAt,
+            updatedAt: new Date()
+        })
+        .where(eq(usersTable.id, userId));
+};
+
+// ❌ verifyEmailService removed — was link-based, replaced by OTP flow in auth.controller.ts
+
+export const setPasswordResetTokenService = async (email: string, token: string, expiresAt: Date) => {
+    const result = await db.update(usersTable)
+        .set({
+            passwordResetToken: token,
+            passwordResetExpires: expiresAt,
+            updatedAt: new Date()
+        })
+        .where(eq(usersTable.email, email))
+        .returning();
+    return result.length > 0;
+};
+
+export const resetPasswordWithTokenService = async (token: string, newPasswordHash: string): Promise<boolean> => {
+    const [user] = await db.select()
+        .from(usersTable)
+        .where(
+            and(
+                eq(usersTable.passwordResetToken, token),
+                gt(usersTable.passwordResetExpires, new Date())
+            )
+        )
+        .limit(1);
+
+    if (!user) return false;
+
+    await db.update(usersTable)
+        .set({
+            passwordHash: newPasswordHash,
+            passwordResetToken: null,
+            passwordResetExpires: null,
+            updatedAt: new Date()
+        })
+        .where(eq(usersTable.id, user.id));
+
+    return true;
+};

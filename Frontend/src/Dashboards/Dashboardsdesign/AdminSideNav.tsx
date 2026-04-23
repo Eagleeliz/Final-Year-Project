@@ -32,10 +32,10 @@ const AdminSideNav = ({ onNavItemClick }: NavProps) => {
     { name: "Pregnancies", path: "/admin/pregnancies", icon: Baby },
     { name: "Emergency Alerts", path: "/admin/emergencies", icon: ShieldAlert },
     { name: "Health Check-ins", path: "/admin/checkins", icon: Activity },
-    { name: "Health Tips", path: "/admin/health-tips", icon: Lightbulb },
+
     { name: "Guidance", path: "/admin/guidance", icon: BookOpen },
     { name: "Facilities", path: "/admin/facilities", icon: Hospital },
-    { name: "Analytics", path: "/admin/analytics", icon: BarChart3 },
+  
   ];
 
   const handleLogout = () => {

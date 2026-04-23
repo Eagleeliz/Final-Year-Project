@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Activity, ShieldAlert, Weight, Baby, PlusCircle, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Activity, ShieldAlert, Weight, Baby, CheckCircle2, AlertCircle, Heart, TrendingUp, Droplets, Footprints } from 'lucide-react';
 import { weeklyCheckinApi } from '../../Features/Apis/WeeklyCheckinAPI';
 import { pregnancyApi } from '../../Features/Apis/PregnancyAPI';
 
@@ -25,8 +25,11 @@ interface HealthFormData {
 }
 
 const HealthMonitoring = () => {
-  const midnightTeal = "#002e33";
-  const aquaText = "#86d9e1";
+  const midnightTeal = "#0B3B3F";
+  const aquaText = "#7FD1E0";
+  const aquaLight = "#E6F7F9";
+  const criticalRed = "#DC2626";
+  const criticalRedLight = "#FEE2E2";
 
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -53,8 +56,6 @@ const HealthMonitoring = () => {
     general_notes: ""
   });
 
-  // Fetch active pregnancy using pregnancyApi.getActive(userId)
-  // userId is saved to localStorage at login — hits GET /api/pregnancies/active/:userId
   useEffect(() => {
     const getActivePregnancy = async () => {
       try {
@@ -65,11 +66,9 @@ const HealthMonitoring = () => {
         }
 
         const response = await pregnancyApi.getActive(userId);
-        // unwrap both { success, data: {...} } and plain object shapes
         const pregnancy = response?.data ?? response;
 
         if (pregnancy?.id) {
-          // auto-fill pregnancy_id and calculate current week from lmpDate
           const lmpDate = pregnancy.lmpDate;
           let weekNumber: number | "" = "";
 
@@ -88,7 +87,6 @@ const HealthMonitoring = () => {
           }));
         }
       } catch (err: any) {
-        // 404 = no active pregnancy, not a real error
         if (err?.response?.status !== 404) {
           console.error("Failed to load pregnancy profile:", err);
           setError("Could not load pregnancy profile.");
@@ -100,10 +98,13 @@ const HealthMonitoring = () => {
   }, []);
 
   const handleNumberChange = (field: keyof HealthFormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value === "" ? "" : Number(value)
-    }));
+    if (value === "") {
+      setFormData(prev => ({ ...prev, [field]: "" }));
+      return;
+    }
+    const num = Number(value);
+    if (num < 0) return;
+    setFormData(prev => ({ ...prev, [field]: num }));
   };
 
   const handleToggle = (field: keyof HealthFormData) => {
@@ -133,15 +134,35 @@ const HealthMonitoring = () => {
       return;
     }
 
-    if (!formData.nausea_level || !formData.fatigue_level) {
+    if (formData.nausea_level === null || formData.fatigue_level === null) {
       setError("Please select nausea and fatigue levels.");
       return;
     }
 
     setLoading(true);
     try {
-      await weeklyCheckinApi.create(formData);
+      const payload = {
+        pregnancyId: formData.pregnancy_id,
+        weekNumber: formData.week_number,
+        bloodPressureSystolic: formData.blood_pressure_systolic,
+        bloodPressureDiastolic: formData.blood_pressure_diastolic,
+        weight: formData.weight,
+        temperature: formData.temperature === "" ? null : formData.temperature,
+        nauseaLevel: formData.nausea_level,
+        fatigueLevel: formData.fatigue_level,
+        backPain: formData.back_pain,
+        headache: formData.headache,
+        dizziness: formData.dizziness,
+        swelling: formData.swelling,
+        vaginalBleeding: formData.vaginal_bleeding,
+        blurredVision: formData.blurred_vision,
+        fetalMovementsCount: formData.fetal_movements_count === "" ? null : formData.fetal_movements_count,
+        fetalMovementNotes: formData.fetal_movement_notes,
+        otherSymptoms: formData.other_symptoms === "" ? null : formData.other_symptoms,
+        generalNotes: formData.general_notes,
+      };
 
+      await weeklyCheckinApi.create(payload);
       setIsSubmitted(true);
 
       setFormData(prev => ({
@@ -166,6 +187,7 @@ const HealthMonitoring = () => {
       }));
 
     } catch (err: any) {
+      console.log("Full error:", err.response?.data);
       setError(err.response?.data?.message || "Error saving check-in.");
     } finally {
       setLoading(false);
@@ -175,9 +197,9 @@ const HealthMonitoring = () => {
   const renderScale = (label: string, field: 'nausea_level' | 'fatigue_level') => (
     <div className="flex-1 space-y-4">
       <div className="flex justify-between items-end">
-        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{label}</label>
-        <span className="text-sm font-black" style={{ color: midnightTeal }}>
-          {formData[field] ? `LVL ${formData[field]}` : "Not Selected"}
+        <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{label}</label>
+        <span className="text-sm font-bold" style={{ color: midnightTeal }}>
+          {formData[field] ? `${formData[field]}/5` : "Not rated"}
         </span>
       </div>
       <div className="flex gap-2">
@@ -186,10 +208,10 @@ const HealthMonitoring = () => {
             key={num}
             type="button"
             onClick={() => setFormData({ ...formData, [field]: num })}
-            className={`flex-1 py-4 rounded-xl font-black transition-all border-2 ${
+            className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${
               formData[field] !== null && formData[field]! >= num
                 ? "text-white shadow-md"
-                : "border-gray-50 bg-gray-50 text-gray-400"
+                : "bg-gray-100 text-gray-400 hover:bg-gray-200"
             }`}
             style={
               formData[field] !== null && formData[field]! >= num
@@ -207,21 +229,22 @@ const HealthMonitoring = () => {
   if (isSubmitted) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="bg-white p-12 rounded-[4rem] shadow-2xl text-center max-w-lg w-full space-y-8 border border-gray-100">
+        <div className="bg-white p-12 rounded-3xl shadow-xl text-center max-w-md w-full space-y-6 border border-gray-100">
           <div className="flex justify-center">
-            <div className="p-6 rounded-full bg-emerald-50 text-emerald-500">
-              <CheckCircle2 size={80} strokeWidth={1.5} />
+            <div className="p-4 rounded-full" style={{ backgroundColor: aquaLight }}>
+              <CheckCircle2 size={60} strokeWidth={1.5} style={{ color: midnightTeal }} />
             </div>
           </div>
-          <h2 className="text-4xl font-black uppercase tracking-tighter" style={{ color: midnightTeal }}>
-            Data Synced
+          <h2 className="text-3xl font-bold tracking-tight" style={{ color: midnightTeal }}>
+            Check-in Complete!
           </h2>
+          <p className="text-gray-500 text-sm">Your health data has been recorded successfully.</p>
           <button
             onClick={() => window.location.href = '/dashboard'}
-            className="w-full py-6 rounded-[2.5rem] font-black uppercase tracking-widest shadow-xl"
+            className="w-full py-4 rounded-xl font-semibold uppercase tracking-wide shadow-lg transition-all hover:shadow-xl"
             style={{ backgroundColor: midnightTeal, color: aquaText }}
           >
-            Go to Dashboard
+            Return to Dashboard
           </button>
         </div>
       </div>
@@ -229,208 +252,277 @@ const HealthMonitoring = () => {
   }
 
   return (
-    <div className="animate-in fade-in duration-700">
-      <header className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter" style={{ color: midnightTeal }}>
-          Health Monitoring
-        </h1>
-        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs mt-1">
-          Week {formData.week_number || "N/A"} • Patient Status Log
-        </p>
-      </header>
-
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
-
-        {/* ── LEFT SIDE ────────────────────────────────────────── */}
-        <div className="lg:col-span-8 space-y-8">
-
-          {/* Biometric Vitals */}
-          <section className="bg-white p-8 md:p-10 rounded-[3rem] shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-3 rounded-2xl bg-[#002e33]/5 text-[#002e33]">
-                <Activity size={24} />
-              </div>
-              <h3 className="font-black text-xl uppercase tracking-tight" style={{ color: midnightTeal }}>
-                Biometric Vitals
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
-              {/* Blood Pressure */}
-              <div className="space-y-4">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                  Blood Pressure Reading
-                </label>
-                <div className="flex items-center gap-4">
-                  <div className="flex-1 space-y-2">
-                    <p className="text-[10px] text-center font-bold text-gray-300">SYS</p>
-                    <input
-                      type="number"
-                      placeholder="Enter SYS"
-                      className="w-full p-5 rounded-2xl border-2 text-black font-black text-2xl text-center outline-none placeholder:text-xs placeholder:text-gray-400"
-                      style={{ borderColor: aquaText }}
-                      value={formData.blood_pressure_systolic}
-                      onChange={(e) => handleNumberChange("blood_pressure_systolic", e.target.value)}
-                    />
-                  </div>
-                  <span className="text-gray-200 font-thin text-4xl mt-6">/</span>
-                  <div className="flex-1 space-y-2">
-                    <p className="text-[10px] text-center font-bold text-gray-300">DIA</p>
-                    <input
-                      type="number"
-                      placeholder="Enter DIA"
-                      className="w-full p-5 rounded-2xl border-2 text-black font-black text-2xl text-center outline-none placeholder:text-xs placeholder:text-gray-400"
-                      style={{ borderColor: aquaText }}
-                      value={formData.blood_pressure_diastolic}
-                      onChange={(e) => handleNumberChange("blood_pressure_diastolic", e.target.value)}
-                    />
-                  </div>
+    <div className="min-h-screen" style={{ backgroundColor: "#F8F9FA" }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-10">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ color: midnightTeal }}>
+                Health Monitoring
+              </h1>
+              <div className="flex items-center gap-3 mt-2">
+                <div className="px-3 py-1 rounded-full bg-white shadow-sm" style={{ borderLeft: `3px solid ${aquaText}` }}>
+                  <span className="text-sm font-semibold" style={{ color: midnightTeal }}>
+                    Week {formData.week_number || "—"}
+                  </span>
                 </div>
-              </div>
-
-              {/* Weight */}
-              <div className="space-y-4 pt-6">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                  Weight (KG)
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder="Enter Weight"
-                    className="w-full p-5 rounded-2xl border-2 text-black font-black text-2xl outline-none placeholder:text-xs placeholder:text-gray-400"
-                    style={{ borderColor: aquaText }}
-                    value={formData.weight}
-                    onChange={(e) => handleNumberChange("weight", e.target.value)}
-                  />
-                  <div className="absolute top-4 right-4 p-2 rounded-lg bg-gray-50">
-                    <Weight size={18} className="text-gray-300" />
-                  </div>
-                </div>
+                <span className="text-xs text-gray-400">•</span>
+                <span className="text-xs text-gray-500 font-medium">Daily Health Log</span>
               </div>
             </div>
-          </section>
-
-          {/* Nausea + Fatigue Scales */}
-          <section className="bg-white p-8 md:p-10 rounded-[3rem] shadow-sm border border-gray-100">
-            <div className="flex flex-col md:flex-row gap-10">
-              {renderScale("Nausea Intensity", "nausea_level")}
-              {renderScale("Fatigue Level", "fatigue_level")}
+            <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm">
+              <Heart size={16} style={{ color: aquaText }} />
+              <span className="text-xs font-medium text-gray-600">Track your pregnancy journey</span>
             </div>
-          </section>
-
-          {/* Clinical Observations */}
-          <section className="bg-white p-8 md:p-10 rounded-[3rem] shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-8">
-              <ShieldAlert className="text-red-500" size={24} />
-              <h3 className="font-black text-xl uppercase tracking-tight" style={{ color: midnightTeal }}>
-                Clinical Observations
-              </h3>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {[
-                { id: 'vaginal_bleeding', label: 'Vaginal Bleeding', urgent: true },
-                { id: 'blurred_vision',   label: 'Blurred Vision',   urgent: true },
-                { id: 'back_pain',        label: 'Back Pain',        urgent: false },
-                { id: 'headache',         label: 'Headache',         urgent: false },
-                { id: 'dizziness',        label: 'Dizziness',        urgent: false },
-                { id: 'swelling',         label: 'Swelling',         urgent: false },
-              ].map(item => {
-                const fieldKey = item.id as keyof HealthFormData;
-                const isActive = formData[fieldKey];
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleToggle(fieldKey)}
-                    className={`flex flex-col items-center justify-center p-6 rounded-[2rem] font-black text-[10px] uppercase tracking-widest transition-all border-2 gap-3 ${
-                      isActive
-                        ? item.urgent
-                          ? 'bg-red-600 border-red-600 text-white shadow-lg'
-                          : 'text-white shadow-lg'
-                        : 'bg-gray-50 border-transparent text-gray-400 hover:border-gray-200'
-                    }`}
-                    style={
-                      isActive
-                        ? item.urgent
-                          ? { backgroundColor: '#dc2626', borderColor: '#dc2626' }
-                          : { backgroundColor: midnightTeal, borderColor: midnightTeal }
-                        : {}
-                    }
-                  >
-                    <PlusCircle
-                      size={18}
-                      className={isActive ? 'rotate-45 transition-transform' : 'transition-transform'}
-                    />
-                    {item.label}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        </div>
-
-        {/* ── RIGHT SIDE ───────────────────────────────────────── */}
-        <div className="lg:col-span-4 space-y-8">
-
-          {/* Fetal Activity */}
-          <section className="bg-white p-8 rounded-[3rem] shadow-sm border border-gray-100 space-y-8">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-2xl bg-[#86d9e1]/10 text-[#002e33]">
-                <Baby size={24} />
-              </div>
-              <h3 className="font-black text-lg uppercase tracking-tight" style={{ color: midnightTeal }}>
-                Fetal Activity
-              </h3>
-            </div>
-            <div className="space-y-4">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                Kick Count (Per Hour)
-              </label>
-              <input
-                type="number"
-                placeholder="Enter Kick Count"
-                className="w-full p-5 rounded-2xl border-2 text-black font-black text-2xl outline-none placeholder:text-xs placeholder:text-gray-400"
-                style={{ borderColor: aquaText }}
-                value={formData.fetal_movements_count}
-                onChange={(e) => handleNumberChange("fetal_movements_count", e.target.value)}
-              />
-              <textarea
-                placeholder="Fetal movement notes..."
-                className="w-full p-5 rounded-2xl bg-gray-50 border-none text-black font-medium text-sm h-32 outline-none placeholder:text-xs placeholder:text-gray-400"
-                value={formData.fetal_movement_notes}
-                onChange={(e) => setFormData({ ...formData, fetal_movement_notes: e.target.value })}
-              />
-            </div>
-          </section>
-
-          {/* General Notes + Submit */}
-          <div className="space-y-4">
-            <textarea
-              placeholder="General notes or other symptoms..."
-              className="w-full p-6 rounded-[2.5rem] bg-white border border-gray-100 shadow-sm text-black font-medium text-sm h-40 outline-none placeholder:text-xs placeholder:text-gray-400"
-              value={formData.general_notes}
-              onChange={(e) => setFormData({ ...formData, general_notes: e.target.value })}
-            />
-
-            {error && (
-              <div className="flex items-center gap-2 p-4 rounded-2xl bg-red-50 text-red-600 border border-red-100 animate-in slide-in-from-top-2">
-                <AlertCircle size={16} />
-                <span className="text-[10px] font-black uppercase tracking-wider">{error}</span>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-7 rounded-[2.5rem] font-black uppercase tracking-[0.3em] shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
-              style={{ backgroundColor: midnightTeal, color: aquaText }}
-            >
-              {loading ? "Syncing..." : "Log Entry"}
-            </button>
           </div>
         </div>
 
-      </form>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            {/* Left Column */}
+            <div className="lg:col-span-2 space-y-8">
+
+              {/* Biometric Vitals */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="px-6 py-5 border-b border-gray-100" style={{ backgroundColor: aquaLight }}>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-white">
+                      <Activity size={20} style={{ color: midnightTeal }} />
+                    </div>
+                    <h3 className="font-bold text-lg" style={{ color: midnightTeal }}>Biometric Vitals</h3>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-2">
+                        <Droplets size={14} /> Blood Pressure
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1">
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="Systolic"
+                            className="w-full px-4 py-3 rounded-xl border-2 text-gray-800 font-semibold text-lg outline-none transition-all focus:shadow-md"
+                            style={{ borderColor: "#E5E7EB" }}
+                            value={formData.blood_pressure_systolic}
+                            onChange={(e) => handleNumberChange("blood_pressure_systolic", e.target.value)}
+                          />
+                          <p className="text-[10px] text-gray-400 mt-1 text-center">mmHg</p>
+                        </div>
+                        <span className="text-2xl text-gray-300">/</span>
+                        <div className="flex-1">
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="Diastolic"
+                            className="w-full px-4 py-3 rounded-xl border-2 text-gray-800 font-semibold text-lg outline-none transition-all focus:shadow-md"
+                            style={{ borderColor: "#E5E7EB" }}
+                            value={formData.blood_pressure_diastolic}
+                            onChange={(e) => handleNumberChange("blood_pressure_diastolic", e.target.value)}
+                          />
+                          <p className="text-[10px] text-gray-400 mt-1 text-center">mmHg</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-2">
+                        <Weight size={14} /> Weight
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.1"
+                          placeholder="Enter weight"
+                          className="w-full px-4 py-3 rounded-xl border-2 text-gray-800 font-semibold text-lg outline-none transition-all focus:shadow-md"
+                          style={{ borderColor: "#E5E7EB" }}
+                          value={formData.weight}
+                          onChange={(e) => handleNumberChange("weight", e.target.value)}
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kg</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Symptom Tracking */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="px-6 py-5 border-b border-gray-100" style={{ backgroundColor: aquaLight }}>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-white">
+                      <TrendingUp size={20} style={{ color: midnightTeal }} />
+                    </div>
+                    <h3 className="font-bold text-lg" style={{ color: midnightTeal }}>Symptom Tracking</h3>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="flex flex-col md:flex-row gap-8">
+                    {renderScale("Nausea Intensity", "nausea_level")}
+                    {renderScale("Fatigue Level", "fatigue_level")}
+                  </div>
+                </div>
+              </div>
+
+              {/* Clinical Observations */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="px-6 py-5 border-b border-gray-100" style={{ backgroundColor: aquaLight }}>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-white">
+                      <ShieldAlert size={20} style={{ color: midnightTeal }} />
+                    </div>
+                    <h3 className="font-bold text-lg" style={{ color: midnightTeal }}>Clinical Observations</h3>
+                    <span className="text-xs text-gray-500 ml-auto">Select all that apply</span>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {[
+                      { id: 'vaginal_bleeding', label: 'Vaginal Bleeding', critical: true },
+                      { id: 'blurred_vision',   label: 'Blurred Vision',   critical: true },
+                      { id: 'back_pain',        label: 'Back Pain',        critical: false },
+                      { id: 'headache',         label: 'Headache',         critical: false },
+                      { id: 'dizziness',        label: 'Dizziness',        critical: false },
+                      { id: 'swelling',         label: 'Swelling',         critical: false },
+                    ].map(item => {
+                      const fieldKey = item.id as keyof HealthFormData;
+                      const isActive = formData[fieldKey];
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => handleToggle(fieldKey)}
+                          className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                            isActive ? 'text-white shadow-md' : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-200'
+                          }`}
+                          style={
+                            isActive
+                              ? item.critical
+                                ? { backgroundColor: criticalRed, borderColor: criticalRed }
+                                : { backgroundColor: midnightTeal, borderColor: midnightTeal }
+                              : {}
+                          }
+                        >
+                          <AlertCircle size={16} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {(formData.vaginal_bleeding || formData.blurred_vision) && (
+                    <div className="mt-4 p-3 rounded-xl flex items-center gap-2" style={{ backgroundColor: criticalRedLight, borderLeft: `3px solid ${criticalRed}` }}>
+                      <AlertCircle size={16} style={{ color: criticalRed }} />
+                      <span className="text-xs font-medium" style={{ color: criticalRed }}>
+                        ⚠️ Critical symptom detected. Please contact your healthcare provider immediately.
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-8 space-y-8">
+
+                {/* Fetal Activity */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="px-6 py-5 border-b border-gray-100" style={{ backgroundColor: aquaLight }}>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-white">
+                        <Baby size={20} style={{ color: midnightTeal }} />
+                      </div>
+                      <h3 className="font-bold text-lg" style={{ color: midnightTeal }}>Fetal Activity</h3>
+                    </div>
+                  </div>
+                  <div className="p-6 space-y-5">
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+                        Kick Count <span className="text-gray-400">(per hour)</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          className="w-full px-4 py-3 rounded-xl border-2 text-gray-800 font-semibold text-2xl text-center outline-none"
+                          style={{ borderColor: "#E5E7EB" }}
+                          value={formData.fetal_movements_count}
+                          onChange={(e) => handleNumberChange("fetal_movements_count", e.target.value)}
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <Footprints size={18} className="text-gray-300" />
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-gray-400 mt-2">Normal range: 10+ movements per hour</p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+                        Movement Notes
+                      </label>
+                      <textarea
+                        placeholder="Describe fetal movement patterns..."
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 text-sm outline-none resize-none focus:bg-white transition-all"
+                        rows={4}
+                        value={formData.fetal_movement_notes}
+                        onChange={(e) => setFormData({ ...formData, fetal_movement_notes: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notes & Submit */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-100" style={{ backgroundColor: aquaLight }}>
+                    <h4 className="font-semibold" style={{ color: midnightTeal }}>Additional Notes</h4>
+                  </div>
+                  <div className="p-6 space-y-5">
+                    <textarea
+                      placeholder="Any other symptoms or concerns you'd like to note..."
+                      className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 text-sm outline-none resize-none focus:bg-white transition-all"
+                      rows={4}
+                      value={formData.general_notes}
+                      onChange={(e) => setFormData({ ...formData, general_notes: e.target.value })}
+                    />
+
+                    {error && (
+                      <div className="flex items-center gap-2 p-3 rounded-xl" style={{ backgroundColor: aquaLight }}>
+                        <AlertCircle size={16} style={{ color: midnightTeal }} />
+                        <span className="text-xs font-medium" style={{ color: midnightTeal }}>{error}</span>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-4 rounded-xl font-bold uppercase tracking-wide shadow-lg transition-all duration-200 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: midnightTeal, color: aquaText }}
+                    >
+                      {loading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          Saving...
+                        </span>
+                      ) : (
+                        "Log Health Entry"
+                      )}
+                    </button>
+
+                    <p className="text-[10px] text-center text-gray-400">
+                      This information helps track your pregnancy health
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

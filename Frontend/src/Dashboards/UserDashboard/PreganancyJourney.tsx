@@ -4,7 +4,7 @@ import { guidanceApi, type PregnancyGuidance } from "../../Features/Apis/Guidanc
 import { pregnancyApi } from "../../Features/Apis/PregnancyAPI";
 import {
   Sparkles, BookOpen, Lightbulb, ExternalLink,
-  ChevronLeft, ChevronRight, Calendar, Baby, RefreshCw,
+  ChevronLeft, ChevronRight, Calendar, Baby,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -32,9 +32,9 @@ const calculateCurrentWeek = (lmpDate: string): number => {
 const getTrimesterLabel = (week: number): {
   label: string; num: 1 | 2 | 3; color: string; bg: string;
 } => {
-  if (week <= 12) return { label: "First Trimester",  num: 1, color: "#86d9e1", bg: "rgba(134,217,225,0.15)" };
-  if (week <= 26) return { label: "Second Trimester", num: 2, color: "#a8d5a2", bg: "rgba(168,213,162,0.15)" };
-  return            { label: "Third Trimester",  num: 3, color: "#f4b8a0", bg: "rgba(244,184,160,0.15)" };
+  if (week <= 13) return { label: "First Trimester", num: 1, color: "#7FD1E0", bg: "#E6F7F9" };
+  if (week <= 26) return { label: "Second Trimester", num: 2, color: "#7FD1E0", bg: "#E6F7F9" };
+  return { label: "Third Trimester", num: 3, color: "#7FD1E0", bg: "#E6F7F9" };
 };
 
 const getDaysToEDD = (eddDate: string): number =>
@@ -52,26 +52,28 @@ const formatDate = (dateStr: string): string =>
 
 const WeekProgressBar: React.FC<{ currentWeek: number }> = ({ currentWeek }) => {
   const percentage = Math.round((currentWeek / 40) * 100);
-  const { color } = getTrimesterLabel(currentWeek);
+  const midnightTeal = "#0B3B3F";
+  const aquaText = "#7FD1E0";
+  
   return (
     <div className="mb-6">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-xs font-bold uppercase tracking-widest text-white/50">
+        <span className="text-sm font-bold uppercase tracking-wider text-gray-400">
           Pregnancy Progress
         </span>
-        <span className="text-xs font-bold" style={{ color }}>
+        <span className="text-sm font-bold" style={{ color: aquaText }}>
           {percentage}% complete
         </span>
       </div>
-      <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-700"
-          style={{ width: `${percentage}%`, backgroundColor: color }}
+          style={{ width: `${percentage}%`, backgroundColor: aquaText }}
         />
       </div>
       <div className="flex justify-between mt-1">
-        <span className="text-xs text-white/30">Week 1</span>
-        <span className="text-xs text-white/30">Week 40</span>
+        <span className="text-sm text-gray-400">Week 1</span>
+        <span className="text-sm text-gray-400">Week 40</span>
       </div>
     </div>
   );
@@ -86,52 +88,53 @@ interface GuidanceCardProps {
 
 const GuidanceCard: React.FC<GuidanceCardProps> = ({ guidance, isCurrentWeek }) => {
   const tips = guidance.tips.split(",").map((t) => t.trim()).filter(Boolean);
+  const midnightTeal = "#0B3B3F";
+  const aquaText = "#7FD1E0";
+  const aquaLight = "#E6F7F9";
 
   return (
     <div
-      className="rounded-3xl border overflow-hidden transition-all duration-300"
+      className="rounded-2xl border overflow-hidden transition-all duration-300 bg-white shadow-sm hover:shadow-md"
       style={{
-        background: isCurrentWeek
-          ? "linear-gradient(135deg, rgba(134,217,225,0.08) 0%, rgba(0,46,51,0.4) 100%)"
-          : "rgba(255,255,255,0.03)",
-        borderColor: isCurrentWeek
-          ? "rgba(134,217,225,0.4)"
-          : "rgba(255,255,255,0.08)",
+        borderColor: isCurrentWeek ? aquaText : "#E5E7EB",
+        borderWidth: isCurrentWeek ? "2px" : "1px",
       }}
     >
       {/* Card header */}
       <div
         className="px-6 py-4 flex items-center"
         style={{
-          background: isCurrentWeek ? "rgba(134,217,225,0.1)" : "rgba(255,255,255,0.03)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          background: isCurrentWeek ? aquaLight : "#F8F9FA",
+          borderBottom: "1px solid #E5E7EB",
         }}
       >
         <div className="flex items-center gap-3">
           {/* Week number badge */}
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0"
+            className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-base shrink-0"
             style={{
-              background: isCurrentWeek ? "#86d9e1" : "rgba(255,255,255,0.08)",
-              color: isCurrentWeek ? "#002e33" : "rgba(255,255,255,0.5)",
+              background: isCurrentWeek ? aquaText : "#F3F4F6",
+              color: isCurrentWeek ? midnightTeal : "#6B7280",
             }}
           >
             {guidance.weekNumber}
           </div>
 
           <div>
-            <p className="text-xs text-white/40 uppercase tracking-widest font-bold flex items-center gap-2">
+            <p className="text-sm text-gray-400 uppercase tracking-wider font-bold flex items-center gap-2">
               Week {guidance.weekNumber}
               {isCurrentWeek && (
                 <span
-                  className="px-2 py-0.5 rounded-full text-xs font-black"
-                  style={{ background: "#86d9e1", color: "#002e33" }}
+                  className="px-2 py-0.5 rounded-full text-sm font-black"
+                  style={{ background: aquaText, color: midnightTeal }}
                 >
                   Current
                 </span>
               )}
             </p>
-            <h3 className="text-white font-bold text-base">{guidance.title}</h3>
+            <h3 className="font-bold text-lg" style={{ color: midnightTeal }}>
+              {guidance.title}
+            </h3>
           </div>
         </div>
       </div>
@@ -140,33 +143,33 @@ const GuidanceCard: React.FC<GuidanceCardProps> = ({ guidance, isCurrentWeek }) 
       <div className="px-6 py-5 space-y-4">
         {/* Summary */}
         <div className="flex gap-3">
-          <BookOpen size={16} className="mt-0.5 shrink-0" style={{ color: "#86d9e1" }} />
-          <p className="text-white/70 text-sm leading-relaxed">{guidance.summary}</p>
+          <BookOpen size={18} className="mt-0.5 shrink-0" style={{ color: aquaText }} />
+          <p className="text-gray-600 text-base leading-relaxed">{guidance.summary}</p>
         </div>
 
-        {/* Tips — comma-separated in DB, shown as bullet list */}
+        {/* Tips */}
         <div
-          className="rounded-2xl p-4"
+          className="rounded-xl p-4"
           style={{
-            background: "rgba(134,217,225,0.06)",
-            border: "1px solid rgba(134,217,225,0.12)",
+            background: aquaLight,
+            border: `1px solid ${aquaText}40`,
           }}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Lightbulb size={14} style={{ color: "#86d9e1" }} />
+            <Lightbulb size={16} style={{ color: aquaText }} />
             <span
-              className="text-xs font-bold uppercase tracking-widest"
-              style={{ color: "#86d9e1" }}
+              className="text-sm font-bold uppercase tracking-wider"
+              style={{ color: midnightTeal }}
             >
               Tips for this week
             </span>
           </div>
           <ul className="space-y-1.5">
             {tips.map((tip, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-white/60">
+              <li key={i} className="flex items-start gap-2 text-base text-gray-600">
                 <span
                   className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{ background: "#86d9e1" }}
+                  style={{ background: aquaText }}
                 />
                 {tip}
               </li>
@@ -176,18 +179,18 @@ const GuidanceCard: React.FC<GuidanceCardProps> = ({ guidance, isCurrentWeek }) 
 
         {/* Source + external link */}
         <div className="flex items-center justify-between pt-1">
-          <span className="text-xs text-white/30">Source: {guidance.source}</span>
-   {guidance.link && (
-  <a                                                          
-    href={guidance.link}                                      
-    target="_blank"                                          
-    rel="noopener noreferrer"                                 
-    className="flex items-center gap-1 text-xs font-bold" 
-    style={{ color: "#86d9e1" }}                             
-  >                                                          
-    Read more <ExternalLink size={11} />
-  </a>
-)}
+          <span className="text-sm text-gray-400">Source: {guidance.source}</span>
+          {guidance.link && (
+            <a
+              href={guidance.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-sm font-bold transition-opacity hover:opacity-70"
+              style={{ color: aquaText }}
+            >
+              Read more <ExternalLink size={13} />
+            </a>
+          )}
         </div>
       </div>
     </div>
@@ -199,19 +202,24 @@ const GuidanceCard: React.FC<GuidanceCardProps> = ({ guidance, isCurrentWeek }) 
 const PregnancyJourney: React.FC = () => {
   const { user } = useSelector((state: any) => state.auth);
 
-  const [activePregnancy, setActivePregnancy]   = useState<Pregnancy | null>(null);
-  const [allGuidance, setAllGuidance]           = useState<PregnancyGuidance[]>([]);
-  const [currentGuidance, setCurrentGuidance]   = useState<PregnancyGuidance | null>(null);
-  const [selectedWeek, setSelectedWeek]         = useState<number>(1);
+  const [activePregnancy, setActivePregnancy] = useState<Pregnancy | null>(null);
+  const [allGuidance, setAllGuidance] = useState<PregnancyGuidance[]>([]);
+  const [currentGuidance, setCurrentGuidance] = useState<PregnancyGuidance | null>(null);
+  const [selectedWeek, setSelectedWeek] = useState<number>(1);
   const [loadingPregnancy, setLoadingPregnancy] = useState(true);
-  const [loadingGuidance, setLoadingGuidance]   = useState(true);
-  const [viewMode, setViewMode]                 = useState<"current" | "browse">("current");
+  const [loadingGuidance, setLoadingGuidance] = useState(true);
+  const [viewMode, setViewMode] = useState<"current" | "browse">("current");
+
+  const midnightTeal = "#0B3B3F";
+  const aquaText = "#7FD1E0";
+  const aquaLight = "#E6F7F9";
+  const warmGray = "#F8F9FA";
 
   const currentWeek = activePregnancy ? calculateCurrentWeek(activePregnancy.lmpDate) : 1;
-  const trimester   = getTrimesterLabel(currentWeek);
-  const daysToEDD   = activePregnancy ? getDaysToEDD(activePregnancy.eddDate) : 0;
+  const trimester = getTrimesterLabel(currentWeek);
+  const daysToEDD = activePregnancy ? getDaysToEDD(activePregnancy.eddDate) : 0;
 
-  // Effect 1 — fetch active pregnancy from GET /api/pregnancies/active/:userId
+  // Effect 1 — fetch active pregnancy
   useEffect(() => {
     const run = async () => {
       const userId = Number(localStorage.getItem("userId"));
@@ -234,7 +242,7 @@ const PregnancyJourney: React.FC = () => {
     run();
   }, []);
 
-  // Effect 2 — fetch all 40 weeks of guidance upfront
+  // Effect 2 — fetch all 40 weeks of guidance
   useEffect(() => {
     const run = async () => {
       try {
@@ -249,7 +257,7 @@ const PregnancyJourney: React.FC = () => {
     run();
   }, []);
 
-  // Effect 3 — pin current week card once both loads are done
+  // Effect 3 — pin current week card
   useEffect(() => {
     if (!activePregnancy || allGuidance.length === 0) return;
     const week = calculateCurrentWeek(activePregnancy.lmpDate);
@@ -268,68 +276,58 @@ const PregnancyJourney: React.FC = () => {
     }
   };
 
-  const handleRefresh = async () => {
-    const userId = Number(localStorage.getItem("userId"));
-    if (!userId) return;
-    try {
-      const res = await pregnancyApi.getActive(userId);
-      const p: Pregnancy = res?.data ?? res;
-      if (p?.isActive) {
-        setActivePregnancy(p);
-        toast.success("Pregnancy data refreshed");
-      }
-    } catch {
-      toast.error("Could not refresh.");
-    }
-  };
-
-  // ── Loading screen
+  // Loading screen
   if (loadingPregnancy || loadingGuidance) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ background: "#001e22" }}
+        style={{ background: warmGray }}
       >
         <div className="text-center">
-          <div className="w-12 h-12 border-2 border-[#86d9e1] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-[#86d9e1]/60 text-sm">Loading your journey...</p>
+          <div 
+            className="w-12 h-12 border-2 rounded-full animate-spin mx-auto mb-4"
+            style={{ borderColor: aquaText, borderTopColor: "transparent" }}
+          />
+          <p className="text-gray-400 text-base">Loading your journey...</p>
         </div>
       </div>
     );
   }
 
-  // ── No active pregnancy screen
+  // No active pregnancy screen
   if (!activePregnancy) {
     return (
       <div
         className="min-h-screen flex items-center justify-center p-8"
-        style={{ background: "#001e22" }}
+        style={{ background: warmGray }}
       >
         <div className="text-center max-w-md w-full">
           <div
-            className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6"
+            className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6"
             style={{
-              background: "rgba(134,217,225,0.1)",
-              border: "1px solid rgba(134,217,225,0.2)",
+              background: aquaLight,
+              border: `1px solid ${aquaText}`,
             }}
           >
-            <Baby size={36} style={{ color: "#86d9e1" }} />
+            <Baby size={38} style={{ color: midnightTeal }} />
           </div>
-          <h2 className="text-2xl font-black text-white mb-3">No Active Pregnancy</h2>
-          <p className="text-white/50 mb-6 leading-relaxed">
+          <h2 className="text-3xl font-bold mb-3" style={{ color: midnightTeal }}>
+            No Active Pregnancy
+          </h2>
+          <p className="text-gray-500 text-base mb-6 leading-relaxed">
             You haven't registered a pregnancy yet. Start your journey by adding your details.
           </p>
           <button
-            className="px-8 py-3 rounded-2xl font-bold"
-            style={{ background: "#86d9e1", color: "#002e33" }}
+            className="px-8 py-3 rounded-xl font-bold transition-all hover:shadow-md text-base"
+            style={{ background: midnightTeal, color: aquaText }}
             onClick={() => toast("Navigate to add pregnancy form")}
           >
             Register Pregnancy
           </button>
 
           {allGuidance.length > 0 && (
-            <div className="mt-8 pt-8 border-t border-white/10 text-left">
-              <p className="text-white/30 text-sm mb-4 text-center">
+            <div className="mt-8 pt-8 border-t border-gray-200 text-left">
+              <p className="text-gray-400 text-base mb-4 text-center">
                 Or browse weekly guidance below
               </p>
               <div className="space-y-4">
@@ -348,7 +346,6 @@ const PregnancyJourney: React.FC = () => {
     );
   }
 
-  // Explicitly typed to avoid TS inferring string literals into the union
   const displayedGuidance: PregnancyGuidance | undefined =
     viewMode === "current"
       ? (currentGuidance ?? allGuidance.find((g) => g.weekNumber === currentWeek))
@@ -357,79 +354,72 @@ const PregnancyJourney: React.FC = () => {
   return (
     <div
       className="min-h-screen font-sans"
-      style={{ background: "#001e22", color: "white" }}
+      style={{ background: warmGray }}
     >
       <div className="max-w-4xl mx-auto px-4 py-8 md:py-10">
 
         {/* Header */}
-        <header className="mb-8 flex items-start justify-between">
+        <header className="mb-8">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <Sparkles size={20} style={{ color: "#86d9e1" }} />
-              <span className="text-xs font-bold uppercase tracking-widest text-white/40">
+              <Sparkles size={22} style={{ color: aquaText }} />
+              <span className="text-sm font-bold uppercase tracking-wider text-gray-400">
                 Pregnancy Journey
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-white">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ color: midnightTeal }}>
               Hello, {user?.firstName || "Mama"} 👋
             </h1>
-            <p className="text-white/40 mt-1">
+            <p className="text-gray-400 text-base mt-1">
               Your week-by-week companion through motherhood.
             </p>
           </div>
-          <button
-            onClick={handleRefresh}
-            className="w-9 h-9 rounded-xl flex items-center justify-center hover:opacity-70 mt-1 shrink-0"
-            style={{ background: "rgba(134,217,225,0.1)", color: "#86d9e1" }}
-            title="Refresh pregnancy data"
-          >
-            <RefreshCw size={15} />
-          </button>
         </header>
 
         {/* Overview card */}
         <div
-          className="rounded-3xl p-6 mb-8"
-          style={{
-            background: "rgba(134,217,225,0.06)",
-            border: "1px solid rgba(134,217,225,0.2)",
-          }}
+          className="rounded-2xl p-6 mb-8 bg-white shadow-sm border"
+          style={{ borderColor: "#E5E7EB" }}
         >
           <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
             <span
-              className="text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full"
+              className="text-sm font-bold uppercase tracking-wider px-3 py-1.5 rounded-full"
               style={{
-                background: trimester.bg,
-                color: trimester.color,
-                border: `1px solid ${trimester.color}40`,
+                background: aquaLight,
+                color: midnightTeal,
+                border: `1px solid ${aquaText}`,
               }}
             >
               {trimester.label}
             </span>
-            <div className="flex items-center gap-2 text-white/40 text-sm">
-              <Calendar size={14} />
+            <div className="flex items-center gap-2 text-gray-400 text-base">
+              <Calendar size={16} />
               <span>EDD: {formatDate(activePregnancy.eddDate)}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="text-center">
-              <p className="text-4xl font-black" style={{ color: "#86d9e1" }}>
+              <p className="text-5xl font-bold" style={{ color: midnightTeal }}>
                 {currentWeek}
               </p>
-              <p className="text-xs text-white/40 uppercase tracking-widest mt-1">
+              <p className="text-sm text-gray-400 uppercase tracking-wider mt-1">
                 Current Week
               </p>
             </div>
-            <div className="text-center border-x border-white/10">
-              <p className="text-4xl font-black text-white">{daysToEDD}</p>
-              <p className="text-xs text-white/40 uppercase tracking-widest mt-1">
+            <div className="text-center border-x border-gray-200">
+              <p className="text-5xl font-bold" style={{ color: midnightTeal }}>
+                {daysToEDD}
+              </p>
+              <p className="text-sm text-gray-400 uppercase tracking-wider mt-1">
                 Days to EDD
               </p>
             </div>
             <div className="text-center">
-              <p className="text-4xl font-black text-white">{trimester.num}</p>
-              <p className="text-xs text-white/40 uppercase tracking-widest mt-1">
+              <p className="text-5xl font-bold" style={{ color: midnightTeal }}>
+                {trimester.num}
+              </p>
+              <p className="text-sm text-gray-400 uppercase tracking-wider mt-1">
                 Trimester
               </p>
             </div>
@@ -437,7 +427,7 @@ const PregnancyJourney: React.FC = () => {
 
           <WeekProgressBar currentWeek={currentWeek} />
 
-          <p className="text-xs text-white/30 text-center">
+          <p className="text-sm text-gray-400 text-center">
             LMP: {formatDate(activePregnancy.lmpDate)}
             {activePregnancy.pregnancyNumber != null && (
               <span className="ml-3 opacity-50">
@@ -449,25 +439,25 @@ const PregnancyJourney: React.FC = () => {
 
         {/* Mode tabs */}
         <div
-          className="flex gap-2 p-1 rounded-2xl mb-6"
-          style={{ background: "rgba(255,255,255,0.05)" }}
+          className="flex gap-2 p-1 rounded-xl mb-6 bg-white shadow-sm border"
+          style={{ borderColor: "#E5E7EB" }}
         >
           <button
             onClick={() => { setViewMode("current"); setSelectedWeek(currentWeek); }}
-            className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all"
+            className="flex-1 py-2.5 rounded-lg text-base font-bold transition-all"
             style={{
-              background: viewMode === "current" ? "#86d9e1" : "transparent",
-              color: viewMode === "current" ? "#002e33" : "rgba(255,255,255,0.4)",
+              background: viewMode === "current" ? midnightTeal : "transparent",
+              color: viewMode === "current" ? aquaText : "#6B7280",
             }}
           >
             This Week (Week {currentWeek})
           </button>
           <button
             onClick={() => setViewMode("browse")}
-            className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all"
+            className="flex-1 py-2.5 rounded-lg text-base font-bold transition-all"
             style={{
-              background: viewMode === "browse" ? "#86d9e1" : "transparent",
-              color: viewMode === "browse" ? "#002e33" : "rgba(255,255,255,0.4)",
+              background: viewMode === "browse" ? midnightTeal : "transparent",
+              color: viewMode === "browse" ? aquaText : "#6B7280",
             }}
           >
             Browse All Weeks
@@ -481,19 +471,21 @@ const PregnancyJourney: React.FC = () => {
               <button
                 onClick={() => handleWeekChange(Math.max(selectedWeek - 1, 1))}
                 disabled={selectedWeek <= 1}
-                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-30"
-                style={{ background: "rgba(134,217,225,0.1)", color: "#86d9e1" }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-30 hover:opacity-70"
+                style={{ background: aquaLight, color: midnightTeal }}
               >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={20} />
               </button>
-              <span className="font-bold text-white">Week {selectedWeek}</span>
+              <span className="font-bold text-xl" style={{ color: midnightTeal }}>
+                Week {selectedWeek}
+              </span>
               <button
                 onClick={() => handleWeekChange(Math.min(selectedWeek + 1, 40))}
                 disabled={selectedWeek >= 40}
-                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-30"
-                style={{ background: "rgba(134,217,225,0.1)", color: "#86d9e1" }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-30 hover:opacity-70"
+                style={{ background: aquaLight, color: midnightTeal }}
               >
-                <ChevronRight size={18} />
+                <ChevronRight size={20} />
               </button>
             </div>
 
@@ -501,27 +493,26 @@ const PregnancyJourney: React.FC = () => {
               {Array.from({ length: 40 }, (_, i) => i + 1).map((w) => {
                 const t = getTrimesterLabel(w);
                 const isSelected = w === selectedWeek;
-                const isCurrent  = w === currentWeek;
+                const isCurrent = w === currentWeek;
                 return (
                   <button
                     key={w}
                     onClick={() => handleWeekChange(w)}
-                    className="aspect-square rounded-lg text-xs font-bold transition-all hover:opacity-80"
+                    className="aspect-square rounded-lg text-sm font-bold transition-all hover:opacity-80"
                     style={{
                       background: isSelected
-                        ? "#86d9e1"
+                        ? midnightTeal
                         : isCurrent
-                        ? "rgba(134,217,225,0.25)"
-                        : t.bg,
+                        ? aquaLight
+                        : "#F3F4F6",
                       color: isSelected
-                        ? "#002e33"
+                        ? aquaText
                         : isCurrent
-                        ? "#86d9e1"
-                        : "rgba(255,255,255,0.4)",
-                      border:
-                        isCurrent && !isSelected
-                          ? "1px solid rgba(134,217,225,0.4)"
-                          : "none",
+                        ? midnightTeal
+                        : "#9CA3AF",
+                      border: isCurrent && !isSelected
+                        ? `1px solid ${aquaText}`
+                        : "none",
                     }}
                   >
                     {w}
@@ -532,16 +523,16 @@ const PregnancyJourney: React.FC = () => {
 
             <div className="flex gap-4 mt-3 justify-center">
               {[
-                { label: "T1 (1–12)",  color: "#86d9e1" },
-                { label: "T2 (13–26)", color: "#a8d5a2" },
-                { label: "T3 (27–40)", color: "#f4b8a0" },
+                { label: "T1 (1–12)", color: aquaText },
+                { label: "T2 (13–26)", color: aquaText },
+                { label: "T3 (27–40)", color: aquaText },
               ].map((t) => (
                 <div key={t.label} className="flex items-center gap-1.5">
                   <span
                     className="w-2.5 h-2.5 rounded-sm"
-                    style={{ background: t.color + "60" }}
+                    style={{ background: t.color }}
                   />
-                  <span className="text-xs text-white/40">{t.label}</span>
+                  <span className="text-sm text-gray-400">{t.label}</span>
                 </div>
               ))}
             </div>
@@ -555,7 +546,7 @@ const PregnancyJourney: React.FC = () => {
             isCurrentWeek={displayedGuidance.weekNumber === currentWeek}
           />
         ) : (
-          <div className="text-center py-16 text-white/30">
+          <div className="text-center py-16 text-gray-400 text-base">
             No guidance available for this week.
           </div>
         )}
@@ -563,7 +554,7 @@ const PregnancyJourney: React.FC = () => {
         {/* Browse: full list of all other weeks */}
         {viewMode === "browse" && allGuidance.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-xs font-black uppercase tracking-widest text-white/30 mb-4">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-4">
               All Weeks
             </h2>
             <div className="space-y-4">

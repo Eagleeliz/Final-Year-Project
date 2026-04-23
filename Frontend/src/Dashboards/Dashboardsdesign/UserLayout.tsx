@@ -44,7 +44,7 @@ const UserLayout = () => {
         {/* Main Content - 2. overflow-y-auto makes ONLY this part scrollable */}
         <main className="flex-1 overflow-y-auto w-full bg-gray-50">
           {/* 3. Reduced top padding to fix the "too much space" issue */}
-          <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-full">
+     <div className="w-full min-h-full">
             <Outlet />
           </div>
         </main>

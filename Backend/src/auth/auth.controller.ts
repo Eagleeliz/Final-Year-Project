@@ -1,23 +1,18 @@
-// src/auth/auth.controller.ts
 import { Request, Response } from "express";
-import { 
-  getUserByEmailService, 
-  getUserByIdService, 
+import {
+  getUserByEmailService,
   registerUserService,
-  updateUserPasswordService,
   setEmailVerificationTokenService,
-  verifyEmailService,
-  setPasswordResetTokenService,
-  resetPasswordWithTokenService
+  updateUserService,
+    setPasswordResetTokenService,
+    getUserByIdService
 } from "./auth.service";
 import { createUserValidator, userLogInValidator } from "../validation/user.validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import { sendNotificationEmail } from "../middlewares/GoogleMailer";
-import { updateUserService } from "./auth.service";
 
-// Register user with email verification
+// REGISTER WITH OTP
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = createUserValidator.safeParse(req.body);
@@ -25,68 +20,115 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       res.status(400).json({ error: parseResult.error.issues });
       return;
     }
+
     const user = parseResult.data;
 
     const existingUser = await getUserByEmailService(user.email);
     if (existingUser) {
-      res.status(400).json({ error: "User with this email already exists" });
+      res.status(400).json({ error: "User already exists" });
       return;
     }
 
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(user.password, salt);
+    const hashedPassword = bcrypt.hashSync(user.password, 10);
 
-    const userForService = {
-      email: user.email,
-      phone: user.phone,
-      passwordHash: hashedPassword,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      county: user.county,
-      userType: user.userType || 'mother'
-    };
+    const result = await registerUserService({
+      ...user,
+      constituency: user.constituency || null,
+      passwordHash: hashedPassword
+    });
 
-    const result = await registerUserService(userForService);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 5 * 60 * 1000);
 
-    // Generate email verification token
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-    await setEmailVerificationTokenService(
-      result.id,
-      verificationToken,
-      verificationExpires
-    );
-
-    const verificationUrl = `http://localhost:5173/verify-email?token=${verificationToken}`;
+    await setEmailVerificationTokenService(result.id, otp, expires);
 
     await sendNotificationEmail(
       user.email,
-      "Verify Your Email",
+      "Your Verification Code",
       `
       Welcome to BabyCentre Care 💛<br/><br/>
-      Please verify your email by clicking the link below:<br/><br/>
-      <a href="${verificationUrl}" style="color:#14b8a6;font-weight:bold;">
-        Verify Email
-      </a><br/><br/>
-      This link expires in 24 hours.
+      Your OTP is:<br/><br/>
+      <h2>${otp}</h2>
+      This code expires in 5 minutes.
       `,
       undefined,
       "welcome"
     );
 
+    // ✅ userType added to JWT
+    const token = jwt.sign(
+      {
+        userId: result.id,
+        userEmail: user.email,
+        userType: user.userType || 'mother'
+      },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "1h" }
+    );
+
     res.status(201).json({
-      message: "User created. Please verify your email.",
-      userId: result.id
+      user: {
+        id: result.id,
+        email: user.email,
+        firstName: user.firstName || null,
+        lastName: user.lastName || null,
+        phone: user.phone || null,
+        userType: user.userType || 'mother',
+        county: user.county || null,
+        constituency: user.constituency || null,
+        ward: user.ward || null
+      },
+      token,
+      isAuthenticated: true,
+      message: "Registration successful. OTP sent to email."
     });
 
   } catch (error: any) {
-    console.error("Register error:", error.message);
-    res.status(500).json({ error: error.message || "Failed to register user" });
+    res.status(500).json({ error: error.message });
   }
 };
 
-// LOGIN USER - Updated with Profile Completion Check
+// VERIFY OTP
+export const verifyOtp = async (req: Request, res: Response) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await getUserByEmailService(email);
+
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    if (user.isEmailVerified) {
+      res.status(400).json({ error: "Already verified" });
+      return;
+    }
+
+    if (user.emailVerificationToken !== otp) {
+      res.status(400).json({ error: "Invalid OTP" });
+      return;
+    }
+
+    if (new Date() > (user.emailVerificationExpires as Date)) {
+      res.status(400).json({ error: "OTP expired" });
+      return;
+    }
+
+    await updateUserService(user.id, {
+      isEmailVerified: true,
+      emailVerificationToken: null,
+      emailVerificationExpires: null
+    });
+
+    res.status(200).json({ message: "Verified successfully" });
+
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// LOGIN
 export const loginUser = async (req: Request, res: Response) => {
   try {
     const parseResult = userLogInValidator.safeParse(req.body);
@@ -95,262 +137,283 @@ export const loginUser = async (req: Request, res: Response) => {
       return;
     }
 
-    const user = parseResult.data;
-    const userExists = await getUserByEmailService(user.email);
-    
-    if (!userExists) {
-      res.status(404).json({ error: "User does not exist" });
-      return;
-    }
+    const { email, password } = parseResult.data;
+    const userExists = await getUserByEmailService(email);
 
-    if (!userExists.isActive) {
-      res.status(403).json({ error: "Account is deactivated" });
+    if (!userExists) {
+      res.status(404).json({ error: "User not found" });
       return;
     }
 
     if (!userExists.isEmailVerified) {
-      res.status(403).json({ 
-        error: "Email not verified. Please verify your email first.",
-        needsVerification: true
-      });
+      res.status(403).json({ error: "Verify your email first", needsVerification: true });
       return;
     }
 
-    const isMatch = bcrypt.compareSync(user.password, userExists.passwordHash);
+    const isMatch = bcrypt.compareSync(password, userExists.passwordHash);
     if (!isMatch) {
-      res.status(401).json({ error: "Invalid password" });
+      res.status(401).json({ error: "Invalid credentials" });
       return;
     }
 
-    const secret = process.env.JWT_SECRET as string;
-    const token = jwt.sign({
-      userId: userExists.id,
-      userEmail: userExists.email,
-      userType: userExists.userType,
-      exp: Math.floor(Date.now() / 1000) + (60 * 60)
-    }, secret);
-
-    // 🔥 PROFILE COMPLETION CHECK
-    // Based on your schema, registration captures: email, phone, name, county.
-    // We check for the "Stage 2" fields: dateOfBirth, subCounty, village.
-    const isProfileComplete = !!(
-      userExists.dateOfBirth && 
-      userExists.subCounty && 
-      userExists.village
+    // ✅ userType added to JWT
+    const token = jwt.sign(
+      {
+        userId: userExists.id,
+        userEmail: userExists.email,
+        userType: userExists.userType
+      },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "1h" }
     );
 
-    res.status(200).json({ 
+    res.status(200).json({
+      user: {
+        id: userExists.id,
+        email: userExists.email,
+        firstName: userExists.firstName,
+        lastName: userExists.lastName,
+        phone: userExists.phone,
+        userType: userExists.userType,
+        county: userExists.county || null,
+        constituency: userExists.constituency || null,
+        ward: userExists.ward || null
+      },
       token,
-      userId: userExists.id,
-      email: userExists.email,
-      userType: userExists.userType,
-      firstName: userExists.firstName,
-      lastName: userExists.lastName,
-      phone: userExists.phone,
-      county: userExists.county,
-      isActive: userExists.isActive,
-      isEmailVerified: userExists.isEmailVerified,
-      isProfileComplete: isProfileComplete // Frontend will use this to redirect
+      isAuthenticated: true,
     });
 
   } catch (error: any) {
-    res.status(500).json({ error: error.message || "Failed to login user" });
+    res.status(500).json({ error: error.message });
   }
 };
 
-// Verify email with token
-export const verifyEmail = async (req: Request, res: Response) => {
+// RESEND OTP
+export const resendOtp = async (req: Request, res: Response) => {
   try {
-    const token = req.params.token || req.query.token as string;
+    const { email } = req.body;
 
-    if (!token) {
-      res.status(400).json({ error: "Verification token is required" });
-      return;
+    const user = await getUserByEmailService(email);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
-    const isVerified = await verifyEmailService(token);
-
-    if (!isVerified) {
-      res.status(400).json({ error: "Token is invalid or has already been used." });
-      return;
+    if (user.isEmailVerified) {
+      return res.status(400).json({ error: "User already verified" });
     }
 
-    res.status(200).json({ message: "Email verified successfully" });
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 5 * 60 * 1000);
+
+    await setEmailVerificationTokenService(user.id, otp, expires);
+
+    await sendNotificationEmail(
+      user.email,
+      "Your New Verification Code",
+      `
+      Your new OTP is:<br/><br/>
+      <h2>${otp}</h2>
+      This code expires in 5 minutes.
+      `,
+      undefined,
+      "welcome"
+    );
+
+    res.status(200).json({
+      message: "New OTP sent to email",
+      expiresAt: expires
+    });
 
   } catch (error: any) {
-    if (error.message.includes("already verified")) {
-       res.status(200).json({ message: "Email is already verified. You can now log in." });
-       return;
-    }
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
-
-// Password reset request
-export const passwordReset = async (req: Request, res: Response): Promise<void> => {
+// FORGOT PASSWORD — sends OTP to email
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
   try {
-    if (!req.body || typeof req.body !== 'object') {
-      res.status(400).json({ error: "Invalid request body" });
-      return;
-    }
-
     const { email } = req.body;
+
     if (!email) {
       res.status(400).json({ error: "Email is required" });
       return;
     }
 
     const user = await getUserByEmailService(email);
+
+    // Always return 200 to avoid exposing which emails exist
     if (!user) {
-      res.status(404).json({ error: "User not found" });
+      res.status(200).json({ message: "If that email exists, a reset code was sent." });
       return;
     }
 
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); 
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    const tokenSet = await setPasswordResetTokenService(email, resetToken, expiresAt);
-    
-    if (!tokenSet) {
-      res.status(500).json({ error: "Failed to set password reset token" });
-      return;
-    }
+    await setPasswordResetTokenService(email, otp, expires);
 
-    const resetUrl = `http://localhost:5000/api/auth/reset-password/${resetToken}`;
+    await sendNotificationEmail(
+      user.email,
+      "Your Password Reset Code",
+      `
+      Hi ${user.firstName || "there"} 👋<br/><br/>
+      You requested a password reset for your BabyCentre Care account.<br/><br/>
+      Your reset code is:<br/><br/>
+      <h2>${otp}</h2>
+      This code expires in 10 minutes.<br/><br/>
+      If you did not request this, please ignore this email.
+      `,
+      undefined,
+      "welcome"
+    );
 
-    res.status(200).json({
-      message: "Password reset email sent",
-      resetUrl: resetUrl,
-      expiresAt: expiresAt
-    });
+    res.status(200).json({ message: "If that email exists, a reset code was sent." });
 
   } catch (error: any) {
-    console.error("❌ passwordReset error:", error.message);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Reset password with token
-export const resetPassword = async (req: Request, res: Response) => {
+// RESET PASSWORD — verifies OTP and sets new password
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
   try {
-    if (!req.body || typeof req.body !== 'object') {
-      res.status(400).json({ error: "Invalid request body" });
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      res.status(400).json({ error: "Email, OTP and new password are required" });
       return;
     }
 
-    const { token } = req.params;
-    const { password } = req.body;
-
-    if (!token || !password) {
-      res.status(400).json({ error: "Token and password are required" });
+    if (newPassword.length < 6) {
+      res.status(400).json({ error: "Password must be at least 6 characters" });
       return;
     }
 
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(password, salt);
+    const user = await getUserByEmailService(email);
 
-    const isReset = await resetPasswordWithTokenService(token, hashedPassword);
-
-    if (!isReset) {
-      res.status(400).json({ error: "Invalid or expired token" });
-      return;
-    }
-
-    res.status(200).json({ message: "Password reset successfully" });
-
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
-// Update Password (old JWT style)
-export const updatePassword = async (req: Request, res: Response) => {
-  try {
-    const { token } = req.params;
-    const { password } = req.body;
-
-    if (!token || !password) {
-      res.status(400).json({ error: "Token and password are required" });
-      return;
-    }
-
-    const secret = process.env.JWT_SECRET as string;
-    const payload: any = jwt.verify(token, secret);
-
-    const user = await getUserByIdService(payload.userId);
     if (!user) {
       res.status(404).json({ error: "User not found" });
       return;
     }
 
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(password, salt);
-
-    await updateUserPasswordService(user.email, hashedPassword);
-
-    res.status(200).json({ message: "Password reset successfully" });
-
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
-// Get user profile
-export const getUserProfile = async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user?.userId;
-    if (!userId) {
-      res.status(401).json({ error: "Unauthorized" });
+    if (user.passwordResetToken !== otp) {
+      res.status(400).json({ error: "Invalid reset code" });
       return;
     }
 
+    if (!user.passwordResetExpires || new Date() > user.passwordResetExpires) {
+      res.status(400).json({ error: "Reset code has expired" });
+      return;
+    }
+
+    const hashedPassword = bcrypt.hashSync(newPassword, 10);
+
+    await updateUserService(user.id, {
+      passwordHash: hashedPassword,
+      passwordResetToken: null,
+      passwordResetExpires: null,
+    });
+
+    res.status(200).json({ message: "Password reset successfully. You can now log in." });
+
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const uploadProfileImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = Number(req.params.userId);
+    if (!req.file) {
+      res.status(400).json({ error: "No image uploaded" });
+      return;
+    }
+    const imageUrl = (req.file as any).path;
+    await updateUserService(userId, { profileImage: imageUrl });
+    res.status(200).json({ profileImage: imageUrl });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const changePassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId, currentPassword, newPassword } = req.body;
+    if (!userId || !currentPassword || !newPassword) {
+      res.status(400).json({ error: "All fields are required" });
+      return;
+    }
+    if (newPassword.length < 6) {
+      res.status(400).json({ error: "Password must be at least 6 characters" });
+      return;
+    }
     const user = await getUserByIdService(userId);
-    if (!user) {
-      res.status(404).json({ error: "User not found" });
-      return;
-    }
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
 
+    const isMatch = bcrypt.compareSync(currentPassword, user.passwordHash);
+    if (!isMatch) { res.status(401).json({ error: "Current password is incorrect" }); return; }
+
+    const hashedPassword = bcrypt.hashSync(newPassword, 10);
+    await updateUserService(userId, { passwordHash: hashedPassword });
+
+    res.status(200).json({ message: "Password changed successfully" });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// auth.controller.ts
+export const getProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = Number((req as any).user?.userId); // from JWT middleware
+    const user = await getUserByIdService(userId);
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
     res.status(200).json({
-      id: user.id,
-      email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
+      email: user.email,
       phone: user.phone,
       county: user.county,
-      subCounty: user.subCounty, // Added for completeness
-      village: user.village,     // Added for completeness
-      userType: user.userType,
-      isEmailVerified: user.isEmailVerified,
-      createdAt: user.createdAt
+      constituency: user.constituency,  
+      ward: user.ward,                  
+      dateOfBirth: user.dateOfBirth,
+      profileImage: user.profileImage,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+export const completeProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = Number((req as any).user?.userId);
+    const { firstName, lastName, phone, county, constituency, ward, dateOfBirth } = req.body;
+
+    await updateUserService(userId, {
+      firstName,
+      lastName,
+      phone,
+      county,
+      constituency: constituency || null,
+      ward: ward || null,
+      dateOfBirth: dateOfBirth || null,
     });
 
+    const updated = await getUserByIdService(userId);
+    if (!updated) { res.status(404).json({ error: "User not found" }); return; }
+
+    res.status(200).json({
+      firstName: updated.firstName,
+      lastName: updated.lastName,
+      email: updated.email,
+      phone: updated.phone,
+      county: updated.county,
+      constituency: updated.constituency,
+      ward: updated.ward,
+      dateOfBirth: updated.dateOfBirth,
+      profileImage: updated.profileImage,
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const completeProfile = async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user?.userId; // Get ID from JWT middleware
-    const { dateOfBirth, subCounty, village } = req.body;
-
-    if (!userId) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
-
-    // Call your service to update the user record
-    // Note: Ensure your service/database schema supports these fields
-    await updateUserService(Number(userId), {
-  // Remove "new Date()" and pass the string directly
-  dateOfBirth: dateOfBirth, 
-  subCounty,
-  village,
-});
-
-    res.status(200).json({ message: "Profile completed successfully" });
-  } catch (error: any) {
-    console.error("Complete Profile Error:", error.message);
-    res.status(500).json({ error: "Failed to update profile" });
-  }
-};
