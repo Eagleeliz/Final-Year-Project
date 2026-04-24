@@ -6,3 +6,8 @@
 
 # Environment files
 **/.env
+__pycache__
+*.pyc
+venv/
+*.db
+.env.local

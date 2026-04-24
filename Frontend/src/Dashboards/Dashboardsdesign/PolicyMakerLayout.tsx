@@ -1,29 +1,28 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import UserSideNav from "./UserSideNav";
+import PolicyMakerSideNav from "./PolicyMakerSideNav";
 import Navbar from "../../components/Navbar";
 
-const UserLayout = () => {
+const PolicyMakerLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    // 1. h-screen + overflow-hidden prevents the WHOLE window from scrolling
     <div className="h-screen flex flex-col overflow-hidden bg-gray-100">
 
-      {/* Top Navbar - Make sure your Navbar component has a fixed height (e.g., h-16) */}
+      {/* Top Navbar */}
       <div className="z-50 border-b border-gray-200 bg-white">
         <Navbar />
       </div>
 
       <div className="flex flex-1 overflow-hidden relative">
 
-        {/* Desktop Sidebar - Fixed to the side */}
+        {/* Desktop Sidebar */}
         <aside className="hidden lg:flex flex-col w-64 bg-[#002e33] border-r border-white/10 shrink-0">
-          <UserSideNav />
+          <PolicyMakerSideNav />
         </aside>
 
-        {/* Mobile Sidebar (Drawer logic remains the same) */}
+        {/* Mobile Sidebar */}
         {sidebarOpen && (
           <>
             <div
@@ -36,15 +35,14 @@ const UserLayout = () => {
                   <X size={24} className="text-white" />
                 </button>
               </div>
-              <UserSideNav onNavItemClick={() => setSidebarOpen(false)} />
+              <PolicyMakerSideNav onNavItemClick={() => setSidebarOpen(false)} />
             </aside>
           </>
         )}
 
-        {/* Main Content - 2. overflow-y-auto makes ONLY this part scrollable */}
+        {/* Main Content */}
         <main className="flex-1 overflow-y-auto w-full bg-gray-50">
-          {/* 3. Reduced top padding to fix the "too much space" issue */}
-     <div className="w-full min-h-full">
+          <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-full">
             <Outlet />
           </div>
         </main>
@@ -63,4 +61,4 @@ const UserLayout = () => {
   );
 };
 
-export default UserLayout;
+export default PolicyMakerLayout;

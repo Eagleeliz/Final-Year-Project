@@ -63,8 +63,10 @@ const LoginPage = () => {
       });
 
       setTimeout(() => {
-        if (data.user.userType === 'admin' || data.user.userType === 'policy_maker') {
+        if (data.user.userType === 'admin') {
           navigate("/admin");
+        } else if (data.user.userType === 'policy_maker') {
+          navigate("/policymaker");
         } else {
           navigate("/dashboard");
         }
@@ -135,7 +137,7 @@ const LoginPage = () => {
                     className="text-[10px] font-black uppercase tracking-widest"
                     style={{ color: midnightTeal }}
                   >
-                    Secure Access 🔒
+                    Please fill in your details
                   </span>
                 </div>
               </div>
@@ -143,7 +145,7 @@ const LoginPage = () => {
               {/* Form */}
               <form onSubmit={handleLogin} className="space-y-5" name="loginForm">
                 <div>
-                  <label className="text-[10px] uppercase font-black text-black mb-2 block tracking-widest">
+                  <label className="text-sm uppercase font-bold text-black mb-2 block tracking-widest">
                     Email Address
                   </label>
                   <input
@@ -154,23 +156,14 @@ const LoginPage = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="jane@example.com"
-                    className="w-full rounded-2xl p-4 border-2 border-transparent focus:border-[#86d9e1] focus:ring-2 focus:ring-[#86d9e1]/50 outline-none shadow-sm bg-white/70 text-gray-800 placeholder:text-gray-300 transition-all"
+                    className="w-full rounded-2xl p-4 border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-300/50 outline-none shadow-sm bg-white text-gray-800 placeholder:text-gray-400 transition-all"
                   />
                 </div>
 
                 <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="text-[10px] uppercase font-black text-black tracking-widest">
-                      Password
-                    </label>
-                    <Link
-                      to="/forgot"
-                      className="text-[10px] font-black uppercase tracking-widest hover:underline"
-                      style={{ color: midnightTeal }}
-                    >
-                      Forgot Password?
-                    </Link>
-                  </div>
+                  <label className="text-sm uppercase font-bold text-black mb-2 block tracking-widest">
+                    Password
+                  </label>
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
@@ -180,7 +173,7 @@ const LoginPage = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full rounded-2xl p-4 border-2 border-transparent focus:border-[#86d9e1] focus:ring-2 focus:ring-[#86d9e1]/50 outline-none shadow-sm bg-white/70 text-gray-800 placeholder:text-gray-300 transition-all"
+                      className="w-full rounded-2xl p-4 border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-300/50 outline-none shadow-sm bg-white text-gray-800 placeholder:text-gray-400 transition-all"
                       style={{ paddingRight: "3rem" }}
                     />
                     <button
@@ -192,6 +185,13 @@ const LoginPage = () => {
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                  <Link
+                    to="/forgot"
+                    className="text-sm font-bold uppercase tracking-widest hover:underline mt-2 inline-block text-right w-full"
+                    style={{ color: midnightTeal }}
+                  >
+                    Forgot Password?
+                  </Link>
                 </div>
 
                 <button

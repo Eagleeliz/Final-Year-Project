@@ -31,7 +31,13 @@ import HealthCheckins from "./Dashboards/AdminDashboard/HealthCheckins";
 import ManageHealthTips from "./Dashboards/AdminDashboard/ManageHealthTips";
 import ManageGuidance from "./Dashboards/AdminDashboard/ManageGuidance";
 import ManageFacilities from "./Dashboards/AdminDashboard/ManageFacilities";
-import Analytics from "./Dashboards/AdminDashboard/Analytics";
+
+// ── Policy Maker Dashboard
+import PolicyMakerLayout from "./Dashboards/Dashboardsdesign/PolicyMakerLayout";
+import PolicyMakerHome from "./Dashboards/PolicyMakerDashboard/PolicyMakerHome";
+import PolicyMakerNationalSummary from "./Dashboards/PolicyMakerDashboard/PolicyMakerNationalSummary";
+import PolicyMakerRiskTrends from "./Dashboards/PolicyMakerDashboard/PolicyMakerRiskTrends";
+
 import DueDateCalculator from "./pages/DueDateCalculator";
 import { EnterOtp } from "./pages/EnterOtp";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -103,17 +109,23 @@ function App() {
         </Route>
 
         {/* ── Admin Dashboard */}
-        {/* Login redirects here for admin + policy_maker — see LoginPage.tsx */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminHome />} />
           <Route path="users" element={<AllUsers />} />
           <Route path="pregnancies" element={<AllPregnancies />} />
           <Route path="emergencies" element={<EmergencyAlerts />} />
           <Route path="checkins" element={<HealthCheckins />} />
-         
+          
           <Route path="guidance" element={<ManageGuidance />} />
           <Route path="facilities" element={<ManageFacilities />} />
         
+        </Route>
+
+        {/* ── Policy Maker Dashboard */}
+        <Route path="/policymaker" element={<PolicyMakerLayout />}>
+          <Route index element={<PolicyMakerHome />} />
+          <Route path="national-summary" element={<PolicyMakerNationalSummary />} />
+          <Route path="risk-trends" element={<PolicyMakerRiskTrends />} />
         </Route>
 
         {/* ── Catch-all */}
@@ -124,6 +136,3 @@ function App() {
 }
 
 export default App;
-
-
-

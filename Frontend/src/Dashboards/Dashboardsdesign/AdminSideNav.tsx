@@ -22,6 +22,8 @@ interface NavProps {
 
 const MySwal = withReactContent(Swal);
 
+const midnightTeal = "#002e33";
+
 const AdminSideNav = ({ onNavItemClick }: NavProps) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -43,8 +45,8 @@ const AdminSideNav = ({ onNavItemClick }: NavProps) => {
       title: "Are you sure you want to log out?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonColor: midnightTeal,
+      cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, Log out",
       cancelButtonText: "Cancel",
     }).then((result) => {

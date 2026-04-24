@@ -47,11 +47,11 @@ const AdminLayout = () => {
           </div>
         </main>
 
-        {/* Mobile Toggle Button */}
+        {/* Mobile Toggle Button - Top Right */}
         {!sidebarOpen && (
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden fixed bottom-6 right-6 bg-[#002e33] text-white p-4 rounded-full shadow-lg z-30"
+            className="lg:hidden fixed top-20 right-6 bg-[#002e33] text-white p-4 rounded-full shadow-lg z-30"
           >
             <Menu size={24} />
           </button>

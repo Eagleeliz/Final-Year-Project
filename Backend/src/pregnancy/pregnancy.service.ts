@@ -1,6 +1,6 @@
 import db from "../drizzle/db";
-import { pregnanciesTable } from "../drizzle/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { pregnanciesTable, usersTable } from "../drizzle/schema";
+import { eq, and, desc, sql } from "drizzle-orm";
 
 /**
  * Utility to calculate pregnancy progress based on LMP
@@ -129,4 +129,119 @@ export const updatePregnancy = async (id: number, data: any) => {
 export const deletePregnancy = async (id: number) => {
   await db.delete(pregnanciesTable).where(eq(pregnanciesTable.id, id));
   return { message: "Pregnancy record deleted successfully" };
+};
+
+// --- LOCATION-BASED & ANALYTICS SERVICES ---
+
+// Get pregnancies with user location data
+const getPregnanciesWithLocation = async () => {
+  return await db.select({
+    pregnancy: pregnanciesTable,
+    userCounty: usersTable.county,
+    userConstituency: usersTable.constituency,
+    userWard: usersTable.ward,
+  })
+  .from(pregnanciesTable)
+  .innerJoin(usersTable, eq(pregnanciesTable.userId, usersTable.id));
+};
+
+// Get pregnancy count by county
+export const getPregnancyCountByCounty = async () => {
+  const data = await getPregnanciesWithLocation();
+  const counts: Record<string, number> = {};
+  data.forEach(row => {
+    const county = row.userCounty;
+    if (county) {
+      counts[county] = (counts[county] || 0) + 1;
+    }
+  });
+  return counts;
+};
+
+// Get pregnancy count by outcome
+export const getPregnancyOutcomeStats = async () => {
+  const pregnancies = await db.query.pregnanciesTable.findMany({
+    columns: { outcome: true },
+  });
+  const stats: Record<string, number> = {};
+  pregnancies.forEach(p => {
+    const outcome = p.outcome || "ongoing";
+    stats[outcome] = (stats[outcome] || 0) + 1;
+  });
+  return stats;
+};
+
+// Get pregnancy counts by trimester
+export const getPregnancyTrimesterStats = async () => {
+  const pregnancies = await db.query.pregnanciesTable.findMany({
+    columns: { currentTrimester: true },
+  });
+  const stats: Record<string, number> = { 1: 0, 2: 0, 3: 0 };
+  pregnancies.forEach(p => {
+    if (p.currentTrimester) {
+      stats[String(p.currentTrimester)] = (stats[String(p.currentTrimester)] || 0) + 1;
+    }
+  });
+  return stats;
+};
+
+// Get delivery stats by month
+export const getDeliveryStatsByMonth = async (months: number = 12) => {
+  const pregnancies = await db.query.pregnanciesTable.findMany({
+    where: eq(pregnanciesTable.outcome, "delivered" as any),
+    columns: { deliveryDate: true },
+  });
+  
+  const now = new Date();
+  const stats: Record<string, number> = {};
+  
+  for (let i = 0; i < months; i++) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    stats[key] = 0;
+  }
+  
+  pregnancies.forEach(p => {
+    if (p.deliveryDate) {
+      const date = new Date(p.deliveryDate);
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (stats[key] !== undefined) {
+        stats[key]++;
+      }
+    }
+  });
+  
+  return stats;
+};
+
+// Get high-risk pregnancies (based on outcomes: miscarriage, terminated)
+export const getHighRiskPregnancies = async () => {
+  const data = await db.select({
+    pregnancy: pregnanciesTable,
+    userCounty: usersTable.county,
+    userConstituency: usersTable.constituency,
+    userWard: usersTable.ward,
+  })
+  .from(pregnanciesTable)
+  .innerJoin(usersTable, eq(pregnanciesTable.userId, usersTable.id))
+  .where(
+    and(
+      sql`${pregnanciesTable.outcome} IN ('miscarriage', 'terminated')`
+    )
+  );
+  
+  return data;
+};
+
+// Get risk count by location
+export const getRiskCountByCounty = async () => {
+  const highRiskData = await getHighRiskPregnancies();
+  const counts: Record<string, number> = {};
+  highRiskData.forEach(row => {
+    const county = row.userCounty;
+    if (county) {
+      counts[county] = (counts[county] || 0) + 1;
+    }
+  });
+  return counts;
 };

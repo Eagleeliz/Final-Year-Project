@@ -45,21 +45,21 @@ const registerSchema = z.object({
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const inputClass = `
-  w-full rounded-2xl p-4 border-2 border-transparent
-  focus:border-[#86d9e1] focus:ring-2 focus:ring-[#86d9e1]/50
-  outline-none shadow-sm bg-white/70 text-gray-800
-  placeholder:text-gray-300 transition-all
+  w-full rounded-2xl p-4 border-2 border-gray-300
+  focus:border-gray-800 focus:ring-2 focus:ring-gray-300/50
+  outline-none shadow-sm bg-white text-gray-800
+  placeholder:text-gray-400 transition-all
 `;
 
-const labelClass = "text-[10px] uppercase font-black text-black  mb-2 block tracking-widest";
+const labelClass = "text-sm uppercase font-bold text-black mb-2 block tracking-widest";
 
 const SectionLabel = ({ children }: { children: string }) => (
   <div className="flex items-center gap-3 mb-4">
-    <div className="w-1 h-4 rounded-full flex-shrink-0" style={{ background: aquaText }} />
-    <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: aquaText }}>
+    <div className="w-1 h-4 rounded-full flex-shrink-0" style={{ background: midnightTeal }} />
+    <span className="text-xs font-bold uppercase tracking-widest" style={{ color: midnightTeal }}>
       {children}
     </span>
-    <div className="flex-1 h-px" style={{ background: "rgba(134,217,225,0.2)" }} />
+    <div className="flex-1 h-px" style={{ background: "rgba(0,46,51,0.2)" }} />
   </div>
 );
 
@@ -267,14 +267,14 @@ export const Register = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className={labelClass}>
-                          First Name <span style={{ color: aquaText }}>*</span>
+                          First Name <span style={{ color: midnightTeal }}>*</span>
                         </label>
                         <input {...register("firstName")} className={inputClass} placeholder="enter first name" />
                         <FieldError message={errors.firstName?.message} />
                       </div>
                       <div>
                         <label className={labelClass}>
-                          Last Name <span style={{ color: aquaText }}>*</span>
+                          Last Name <span style={{ color: midnightTeal }}>*</span>
                         </label>
                         <input {...register("lastName")} className={inputClass} placeholder="enter last name" />
                         <FieldError message={errors.lastName?.message} />
@@ -284,14 +284,14 @@ export const Register = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className={labelClass}>
-                          Email <span style={{ color: aquaText }}>*</span>
+                          Email <span style={{ color: midnightTeal }}>*</span>
                         </label>
                         <input type="email" {...register("email")} className={inputClass} placeholder="e.g jane@example.com" />
                         <FieldError message={errors.email?.message} />
                       </div>
                       <div>
                         <label className={labelClass}>
-                          Phone <span style={{ color: aquaText }}>*</span>
+                          Phone <span style={{ color: midnightTeal }}>*</span>
                         </label>
                         <input {...register("phone")} className={inputClass} placeholder="eg 0700000000" />
                         <FieldError message={errors.phone?.message} />
@@ -300,7 +300,7 @@ export const Register = () => {
 
                     <div>
                       <label className={labelClass}>
-                        Date of Birth <span style={{ color: aquaText }}>*</span>
+                        Date of Birth <span style={{ color: midnightTeal }}>*</span>
                       </label>
                       <input type="date" {...register("dateOfBirth")} className={inputClass} />
                       <FieldError message={errors.dateOfBirth?.message} />
@@ -314,7 +314,7 @@ export const Register = () => {
                   <div className="space-y-4">
                     <div>
                       <label className={labelClass}>
-                        County <span style={{ color: aquaText }}>*</span>
+                        County <span style={{ color: midnightTeal }}>*</span>
                       </label>
                       <select {...register("county")} className={inputClass}>
                         <option value="">Select County</option>
@@ -326,9 +326,9 @@ export const Register = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className={labelClass}>
-                          Constituency <span style={{ color: aquaText }}>*</span>
+                          Constituency <span style={{ color: midnightTeal }}>*</span>
                           {loadingConstituencies && (
-                            <span className="ml-2 inline-block w-3 h-3 rounded-full border-2 border-[#86d9e1] border-t-transparent animate-spin" />
+                            <span className="ml-2 inline-block w-3 h-3 rounded-full border-2 border-gray-800 border-t-transparent animate-spin" />
                           )}
                         </label>
                         <select
@@ -350,9 +350,9 @@ export const Register = () => {
 
                       <div>
                         <label className={labelClass}>
-                          Ward <span style={{ color: aquaText }}>*</span>
+                          Ward <span style={{ color: midnightTeal }}>*</span>
                           {loadingWards && (
-                            <span className="ml-2 inline-block w-3 h-3 rounded-full border-2 border-[#86d9e1] border-t-transparent animate-spin" />
+                            <span className="ml-2 inline-block w-3 h-3 rounded-full border-2 border-gray-800 border-t-transparent animate-spin" />
                           )}
                         </label>
                         <select
@@ -380,7 +380,7 @@ export const Register = () => {
                   <SectionLabel>Security</SectionLabel>
                   <div className="space-y-4">
 <div>
-  <label className={labelClass}>Password <span style={{ color: aquaText }}>*</span></label>
+  <label className={labelClass}>Password <span style={{ color: midnightTeal }}>*</span></label>
   <div className="relative">
     <input
       type={showPassword ? "text" : "password"}
@@ -393,7 +393,7 @@ export const Register = () => {
       type="button"
       onClick={() => setShowPassword(v => !v)}
       className="absolute right-4 top-1/2 -translate-y-1/2 p-0 transition-colors"
-      style={{ background: "transparent", border: "none", color: showPassword ? aquaText : "#9ca3af" }}
+      style={{ background: "transparent", border: "none", color: showPassword ? midnightTeal : "#9ca3af" }}
     >
       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
     </button>
@@ -402,7 +402,7 @@ export const Register = () => {
 </div>
 
 <div>
-  <label className={labelClass}>Confirm Password <span style={{ color: aquaText }}>*</span></label>
+  <label className={labelClass}>Confirm Password <span style={{ color: midnightTeal }}>*</span></label>
   <div className="relative">
     <input
       type={showConfirm ? "text" : "password"}
@@ -415,7 +415,7 @@ export const Register = () => {
       type="button"
       onClick={() => setShowConfirm(v => !v)}
       className="absolute right-4 top-1/2 -translate-y-1/2 p-0 transition-colors"
-      style={{ background: "transparent", border: "none", color: showConfirm ? aquaText : "#9ca3af" }}
+      style={{ background: "transparent", border: "none", color: showConfirm ? midnightTeal : "#9ca3af" }}
     >
       {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
     </button>
@@ -426,20 +426,20 @@ export const Register = () => {
                 </div>
 
                 {/* Required note */}
-                <p className="text-xs text-gray-400">
-                  <span style={{ color: aquaText }}>*</span> indicates a required field
+                <p className="text-sm text-gray-600">
+                  <span style={{ color: midnightTeal }}>*</span> indicates a required field
                 </p>
 
                 {/* Submit */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-5 rounded-2xl font-black text-lg uppercase tracking-wide shadow-xl flex justify-center items-center active:scale-95 transition-all disabled:opacity-50"
-                  style={{ backgroundColor: midnightTeal, color: aquaText }}
+                  className="w-full py-5 rounded-2xl font-bold text-lg uppercase tracking-wide shadow-xl flex justify-center items-center active:scale-95 transition-all disabled:opacity-50"
+                  style={{ backgroundColor: midnightTeal, color: "white" }}
                 >
                   {isLoading ? (
                     <span className="flex items-center gap-3">
-                      <span className="w-5 h-5 rounded-full border-2 border-[#86d9e1] border-t-transparent animate-spin" />
+                      <span className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
                       Creating account...
                     </span>
                   ) : "Register Now"}

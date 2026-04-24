@@ -38,12 +38,12 @@ const Navbar = () => {
         </h1>
 
         {/* Desktop Navigation Links */}
-        <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-gray-600">
-          <Link to="/" className="hover:text-[#002e33] transition-colors">Home</Link>
-          <Link to="/about" className="hover:text-[#002e33] transition-colors">About</Link>
-          <Link to="/howitworks" className="hover:text-[#002e33] transition-colors">How It Works</Link>
-          <Link to="/duedatecalculator" className="hover:text-[#002e33] transition-colors">DueDate Calculator</Link>
-          <Link to="/contact" className="hover:text-[#002e33] transition-colors">Contact</Link>
+        <div className="hidden md:flex items-center gap-8 text-base font-semibold">
+          <Link to="/" className="transition-colors" style={{ color: midnightTeal }}>Home</Link>
+          <Link to="/about" className="transition-colors" style={{ color: midnightTeal }}>About</Link>
+          <Link to="/howitworks" className="transition-colors" style={{ color: midnightTeal }}>How It Works</Link>
+          <Link to="/duedatecalculator" className="transition-colors" style={{ color: midnightTeal }}>DueDate Calculator</Link>
+          <Link to="/contact" className="transition-colors" style={{ color: midnightTeal }}>Contact</Link>
         </div>
 
         {/* Desktop Auth Section */}
@@ -85,6 +85,8 @@ const Navbar = () => {
                     to={
                       user?.userType === "admin"
                         ? "/admin"
+                        : user?.userType === "policy_maker"
+                        ? "/policymaker"
                         : "/dashboard"
                     }
                     onClick={() => setDropdownOpen(false)}
@@ -106,79 +108,66 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Menu Toggle Button */}
-        <button 
-          onClick={toggleMenu}
-          className="md:hidden p-2 rounded-lg"
-          style={{ color: midnightTeal }}
-        >
-          {isOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
+        {/* Mobile Menu Toggle Button - Only show when NOT logged in */}
+        {!isAuthenticated && (
+          <button 
+            onClick={toggleMenu}
+            className="md:hidden p-2 rounded-lg flex items-center"
+            style={{ color: midnightTeal }}
+          >
+            {isOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        )}
       </div>
 
-      {/* Mobile Navigation Menu */}
-      {isOpen && (
-        <div className="absolute top-full left-0 w-full bg-white border-b border-gray-100 md:hidden flex flex-col p-6 gap-4 shadow-xl">
+      {/* Mobile Menu Container - Below navbar, not covering it */}
+      {!isAuthenticated && isOpen && (
+        <>
+          {/* Overlay */}
+          <div 
+            className="fixed inset-0 bg-black/40 z-40 md:hidden"
+            onClick={toggleMenu}
+          />
+          {/* Side drawer - below navbar */}
+          <div className="absolute top-full left-0 w-72 h-screen bg-white md:hidden flex flex-col p-6 gap-4 shadow-xl z-50 overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold" style={{ color: midnightTeal }}>
+                Menu
+              </h2>
+              <button onClick={toggleMenu} className="p-1">
+                <X size={24} style={{ color: midnightTeal }} />
+              </button>
+            </div>
 
-          <Link to="/" onClick={toggleMenu} className="text-lg font-medium text-gray-700">Home</Link>
-          <Link to="/about" onClick={toggleMenu} className="text-lg font-medium text-gray-700">About</Link>
-          <Link to="/howitworks" onClick={toggleMenu} className="text-lg font-medium text-gray-700">How It Works</Link>
-          <Link to="/ai-public" onClick={toggleMenu} className="text-lg font-medium text-gray-700">AI Assistant</Link>
-          <Link to="/contact" onClick={toggleMenu} className="text-lg font-medium text-gray-700">Contact</Link>
+            <Link to="/" onClick={toggleMenu} className="text-xl font-medium" style={{ color: midnightTeal }}>Home</Link>
+            <Link to="/about" onClick={toggleMenu} className="text-xl font-medium" style={{ color: midnightTeal }}>About</Link>
+            <Link to="/howitworks" onClick={toggleMenu} className="text-xl font-medium" style={{ color: midnightTeal }}>How It Works</Link>
+            <Link to="/ai-public" onClick={toggleMenu} className="text-xl font-medium" style={{ color: midnightTeal }}>AI Assistant</Link>
+            <Link to="/contact" onClick={toggleMenu} className="text-xl font-medium" style={{ color: midnightTeal }}>Contact</Link>
 
-          <hr className="border-gray-100 my-2" />
+            <hr className="border-gray-100 my-2" />
 
-          {/* Mobile Auth Section */}
-          <div className="flex flex-col gap-3">
-            {!isAuthenticated ? (
-              <>
-                <Link
-                  to="/login"
-                  onClick={toggleMenu}
-                  className="w-full py-3 text-center font-bold rounded-xl border-2"
-                  style={{ borderColor: midnightTeal, color: midnightTeal }}
-                >
-                  Login
-                </Link>
+            <div className="flex flex-col gap-3">
+              <Link
+                to="/login"
+                onClick={toggleMenu}
+                className="w-full py-3 text-center font-bold rounded-xl border-2"
+                style={{ borderColor: midnightTeal, color: midnightTeal }}
+              >
+                Login
+              </Link>
 
-                <Link
-                  to="/register"
-                  onClick={toggleMenu}
-                  className="w-full py-3 text-center font-bold rounded-xl"
-                  style={{ backgroundColor: midnightTeal, color: aquaText }}
-                >
-                  Register
-                </Link>
-              </>
-            ) : (
-              <>
-                <div className="text-center font-semibold text-gray-700">
-                  Hey {user?.firstName}
-                </div>
-
-                {/* Mobile Dropdown Menu */}
-                <Link
-                  to={
-                    user?.userType === "admin"
-                      ? "/admin-dashboard"
-                      : "/dashboard"
-                  }
-                  onClick={toggleMenu}
-                  className="w-full py-3 text-center font-semibold rounded-xl bg-gray-100"
-                >
-                  My Dashboard
-                </Link>
-
-                <button
-                  onClick={handleLogout}
-                  className="w-full py-3 text-center font-semibold rounded-xl bg-rose-100 text-rose-600"
-                >
-                  Terminate Session
-                </button>
-              </>
-            )}
+              <Link
+                to="/register"
+                onClick={toggleMenu}
+                className="w-full py-3 text-center font-bold rounded-xl"
+                style={{ backgroundColor: midnightTeal, color: aquaText }}
+              >
+                Register
+              </Link>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </nav>
   );

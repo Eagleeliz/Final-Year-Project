@@ -123,6 +123,85 @@ export const setPasswordResetTokenService = async (email: string, token: string,
     return result.length > 0;
 };
 
+// --- LOCATION-BASED SERVICES ---
+
+// Get Users By County
+export const getUsersByCounty = async (county: string) => {
+    return await db.query.usersTable.findMany({
+        where: eq(usersTable.county, county),
+        columns: { passwordHash: false },
+        orderBy: [desc(usersTable.createdAt)],
+    });
+};
+
+// Get Users By Constituency
+export const getUsersByConstituency = async (constituency: string) => {
+    return await db.query.usersTable.findMany({
+        where: eq(usersTable.constituency, constituency),
+        columns: { passwordHash: false },
+        orderBy: [desc(usersTable.createdAt)],
+    });
+};
+
+// Get Users By Ward
+export const getUsersByWard = async (ward: string) => {
+    return await db.query.usersTable.findMany({
+        where: eq(usersTable.ward, ward),
+        columns: { passwordHash: false },
+        orderBy: [desc(usersTable.createdAt)],
+    });
+};
+
+// Get Users By User Type
+export const getUsersByUserType = async (userType: string) => {
+    return await db.query.usersTable.findMany({
+        where: eq(usersTable.userType, userType as any),
+        columns: { passwordHash: false },
+        orderBy: [desc(usersTable.createdAt)],
+    });
+};
+
+// Get User Count By County
+export const getUserCountByCounty = async () => {
+    const users = await db.query.usersTable.findMany({
+        columns: { county: true },
+    });
+    const counts: Record<string, number> = {};
+    users.forEach(user => {
+        if (user.county) {
+            counts[user.county] = (counts[user.county] || 0) + 1;
+        }
+    });
+    return counts;
+};
+
+// Get User Registration Stats By Month
+export const getUserRegistrationStats = async (months: number = 12) => {
+    const allUsers = await db.query.usersTable.findMany({
+        columns: { createdAt: true },
+    });
+    const now = new Date();
+    const stats: Record<string, number> = {};
+    
+    for (let i = 0; i < months; i++) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        stats[key] = 0;
+    }
+    
+    allUsers.forEach(user => {
+        if (user.createdAt) {
+            const date = new Date(user.createdAt);
+            const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            if (stats[key] !== undefined) {
+                stats[key]++;
+            }
+        }
+    });
+    
+    return stats;
+};
+
 // Reset Password with Token
 export const resetPasswordWithTokenService = async (token: string, newPasswordHash: string): Promise<boolean> => {
     const [user] = await db.select()

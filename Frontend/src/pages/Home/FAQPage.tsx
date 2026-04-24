@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const midnightTeal = "#002e33";
-const accentTeal = "#00a0b0";
-const lightTeal = "#86d9e1";
+const black = "#000000";
+const white = "#ffffff";
 
 const faqs = [
   {
@@ -40,8 +40,8 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
       className="rounded-[18px] overflow-hidden transition-all duration-300"
       style={{
         background: open ? midnightTeal : "#fff",
-        border: `1.5px solid ${open ? "transparent" : "#c8eef1"}`,
-        boxShadow: open ? "0 8px 32px rgba(0,46,51,0.15)" : "0 1px 4px rgba(0,46,51,0.04)",
+        border: `1.5px solid ${open ? "transparent" : "#e5e5e5"}`,
+        boxShadow: open ? "0 8px 32px rgba(0,46,51,0.15)" : "0 1px 4px rgba(0,0,0,0.04)",
       }}
     >
       <button
@@ -57,11 +57,11 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
         <span
           className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300"
           style={{
-            background: open ? "rgba(134,217,225,0.18)" : "#e0f7f9",
+            background: open ? "rgba(255,255,255,0.18)" : "#f5f5f5",
             transform: open ? "rotate(45deg)" : "rotate(0deg)",
           }}
         >
-          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke={open ? lightTeal : accentTeal} strokeWidth={2.5} strokeLinecap="round">
+          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke={open ? white : black} strokeWidth={2.5} strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
         </span>
@@ -73,7 +73,7 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
       >
         <p
           className="px-7 pb-7 text-[17px] leading-relaxed"
-          style={{ color: "rgba(134,217,225,0.88)" }}
+          style={{ color: "rgba(255,255,255,0.88)" }}
         >
           {a}
         </p>
@@ -88,14 +88,14 @@ const FAQPage = () => {
   return (
     <div
       className="w-full min-h-screen"
-      style={{ background: "linear-gradient(160deg, #f0fbfc 0%, #e8f8f9 60%, #f7fdfd 100%)" }}
+      style={{ background: "linear-gradient(160deg, #f5f5f5 0%, #ffffff 60%, #fafafa 100%)" }}
     >
 
       {/* ── HEADER ── */}
       <div className="text-center px-6 pt-20 pb-12 max-w-[680px] mx-auto">
         <span
           className="inline-block text-[14px] font-bold tracking-[2px] uppercase px-5 py-2 rounded-full mb-5"
-          style={{ background: "#e0f7f9", color: "#007a87" }}
+          style={{ background: "#f5f5f5", color: midnightTeal }}
         >
           FAQ
         </span>
@@ -104,9 +104,9 @@ const FAQPage = () => {
           style={{ color: midnightTeal, fontFamily: "serif", fontSize: "clamp(38px, 5vw, 60px)" }}
         >
           Got questions?{" "}
-          <em className="not-italic" style={{ color: accentTeal }}>We have answers.</em>
+          <em className="not-italic" style={{ color: black }}>We have answers.</em>
         </h1>
-        <p className="text-[20px] leading-relaxed" style={{ color: "#4a7a7e" }}>
+        <p className="text-[20px] leading-relaxed" style={{ color: "#4a4a4a" }}>
           Everything you need to know about MamaCare — clear, honest, and straight to the point.
         </p>
       </div>
@@ -124,14 +124,14 @@ const FAQPage = () => {
           className="rounded-[22px] p-8 flex flex-col sm:flex-row items-center gap-6 relative overflow-hidden"
           style={{ background: midnightTeal }}
         >
-          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full" style={{ background: "rgba(134,217,225,0.06)" }} />
-          <div className="absolute bottom-0 left-10 w-24 h-24 rounded-full" style={{ background: "rgba(134,217,225,0.04)" }} />
+          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }} />
+          <div className="absolute bottom-0 left-10 w-24 h-24 rounded-full" style={{ background: "rgba(255,255,255,0.04)" }} />
 
           <div
             className="w-14 h-14 rounded-[16px] flex-shrink-0 flex items-center justify-center relative z-10"
-            style={{ background: "rgba(134,217,225,0.15)", border: "1px solid rgba(134,217,225,0.2)" }}
+            style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.2)" }}
           >
-            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke={lightTeal} strokeWidth={1.8} strokeLinecap="round">
+            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke={white} strokeWidth={1.8} strokeLinecap="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
           </div>
@@ -140,14 +140,14 @@ const FAQPage = () => {
             <p className="text-[21px] font-bold mb-1" style={{ color: "#fff" }}>
               Still have questions?
             </p>
-            <p className="text-[17px]" style={{ color: "rgba(134,217,225,0.75)" }}>
+            <p className="text-[17px]" style={{ color: "rgba(255,255,255,0.75)" }}>
               Our care team is available 24/7. We're always happy to help.
             </p>
           </div>
 
           <button
             className="px-6 py-3 rounded-[12px] text-[17px] font-bold flex-shrink-0 relative z-10 transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5"
-            style={{ background: accentTeal, color: "#fff" }}
+            style={{ background: white, color: midnightTeal }}
           >
             Chat with us
           </button>
@@ -160,9 +160,9 @@ const FAQPage = () => {
           onClick={() => navigate("/register")}
           className="w-full flex items-center justify-center gap-3 py-6 rounded-[18px] text-[20px] font-bold transition-all duration-300 hover:-translate-y-1"
           style={{
-            background: "linear-gradient(135deg, #00c6b8 0%, #00a0b0 50%, #007a87 100%)",
+            background: "linear-gradient(135deg, #333333 0%, #000000 50%, #000000 100%)",
             color: "#fff",
-            boxShadow: "0 12px 40px rgba(0,160,176,0.45), 0 4px 12px rgba(0,160,176,0.2)",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.2)",
             letterSpacing: "0.3px",
           }}
         >
@@ -171,7 +171,7 @@ const FAQPage = () => {
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </button>
-        <p className="text-center text-[15px] mt-3" style={{ color: "#5a8a8e" }}>
+        <p className="text-center text-[15px] mt-3" style={{ color: "#5a5a5a" }}>
           Join 10,000+ mothers across Kenya — no credit card needed.
         </p>
       </div>
