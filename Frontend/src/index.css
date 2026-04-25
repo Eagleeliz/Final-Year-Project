@@ -1,96 +1,150 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  /* Standardizing colors for a healthcare platform */
-  color-scheme: light dark;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --bg: #ffffff;
+  --text: #1f2937;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --card: #ffffff;
+  --card-hover: #f9fafb;
+  --primary: #0d9488;
+  --primary-hover: #0f766e;
+  --nav-bg: #ffffff;
+  --section-bg: #f7fdfd;
 }
 
-/* 1. Reset Body to allow full-width content */
+* {
+  font-family: 'Inter', sans-serif;
+}
+
 body {
   margin: 0;
-  display: block; /* Changed from flex to block */
   width: 100%;
   min-height: 100vh;
-  background-color: #ffffff; /* Default to white for maternal health trust */
-  color: #213547;
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* 2. Ensure the React root fills the entire screen */
 #root {
   width: 100%;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
-/* 3. Global Links */
-a {
+/* Only top navbar, not sidebars */
+body > #root nav:first-of-type {
+  background-color: var(--nav-bg) !important;
+  border-color: var(--border) !important;
+}
+
+/* Links — exclude sidebar */
+a:not(aside a) {
   font-weight: 500;
-  color: #0d9488; /* Teal color matching your "Get Started" button */
+  color: var(--primary);
   text-decoration: none;
   transition: color 0.2s;
 }
 
-a:hover {
-  color: #0f766e;
+a:not(aside a):hover {
+  color: var(--primary-hover);
 }
 
-/* 4. Typography */
-h1 {
-  font-size: 2.5rem;
-  line-height: 1.2;
-  margin: 0;
+/* Headings — exclude sidebar */
+h1:not(aside h1),
+h2:not(aside h2),
+h3:not(aside h3) {
+  color: var(--text);
 }
 
-/* 5. Modern Button Styling */
+/* Paragraphs — exclude sidebar */
+p:not(aside p) {
+  color: var(--text-muted);
+}
+
+/* Buttons */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1rem;
-  font-weight: 600;
   font-family: inherit;
-  background-color: #0d9488; /* Teal Branding */
-  color: white;
   cursor: pointer;
-  transition: all 0.25s ease;
 }
 
-button:hover {
-  background-color: #0f766e;
-  border-color: #0f766e;
-}
-
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-/* 6. Respecting System Dark Mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f8fafc;
-    background-color: #0f172a; /* Soft dark blue instead of pitch black */
-  }
-  
-  body {
-    background-color: #0f172a;
-    color: #f8fafc;
-  }
-
-  button {
-    background-color: #14b8a6;
-  }
-}
-
-/* 7. Quick fix for the layout issue you saw in the image */
+/* Main content */
 main {
-  flex-grow: 1;
   width: 100%;
+  flex: 1;
+}
+
+/* Sidebar — always midnight teal */
+.sidebar,
+.w-64.shrink-0,
+[class*="Sidebar"],
+[class*="sidenav"] {
+  background-color: #002e33 !important;
+}
+
+aside,
+aside nav,
+aside * {
+  background-color: #002e33 !important;
+  color: #ffffff !important;
+}
+
+aside nav a,
+aside nav button,
+aside nav span,
+aside nav p {
+  color: #ffffff !important;
+}
+
+/* ================= DARK MODE ================= */
+.dark {
+  --bg: #0f172a;
+  --text: #f3f4f6;
+  --text-muted: #9ca3af;
+  --border: #374151;
+  --card: #1f2937;
+  --card-hover: #374151;
+  --primary: #14b8a6;
+  --primary-hover: #2dd4bf;
+  --nav-bg: #1f2937;
+  --section-bg: #0f172a;
+}
+
+.dark body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.dark .card,
+.dark [class*="bg-white"],
+.dark [class*="bg-\[white"] {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+.dark section {
+  background-color: var(--section-bg) !important;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: var(--card);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.dark .text-gray-600,
+.dark .text-gray-500,
+.dark .text-gray-400 {
+  color: var(--text-muted) !important;
+}
+
+.dark .text-black {
+  color: var(--text) !important;
+}
+
+.dark .text-white {
+  color: #ffffff !important;
 }

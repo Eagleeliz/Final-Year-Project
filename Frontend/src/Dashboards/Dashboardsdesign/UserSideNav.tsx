@@ -13,7 +13,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { useDispatch } from "react-redux";
-import { clearCredentials } from "../../Features/Auth/AuthSlice"; // adjust path if needed
+import { clearCredentials } from "../../Features/Auth/AuthSlice";
 
 interface NavProps {
   onNavItemClick?: () => void;
@@ -26,13 +26,12 @@ const UserSideNav = ({ onNavItemClick }: NavProps) => {
   const navigate = useNavigate();
 
   const navItems = [
-    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-    { name: "My Health Monitoring", path: "/dashboard/health-monitoring", icon: Activity },
     { name: "Pregnancy Journey", path: "/dashboard/journey", icon: Sparkles },
+    { name: "My Health Monitoring", path: "/dashboard/health-monitoring", icon: Activity },
     { name: "Clinic Reminders", path: "/dashboard/reminders", icon: BellRing },
     { name: "Child Development", path: "/dashboard/child-dev", icon: Baby },
     { name: "BabyCentreAI", path: "/dashboard/babycentre-ai", icon: BookOpen },
-    { name: "Emergency",  path: "/dashboard/emergency", icon: ShieldAlert },
+    { name: "Emergency", path: "/dashboard/emergency", icon: ShieldAlert },
     { name: "Profile", path: "/dashboard/profile", icon: UserCircle },
   ];
 
@@ -57,43 +56,49 @@ const UserSideNav = ({ onNavItemClick }: NavProps) => {
           timer: 1500,
           showConfirmButton: false,
         }).then(() => {
-          navigate("/"); // redirect to home
+          navigate("/");
         });
       }
     });
   };
 
   return (
-    <nav className="flex flex-col h-full py-6 px-3 text-white">
+    <nav
+      className="flex flex-col px-2 pt-0 text-white overflow-hidden"
+      style={{ backgroundColor: midnightTeal, height: "100%", minHeight: "100%" }}
+    >
+      {/* Brand Label */}
+      <div className="px-6 pt-12">
+        <p className="text-xs font-black uppercase tracking-widest text-white/40">
+          My Dashboard
+        </p>
+      </div>
+
       {/* Navigation Links */}
-      <div className="flex-1 space-y-3">
+      <div className="flex-1 space-y-1 overflow-y-auto">
         {navItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
             onClick={onNavItemClick}
             className={({ isActive }) =>
-              `flex items-center px-4 py-3 rounded-lg transition-all
-               text-white !text-white
-               ${isActive
-                 ? "bg-white/10 font-semibold !text-white"
-                 : "hover:bg-white/5 !text-white"}`
+              `flex items-center px-4 py-3 rounded-lg transition-all text-white !text-white ${isActive ? "font-semibold" : ""}`
             }
           >
-            <item.icon size={20} className="mr-3" />
-            <span className="text-sm">{item.name}</span>
+            <item.icon size={22} className="mr-3" />
+            <span className="text-base">{item.name}</span>
           </NavLink>
         ))}
       </div>
 
-      {/* Logout Section */}
-      <div className="mt-auto pt-6 border-t border-white/10">
+      {/* Logout */}
+      <div className="mt-auto pt-4 border-t border-white/10 shrink-0">
         <button
           onClick={handleLogout}
-          className="flex items-center w-full px-4 py-3 text-white hover:text-rose-400 transition"
+          className="flex items-center w-full px-4 py-3 rounded-lg text-white hover:bg-white/10 hover:text-rose-400 transition-all"
         >
-          <LogOut size={20} className="mr-3" />
-          <span className="text-sm font-medium">Logout</span>
+          <LogOut size={22} className="mr-3" />
+          <span className="text-base font-medium">Logout</span>
         </button>
       </div>
     </nav>

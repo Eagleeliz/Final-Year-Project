@@ -21,7 +21,6 @@ const aquaLight    = "#E6F7F9";
 const warmGray     = "#F8F9FA";
 
 // ── Alert Types ───────────────────────────────────────────────
-
 const ALERT_TYPES = [
   { id: "bleeding",          label: "Bleeding",          emoji: "🩸", severity: "critical" },
   { id: "water_break",       label: "Water Break",       emoji: "💧", severity: "critical" },
@@ -57,7 +56,6 @@ const severityColors: Record<string, { bg: string; color: string; label: string 
 };
 
 // ── Helpers ───────────────────────────────────────────────────
-
 const getStatusColor = (status: string) => {
   switch (status) {
     case "resolved":  return { bg: "#DCFCE7", color: "#16A34A" };
@@ -83,10 +81,7 @@ const formatDate = (dateStr: string) =>
   });
 
 // ── Alert Card ────────────────────────────────────────────────
-
-interface AlertCardProps {
-  alert: EmergencyAlert;
-}
+interface AlertCardProps { alert: EmergencyAlert; }
 
 const AlertCard: React.FC<AlertCardProps> = ({ alert }) => {
   const statusStyle   = getStatusColor(alert.status);
@@ -94,18 +89,12 @@ const AlertCard: React.FC<AlertCardProps> = ({ alert }) => {
 
   const openLocation = () => {
     if (alert.locationLat && alert.locationLong) {
-      window.open(
-        `https://maps.google.com/?q=${alert.locationLat},${alert.locationLong}`,
-        "_blank"
-      );
+      window.open(`https://maps.google.com/?q=${alert.locationLat},${alert.locationLong}`, "_blank");
     }
   };
 
   return (
-    <div
-      className="p-4 rounded-2xl border"
-      style={{ background: "#FFFFFF", borderColor: "#E5E7EB" }}
-    >
+    <div className="p-4 rounded-2xl border" style={{ background: "#FFFFFF", borderColor: "#E5E7EB" }}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <div
@@ -160,7 +149,6 @@ const AlertCard: React.FC<AlertCardProps> = ({ alert }) => {
 };
 
 // ── Symptom Modal ─────────────────────────────────────────────
-
 interface SymptomModalProps {
   onConfirm: (selected: string[]) => void;
   onCancel: () => void;
@@ -183,11 +171,7 @@ const SymptomModal: React.FC<SymptomModalProps> = ({ onConfirm, onCancel }) => {
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.5)" }}
     >
-      <div
-        className="w-full max-w-md rounded-3xl p-6 bg-white shadow-xl"
-        style={{ border: "1px solid #E5E7EB" }}
-      >
-        {/* Modal header */}
+      <div className="w-full max-w-md rounded-3xl p-6 bg-white shadow-xl" style={{ border: "1px solid #E5E7EB" }}>
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-black" style={{ color: midnightTeal }}>
             What is your emergency?
@@ -202,7 +186,6 @@ const SymptomModal: React.FC<SymptomModalProps> = ({ onConfirm, onCancel }) => {
         </div>
         <p className="text-xs text-gray-400 mb-5">Select all that apply</p>
 
-        {/* Symptom grid */}
         <div className="grid grid-cols-3 gap-2 mb-5">
           {ALERT_TYPES.map((type) => {
             const isSelected = selected.includes(type.id);
@@ -214,9 +197,7 @@ const SymptomModal: React.FC<SymptomModalProps> = ({ onConfirm, onCancel }) => {
                 className="flex flex-col items-center justify-center p-3 rounded-2xl text-center transition-all"
                 style={{
                   background: isSelected ? typeColor.bg : warmGray,
-                  border: isSelected
-                    ? `1px solid ${typeColor.color}`
-                    : "1px solid #E5E7EB",
+                  border: isSelected ? `1px solid ${typeColor.color}` : "1px solid #E5E7EB",
                 }}
               >
                 <span style={{ fontSize: "20px" }}>{type.emoji}</span>
@@ -231,14 +212,10 @@ const SymptomModal: React.FC<SymptomModalProps> = ({ onConfirm, onCancel }) => {
           })}
         </div>
 
-        {/* Severity preview */}
         {severityStyle && severity && (
           <div
             className="rounded-2xl px-4 py-3 mb-5 flex items-center justify-between"
-            style={{
-              background: severityStyle.bg,
-              border: `1px solid ${severityStyle.color}40`,
-            }}
+            style={{ background: severityStyle.bg, border: `1px solid ${severityStyle.color}40` }}
           >
             <div>
               <p className="text-xs text-gray-400">Auto severity</p>
@@ -252,7 +229,6 @@ const SymptomModal: React.FC<SymptomModalProps> = ({ onConfirm, onCancel }) => {
           </div>
         )}
 
-        {/* Buttons */}
         <div className="flex gap-3">
           <button
             onClick={onCancel}
@@ -276,7 +252,6 @@ const SymptomModal: React.FC<SymptomModalProps> = ({ onConfirm, onCancel }) => {
 };
 
 // ── Main Page ─────────────────────────────────────────────────
-
 const EmergencyPage: React.FC = () => {
   const { user } = useSelector((state: any) => state.auth);
   const userId = Number(localStorage.getItem("userId"));
@@ -285,9 +260,7 @@ const EmergencyPage: React.FC = () => {
   const [loadingContact, setLoadingContact]     = useState(true);
   const [showContactForm, setShowContactForm]   = useState(false);
   const [editingContact, setEditingContact]     = useState(false);
-  const [contactForm, setContactForm]           = useState({
-    name: "", phoneNumber: "", relationship: "",
-  });
+  const [contactForm, setContactForm]           = useState({ name: "", phoneNumber: "", relationship: "" });
   const [alerts, setAlerts]                     = useState<EmergencyAlert[]>([]);
   const [loadingAlerts, setLoadingAlerts]       = useState(true);
   const [sosLoading, setSosLoading]             = useState(false);
@@ -299,9 +272,7 @@ const EmergencyPage: React.FC = () => {
         const data = await emergencyContactApi.getByUser(userId);
         setContact(data);
       } catch (err: any) {
-        if (err?.response?.status !== 404) {
-          toast.error("Could not load emergency contact.");
-        }
+        if (err?.response?.status !== 404) toast.error("Could not load emergency contact.");
       } finally {
         setLoadingContact(false);
       }
@@ -331,6 +302,7 @@ const EmergencyPage: React.FC = () => {
     setShowSymptomModal(true);
   };
 
+  // ── Updated handleConfirmSOS ──────────────────────────────
   const handleConfirmSOS = async (selectedSymptoms: string[]) => {
     setShowSymptomModal(false);
     setSosLoading(true);
@@ -350,18 +322,29 @@ const EmergencyPage: React.FC = () => {
       const severity    = getHighestSeverity(selectedSymptoms);
       const description = selectedSymptoms.join(", ");
 
-      const newAlert = await emergencyAlertApi.create({
+      // Now returns { alert, smsSent, message }
+      const result = await emergencyAlertApi.create({
         userId, alertType, severity, description,
-        locationLat: location?.lat,
+        locationLat:  location?.lat,
         locationLong: location?.lng,
       });
 
-      setAlerts((prev) => [newAlert, ...prev]);
+      // Add the new alert to history
+      setAlerts((prev) => [result.alert, ...prev]);
 
-      const severityStyle = severityColors[severity];
-      toast.success(`${severityStyle.label} alert sent to ${contact?.name}!`, {
-        duration: 5000,
-      });
+      // Show feedback based on whether SMS was sent
+      if (result.smsSent) {
+        toast.success(
+          `🚨 Alert sent! SMS delivered to ${contact?.name} (${contact?.phoneNumber})`,
+          { duration: 6000 }
+        );
+      } else {
+        // Alert created but SMS failed or no contact
+        toast(
+          `⚠️ Alert recorded but SMS could not be sent. Call ${contact?.name} directly.`,
+          { duration: 6000, icon: "⚠️" }
+        );
+      }
     } catch {
       toast.error("Failed to send alert. Please call your contact directly.");
     } finally {
@@ -426,12 +409,9 @@ const EmergencyPage: React.FC = () => {
     setShowContactForm(true);
   };
 
-  const handleCall    = () => { if (contact) window.open(`tel:${contact.phoneNumber}`); };
+  const handleCall     = () => { if (contact) window.open(`tel:${contact.phoneNumber}`); };
   const openMapsSearch = () => {
-    window.open(
-      `https://www.google.com/maps/search/hospitals+in+${user?.county}+Kenya`,
-      "_blank"
-    );
+    window.open(`https://www.google.com/maps/search/hospitals+in+${user?.county}+Kenya`, "_blank");
   };
 
   return (
@@ -454,15 +434,11 @@ const EmergencyPage: React.FC = () => {
               Emergency Services
             </h1>
           </div>
-          <p className="text-gray-400 text-base">
-            Quick access to emergency help and nearby facilities.
-          </p>
+          <p className="text-gray-400 text-base">Quick access to emergency help and nearby facilities.</p>
         </header>
 
         {/* SOS Button */}
-        <div
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8 text-center"
-        >
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8 text-center">
           <p className="text-gray-400 text-sm mb-6">
             {contact
               ? `Alert will be sent to ${contact.name} (${contact.phoneNumber})`
@@ -484,9 +460,7 @@ const EmergencyPage: React.FC = () => {
             )}
           </button>
           {!contact && (
-            <p className="text-xs text-gray-400 mt-4">
-              SOS disabled — no emergency contact saved
-            </p>
+            <p className="text-xs text-gray-400 mt-4">SOS disabled — no emergency contact saved</p>
           )}
         </div>
 
@@ -498,9 +472,7 @@ const EmergencyPage: React.FC = () => {
                 <div className="p-2 rounded-lg bg-white">
                   <Phone size={22} style={{ color: midnightTeal }} />
                 </div>
-                <h2 className="font-bold text-xl" style={{ color: midnightTeal }}>
-                  Emergency Contact
-                </h2>
+                <h2 className="font-bold text-xl" style={{ color: midnightTeal }}>Emergency Contact</h2>
               </div>
               {!contact && !showContactForm && (
                 <button
@@ -633,9 +605,7 @@ const EmergencyPage: React.FC = () => {
                   <MapPin size={22} style={{ color: midnightTeal }} />
                 </div>
                 <div>
-                  <h2 className="font-bold text-xl" style={{ color: midnightTeal }}>
-                    Nearby Facilities
-                  </h2>
+                  <h2 className="font-bold text-xl" style={{ color: midnightTeal }}>Nearby Facilities</h2>
                   <p className="text-xs text-gray-400">
                     {user?.county
                       ? `Hospitals in ${user.county}`
@@ -654,7 +624,6 @@ const EmergencyPage: React.FC = () => {
               )}
             </div>
           </div>
-
           <div className="p-6">
             {user?.county ? (
               <div className="rounded-2xl overflow-hidden">
@@ -669,10 +638,7 @@ const EmergencyPage: React.FC = () => {
                 />
               </div>
             ) : (
-              <div
-                className="rounded-2xl flex items-center justify-center py-16"
-                style={{ background: warmGray }}
-              >
+              <div className="rounded-2xl flex items-center justify-center py-16" style={{ background: warmGray }}>
                 <div className="text-center">
                   <div
                     className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -696,12 +662,9 @@ const EmergencyPage: React.FC = () => {
               <div className="p-2 rounded-lg bg-white">
                 <ShieldAlert size={22} style={{ color: "#DC2626" }} />
               </div>
-              <h2 className="font-bold text-xl" style={{ color: "#DC2626" }}>
-                Alert History
-              </h2>
+              <h2 className="font-bold text-xl" style={{ color: "#DC2626" }}>Alert History</h2>
             </div>
           </div>
-
           <div className="p-6">
             {loadingAlerts ? (
               <div className="flex items-center justify-center py-8">

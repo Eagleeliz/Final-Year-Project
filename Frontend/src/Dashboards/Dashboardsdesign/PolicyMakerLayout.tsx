@@ -10,15 +10,25 @@ const PolicyMakerLayout = () => {
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gray-100">
 
+      <style>{`
+        .policymaker-sidebar {
+          background-color: #002e33 !important;
+          color: white !important;
+        }
+        .policymaker-sidebar * {
+          color: white !important;
+        }
+      `}</style>
+
       {/* Top Navbar */}
-      <div className="z-50 border-b border-gray-200 bg-white">
-        <Navbar />
+      <div className="z-50 bg-white shrink-0">
+        <Navbar hideThemeToggle={true} />
       </div>
 
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="flex flex-1 overflow-hidden relative" style={{ alignItems: "stretch", height: "calc(100vh - 96px)" }}>
 
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex flex-col w-64 bg-[#002e33] border-r border-white/10 shrink-0">
+        <aside className="policymaker-sidebar hidden lg:flex flex-col w-80 shrink-0" style={{ alignSelf: "stretch" }}>
           <PolicyMakerSideNav />
         </aside>
 
@@ -29,10 +39,10 @@ const PolicyMakerLayout = () => {
               className="fixed inset-0 bg-black/40 z-40 lg:hidden"
               onClick={() => setSidebarOpen(false)}
             />
-            <aside className="fixed top-0 left-0 w-3/4 max-w-xs h-full bg-[#002e33] z-50 shadow-xl lg:hidden">
+            <aside className="policymaker-sidebar fixed top-0 left-0 w-3/4 max-w-xs h-full z-50 shadow-xl lg:hidden">
               <div className="flex justify-end p-4">
                 <button onClick={() => setSidebarOpen(false)}>
-                  <X size={24} className="text-white" />
+                  <X size={24} />
                 </button>
               </div>
               <PolicyMakerSideNav onNavItemClick={() => setSidebarOpen(false)} />
@@ -47,7 +57,7 @@ const PolicyMakerLayout = () => {
           </div>
         </main>
 
-        {/* Mobile Toggle Button - Top Right */}
+        {/* Mobile Toggle */}
         {!sidebarOpen && (
           <button
             onClick={() => setSidebarOpen(true)}

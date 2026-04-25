@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";  {/* ← add Navigate */}
 import Home from "./pages/Home";
 import { Toaster } from "sonner";
 import './App.css';
@@ -7,13 +7,11 @@ import About from "./pages/About";
 import HIWorks from "./pages/HIWorks";
 import Contact from "./pages/Contact";
 import { Register } from "./pages/Register";
-
 import Login from "./pages/Login";
-
 
 // ── User Dashboard
 import UserLayout from "./Dashboards/Dashboardsdesign/UserLayout";
-import DashboardHome from "./Dashboards/UserDashboard/DashboardHome";
+// ← DashboardHome import removed
 import HealthMonitoring from "./Dashboards/UserDashboard/HealthMonitoring";
 import RemindersPage from "./Dashboards/UserDashboard/RemindersPage";
 import MyProfile from "./Dashboards/UserDashboard/MyProfile";
@@ -47,7 +45,7 @@ import { logout } from "./Features/Auth/AuthSlice";
 import { jwtDecode } from "jwt-decode";
 
 function App() {
-   const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -76,6 +74,7 @@ function App() {
       dispatch(logout());
     }
   }, [dispatch]);
+
   return (
     <>
       <Toaster position="top-right" richColors />
@@ -90,15 +89,13 @@ function App() {
 
         {/* ── Auth Pages */}
         <Route path="/register" element={<Register />} />
-  
         <Route path="/enter-otp" element={<EnterOtp />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/forgot" element={<ForgotPassword/>} />
-
+        <Route path="/forgot" element={<ForgotPassword />} />
 
         {/* ── User Dashboard */}
         <Route path="/dashboard" element={<UserLayout />}>
-          <Route index element={<DashboardHome />} />
+          <Route index element={<Navigate to="journey" replace />} /> {/* ← CHANGED */}
           <Route path="health-monitoring" element={<HealthMonitoring />} />
           <Route path="journey" element={<PregnancyJourney />} />
           <Route path="reminders" element={<RemindersPage />} />
@@ -115,10 +112,8 @@ function App() {
           <Route path="pregnancies" element={<AllPregnancies />} />
           <Route path="emergencies" element={<EmergencyAlerts />} />
           <Route path="checkins" element={<HealthCheckins />} />
-          
           <Route path="guidance" element={<ManageGuidance />} />
           <Route path="facilities" element={<ManageFacilities />} />
-        
         </Route>
 
         {/* ── Policy Maker Dashboard */}

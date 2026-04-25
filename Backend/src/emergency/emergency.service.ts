@@ -1,13 +1,14 @@
 import db from "../drizzle/db";
-import { eq,desc } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import {
   emergencyAlertsTable,
   emergencyContactsTable,
 } from "../drizzle/schema";
+import { smsService } from "../sms/sms.service";
+import { usersTable } from "../drizzle/schema";
 
 // ── Emergency Contact Services ────────────────────────────────
 
-// Get emergency contact by userId (one contact per user)
 export const getEmergencyContact = async (userId: number) => {
   const result = await db
     .select()
@@ -16,7 +17,6 @@ export const getEmergencyContact = async (userId: number) => {
   return result[0] ?? null;
 };
 
-// Create emergency contact
 export const createEmergencyContact = async (data: {
   userId: number;
   name: string;
@@ -30,13 +30,12 @@ export const createEmergencyContact = async (data: {
       name: data.name,
       phoneNumber: data.phoneNumber,
       relationship: data.relationship,
-      isPrimary: true, // always primary since only one contact
+      isPrimary: true,
     })
     .returning();
   return result[0];
 };
 
-// Update emergency contact
 export const updateEmergencyContact = async (
   id: number,
   data: {
@@ -58,7 +57,6 @@ export const updateEmergencyContact = async (
   return result[0] ?? null;
 };
 
-// Delete emergency contact
 export const deleteEmergencyContact = async (id: number) => {
   await db
     .delete(emergencyContactsTable)
@@ -67,7 +65,6 @@ export const deleteEmergencyContact = async (id: number) => {
 
 // ── Emergency Alert Services ──────────────────────────────────
 
-// Create an emergency alert (triggered by SOS button)
 export const createEmergencyAlert = async (data: {
   userId: number;
   pregnancyId?: number;
@@ -90,10 +87,50 @@ export const createEmergencyAlert = async (data: {
       status: "pending",
     })
     .returning();
-  return result[0];
+
+  const alert = result[0];
+
+  const emergencyContact = await getEmergencyContact(data.userId);
+
+  if (emergencyContact?.phoneNumber) {
+    try {
+      // ← Fetch the user's name
+      const userResult = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.id, data.userId));
+      
+      const user = userResult[0];
+      const userFullName = user
+        ? `${user.firstName} ${user.lastName}`.trim()
+        : `User ${data.userId}`; // fallback if user not found
+
+      await smsService.sendEmergencyAlert(
+        emergencyContact.phoneNumber,
+        userFullName,  // ← pass name instead of userId
+        data.alertType ?? "other",
+        (data.severity as "medium" | "high" | "critical") ?? "high",
+        data.description ?? "Emergency alert triggered"
+      );
+
+      await db
+        .update(emergencyAlertsTable)
+        .set({ status: "notified" })
+        .where(eq(emergencyAlertsTable.id, alert.id));
+
+      alert.status = "notified";
+
+      console.log(`✅ Emergency SMS sent to ${emergencyContact.name} (${emergencyContact.phoneNumber})`);
+    } catch (smsError: any) {
+      console.error(`❌ SMS failed but alert was created: ${smsError.message}`);
+    }
+  } else {
+    console.warn(`⚠️ No emergency contact found for user ${data.userId} — SMS not sent`);
+  }
+
+  return alert;
 };
 
-// Get all alerts for a user
 export const getAlertsByUser = async (userId: number) => {
   return db
     .select()
@@ -101,7 +138,6 @@ export const getAlertsByUser = async (userId: number) => {
     .where(eq(emergencyAlertsTable.userId, userId));
 };
 
-// Update alert status
 export const updateAlertStatus = async (
   id: number,
   status: "pending" | "notified" | "responded" | "resolved"
@@ -116,7 +152,7 @@ export const updateAlertStatus = async (
     .returning();
   return result[0] ?? null;
 };
-// Get all emergency alerts (admin use)
+
 export const getAllEmergencyAlerts = async () => {
   return db
     .select()
@@ -124,7 +160,6 @@ export const getAllEmergencyAlerts = async () => {
     .orderBy(desc(emergencyAlertsTable.createdAt));
 };
 
-// Get count of pending alerts
 export const getPendingAlertsCount = async () => {
   const result = await db
     .select()

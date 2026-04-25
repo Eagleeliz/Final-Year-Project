@@ -43,7 +43,7 @@ export const authApi = {
   },
 
   // LOGIN
-  login: async (credentials: { email: string; password: string }) => {
+  login: async (credentials: { email: string; password: string; rememberMe?: boolean }) => {
     const response = await apiClient.post("/login", credentials);
     return response.data;
   },

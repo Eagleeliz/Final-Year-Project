@@ -31,6 +31,7 @@ export const updateUserValidator = createUserValidator.extend({
 export const userLogInValidator = z.object({
   email: z.string().email().trim(),
   password: z.string().min(4).max(100).trim(),
+  rememberMe: z.boolean().optional(),
 });
 
 export const passwordResetValidator = z.object({

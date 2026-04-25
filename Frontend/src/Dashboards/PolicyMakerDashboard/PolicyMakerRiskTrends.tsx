@@ -4,7 +4,7 @@ import {
   AlertTriangle,
   Loader2,
 } from "lucide-react";
-import dashboardApi from "../../Features/Apis/dashboardApi";
+import dashboardApi from "../../Features/Apis/policyAPI";
 
 const PolicyMakerRiskTrends = () => {
   const midnightTeal = "#0B3B3F";

@@ -137,7 +137,7 @@ export const loginUser = async (req: Request, res: Response) => {
       return;
     }
 
-    const { email, password } = parseResult.data;
+    const { email, password, rememberMe } = parseResult.data;
     const userExists = await getUserByEmailService(email);
 
     if (!userExists) {
@@ -156,6 +156,9 @@ export const loginUser = async (req: Request, res: Response) => {
       return;
     }
 
+    // Extended expiry for "Remember Me" - 30 days, otherwise 1 hour
+    const expiresIn = rememberMe ? "30d" : "1h";
+
     // ✅ userType added to JWT
     const token = jwt.sign(
       {
@@ -164,7 +167,7 @@ export const loginUser = async (req: Request, res: Response) => {
         userType: userExists.userType
       },
       process.env.JWT_SECRET as string,
-      { expiresIn: "1h" }
+      { expiresIn }
     );
 
     res.status(200).json({

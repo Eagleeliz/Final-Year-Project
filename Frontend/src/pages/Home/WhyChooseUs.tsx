@@ -1,205 +1,179 @@
+import { motion } from "framer-motion";
+import { useTheme } from "../../features/ThemeContext";
+
 const WhyChooseUsSection = () => {
-  const midnightTeal = "#002e33";
+  const { theme } = useTheme?.() || { theme: "light" };
+  const isDark = theme === "dark";
+  
+  const textColor = isDark ? "#f3f4f6" : "#002e33";
+  const mutedColor = isDark ? "#9ca3af" : "#4a7a7e";
+  const bgSection = isDark ? "#0f172a" : "#f7fdfd";
+  const bgCard = isDark ? "#1f2937" : "#ffffff";
+  const borderColor = isDark ? "#374151" : "#d4eef1";
+  const accentTeal = isDark ? "#86d9e1" : "#00a0b0";
+  const quoteColor = isDark ? "#b0dde2" : "#b0dde2";
+
+  const featureCards = [
+    {
+      title: "AI-Powered Safety",
+      desc: "Our AI detects danger signs early and sends instant alerts to keep you and your baby safe.",
+      gradient: "linear-gradient(135deg, #002e33 0%, #00a0b0 100%)",
+    },
+    {
+      title: "Personalized Care",
+      desc: "Get a pregnancy plan tailored to your health history, trimester, and individual needs.",
+      gradient: "linear-gradient(135deg, #00a0b0 0%, #00c6d4 100%)",
+    },
+    {
+      title: "Kenya-Wide Coverage",
+      desc: "We support mothers across all 47 counties with localized health resources and guidance.",
+      gradient: "linear-gradient(135deg, #005f6b 0%, #002e33 100%)",
+    },
+  ];
+
+  const testimonials = [
+    {
+      quote: "MamaCare gave me peace of mind throughout my pregnancy. The AI support was always there when I needed it.",
+      name: "Jane Mwangi",
+    },
+    {
+      quote: "Tracking my symptoms and getting instant advice made such a difference. Highly recommend to every mother!",
+      name: "Grace Gracie",
+    },
+    {
+      quote: "I loved the weekly milestone updates, and when an emergency came up, I was able to get help quickly and easily.",
+      name: "Winnie Njeri",
+    },
+  ];
 
   return (
     <section
-      className="w-full overflow-hidden px-12 py-16"
-      style={{ background: "linear-gradient(135deg, #f0fbfc 0%, #e8f8f9 50%, #f7fdfd 100%)" }}
+      className="py-20 px-6 overflow-x-hidden"
+      style={{ background: bgSection }}
     >
-      <div
-        className="grid gap-12 max-w-[1200px] mx-auto items-start"
-        style={{ gridTemplateColumns: "1.2fr 0.8fr" }}
-      >
+      <div className="max-w-5xl mx-auto">
 
-        {/* ── LEFT ── */}
-        <div className="flex flex-col gap-5">
+        {/* Why Choose Us Header */}
+        <motion.h2
+          initial={{ y: -30, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: false, amount: 0.3 }}
+          className="text-5xl font-extrabold text-center mb-4"
+          style={{ color: textColor }}
+        >
+          Why Choose Us
+        </motion.h2>
 
-          {/* Eyebrow */}
-          <span
-            className="inline-block text-[15px] font-bold tracking-[2px] uppercase px-4 py-1.5 rounded-full w-fit"
-            style={{ background: "#e0f7f9", color: "#007a87" }}
-          >
-            Why Choose Us
-          </span>
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          viewport={{ once: false, amount: 0.3 }}
+          className="text-lg text-center max-w-2xl mx-auto mb-5"
+          style={{ color: mutedColor }}
+        >
+          Discover the features that make MamaCare the top choice for your pregnancy journey.
+        </motion.p>
 
-          {/* Title — unchanged */}
-          <h2
-            className="leading-tight"
-            style={{ color: midnightTeal, fontFamily: "serif", fontSize: "clamp(32px, 3.5vw, 50px)" }}
-          >
-            Built for every{" "}
-            <em className="not-italic" style={{ color: "#00a0b0" }}>Kenyan mother</em>,
-            <br />backed by real care.
-          </h2>
+        <div
+          className="w-16 h-[3px] mx-auto mb-12 rounded-full"
+          style={{ background: accentTeal, opacity: 0.5 }}
+        />
 
-          {/* Subtitle */}
-          <p className="text-[19px] leading-relaxed" style={{ color: "#4a7a7e" }}>
-            MamaCare isn't just an app — it's a trusted companion combining technology and
-            compassion to keep you and your baby safe throughout every stage.
-          </p>
-
-          {/* Big dark card */}
-          <div
-            className="rounded-[20px] p-7 relative overflow-hidden"
-            style={{ background: midnightTeal }}
-          >
-            <div className="absolute -bottom-10 -right-10 w-44 h-44 rounded-full" style={{ background: "rgba(134,217,225,0.08)" }} />
-            <div className="absolute bottom-5 right-2 w-24 h-24 rounded-full" style={{ background: "rgba(134,217,225,0.05)" }} />
-
-            <div className="relative z-10">
-              <div
-                className="w-[46px] h-[46px] rounded-[12px] flex items-center justify-center mb-4"
-                style={{ background: "rgba(134,217,225,0.15)", border: "1px solid rgba(134,217,225,0.2)" }}
-              >
-                <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" fill="none" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" stroke="#86d9e1">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-              </div>
-
-              <p className="text-[13px] font-bold tracking-[2px] uppercase mb-2" style={{ color: "#86d9e1" }}>
-                AI-Powered Safety
-              </p>
-              <h3 className="text-[22px] font-bold leading-snug mb-3" style={{ color: "#fff", fontFamily: "serif" }}>
-                Real-time danger sign detection — before it's too late.
-              </h3>
-              <p className="text-[16px] leading-relaxed" style={{ color: "rgba(134,217,225,0.8)" }}>
-                Our AI monitors your weekly symptom logs and flags warning signs like preeclampsia,
-                gestational diabetes, and preterm labor — alerting you and your care team instantly.
-              </p>
-
-              <div
-                className="flex gap-8 mt-5 pt-4"
-                style={{ borderTop: "1px solid rgba(134,217,225,0.18)" }}
-              >
-                <div>
-                  <p className="text-[34px] font-bold leading-none" style={{ color: "#86d9e1", fontFamily: "serif" }}>355</p>
-                  <p className="text-[14px] mt-1 leading-snug" style={{ color: "rgba(255,255,255,0.45)" }}>
-                    maternal deaths per<br />100k live births in Kenya
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[34px] font-bold leading-none" style={{ color: "#86d9e1", fontFamily: "serif" }}>80%</p>
-                  <p className="text-[14px] mt-1 leading-snug" style={{ color: "rgba(255,255,255,0.45)" }}>
-                    of these deaths are<br />preventable with early care
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Two small cards */}
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              {
-                iconBg: "bg-[#d4f4f7]",
-                icon: (
-                  <svg viewBox="0 0 24 24" className="w-[20px] h-[20px]" fill="none" strokeWidth={1.65} strokeLinecap="round" strokeLinejoin="round" stroke="#007a87">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                ),
-                title: "Personalized for you",
-                body: "Guidance tailored to your trimester, health history, and risk profile.",
-              },
-              {
-                iconBg: "bg-[#fde8f0]",
-                icon: (
-                  <svg viewBox="0 0 24 24" className="w-[20px] h-[20px]" fill="none" strokeWidth={1.65} strokeLinecap="round" strokeLinejoin="round" stroke="#c0426e">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                  </svg>
-                ),
-                title: "Continuous monitoring",
-                body: "From first antenatal visit to early childhood — no gaps, no missed signs.",
-              },
-            ].map((card, i) => (
-              <div
-                key={i}
-                className="bg-white border border-[#c8eef1] rounded-2xl p-5 flex flex-col gap-3 transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
-              >
+        {/* Feature Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+          {featureCards.map((card, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.4, delay: i * 0.2 }}
+              viewport={{ once: false, amount: 0.3 }}
+              className="rounded-2xl overflow-hidden border cursor-pointer transition-all duration-300 hover:shadow-xl"
+              style={{
+                borderColor: borderColor,
+                boxShadow: "0 2px 8px rgba(0,160,176,0.06)",
+              }}
+            >
+              <div className="h-[5px]" style={{ background: card.gradient }} />
+              <div className="p-7" style={{ background: bgCard }}>
                 <div
-                  className={`w-[38px] h-[38px] rounded-[10px] ${card.iconBg}`}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4"
+                  style={{ background: card.gradient }}
                 >
-                  {card.icon}
+                  {i + 1}
                 </div>
-                <p className="text-[17px] font-bold" style={{ color: midnightTeal }}>{card.title}</p>
-                <p className="text-[15px] leading-relaxed" style={{ color: "#5a8a8e" }}>{card.body}</p>
+                <h3 className="text-lg font-bold mb-3" style={{ color: textColor }}>
+                  {card.title}
+                </h3>
+                <p className="text-base leading-relaxed" style={{ color: mutedColor }}>
+                  {card.desc}
+                </p>
               </div>
-            ))}
-          </div>
-
-          {/* Mini stat cards */}
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { num: "24/7", title: "Always available",    body: "AI answers any time, day or night.",    bg: midnightTeal },
-              { num: "47",   title: "Counties covered",    body: "Across all of Kenya — urban and rural.", bg: "#003840" },
-              { num: "Free", title: "No cost to mothers",  body: "Safe motherhood for everyone.",          bg: midnightTeal },
-            ].map((card, i) => (
-              <div
-                key={i}
-                className="rounded-[14px] p-4 flex flex-col gap-1.5 transition-all duration-200 hover:brightness-110"
-                style={{ background: card.bg }}
-              >
-                <p className="text-[30px] font-bold leading-none" style={{ color: "#86d9e1", fontFamily: "serif" }}>{card.num}</p>
-                <p className="text-[15px] font-bold" style={{ color: "#fff" }}>{card.title}</p>
-                <p className="text-[14px] leading-relaxed" style={{ color: "rgba(134,217,225,0.7)" }}>{card.body}</p>
-              </div>
-            ))}
-          </div>
+            </motion.div>
+          ))}
         </div>
 
-        {/* ── RIGHT: single image ── */}
-        <div className="hidden lg:flex flex-col gap-4 sticky top-8">
+        {/* Testimonials Header */}
+        <motion.h2
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: false, amount: 0.3 }}
+          className="text-4xl font-extrabold text-center mb-3"
+          style={{ color: textColor }}
+        >
+          What People Say About Us
+        </motion.h2>
 
-          {/* Main image */}
-          <div className="relative rounded-[22px] overflow-hidden" style={{ height: "420px" }}>
-            <img
-              src="https://images.pexels.com/photos/3662849/pexels-photo-3662849.jpeg?auto=compress&cs=tinysrgb&w=700"
-              alt="Pregnant woman"
-              className="w-full h-full object-cover object-top"
-            />
-            <div
-              className="absolute bottom-4 left-3 right-3 rounded-[14px] px-4 py-3 flex items-center gap-3"
-              style={{ background: "rgba(0,46,51,0.92)" }}
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          viewport={{ once: false, amount: 0.3 }}
+          className="text-base text-center mb-10"
+          style={{ color: mutedColor }}
+        >
+          Real stories from real mothers — see what makes our service stand out.
+        </motion.p>
+
+        {/* Testimonial Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {testimonials.map((t, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.4, delay: i * 0.2 }}
+              viewport={{ once: false, amount: 0.3 }}
+              className="rounded-2xl p-7 flex flex-col justify-between border cursor-pointer transition-all duration-300 hover:shadow-xl"
+              style={{
+                background: bgCard,
+                borderColor: borderColor,
+              }}
             >
               <span
-                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                style={{ background: "#86d9e1", animation: "pulse 2s infinite" }}
-              />
-              <div>
-                <p className="text-[16px] font-semibold" style={{ color: "#fff" }}>10,000+ mothers</p>
-                <p className="text-[14px]" style={{ color: "rgba(134,217,225,0.75)" }}>actively using MamaCare</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats below image */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-[14px] p-4 flex flex-col gap-1" style={{ background: "#e0f7f9" }}>
-              <p className="text-[28px] font-bold leading-none" style={{ color: midnightTeal, fontFamily: "serif" }}>500+</p>
-              <p className="text-[14px] font-semibold" style={{ color: "#007a87" }}>Expert articles</p>
-              <p className="text-[13px]" style={{ color: "#4a7a7e" }}>Reviewed by doctors</p>
-            </div>
-            <div className="rounded-[14px] p-4 flex flex-col gap-1" style={{ background: "#e0f7f9" }}>
-              <p className="text-[28px] font-bold leading-none" style={{ color: midnightTeal, fontFamily: "serif" }}>47</p>
-              <p className="text-[14px] font-semibold" style={{ color: "#007a87" }}>Counties reached</p>
-              <p className="text-[13px]" style={{ color: "#4a7a7e" }}>Urban and rural Kenya</p>
-            </div>
-          </div>
-
+                className="text-4xl font-black leading-none mb-2 block"
+                style={{ color: quoteColor }}
+              >
+                "
+              </span>
+              <p className="text-base leading-relaxed italic mb-6" style={{ color: mutedColor }}>
+                {t.quote}
+              </p>
+              <p className="text-right font-semibold" style={{ color: accentTeal }}>
+                — {t.name}
+              </p>
+            </motion.div>
+          ))}
         </div>
 
       </div>
-
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50%       { opacity: 0.35; }
-        }
-      `}</style>
-
     </section>
   );
 };

@@ -12,7 +12,6 @@ import {
 
 // ── Emergency Contact Controllers ─────────────────────────────
 
-// GET /api/emergency/contact/:userId
 export const getEmergencyContactController = async (req: Request, res: Response) => {
   try {
     const userId = Number(req.params.userId);
@@ -31,7 +30,6 @@ export const getEmergencyContactController = async (req: Request, res: Response)
   }
 };
 
-// POST /api/emergency/contact
 export const createEmergencyContactController = async (req: Request, res: Response) => {
   try {
     const { userId, name, phoneNumber, relationship } = req.body;
@@ -46,7 +44,6 @@ export const createEmergencyContactController = async (req: Request, res: Respon
   }
 };
 
-// PUT /api/emergency/contact/:id
 export const updateEmergencyContactController = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
@@ -65,7 +62,6 @@ export const updateEmergencyContactController = async (req: Request, res: Respon
   }
 };
 
-// DELETE /api/emergency/contact/:id
 export const deleteEmergencyContactController = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
@@ -82,7 +78,6 @@ export const deleteEmergencyContactController = async (req: Request, res: Respon
 
 // ── Emergency Alert Controllers ───────────────────────────────
 
-// POST /api/emergency/alert
 export const createEmergencyAlertController = async (req: Request, res: Response) => {
   try {
     const { userId, pregnancyId, alertType, severity, description, locationLat, locationLong } = req.body;
@@ -90,6 +85,7 @@ export const createEmergencyAlertController = async (req: Request, res: Response
       res.status(400).json({ success: false, message: "userId is required" });
       return;
     }
+
     const alert = await createEmergencyAlert({
       userId,
       pregnancyId,
@@ -99,13 +95,23 @@ export const createEmergencyAlertController = async (req: Request, res: Response
       locationLat,
       locationLong,
     });
-    res.status(201).json({ success: true, data: alert });
+
+    // Tell frontend whether SMS was sent based on alert status
+    const smsSent = alert.status === "notified";
+
+    res.status(201).json({
+      success: true,
+      data: alert,
+      smsSent,
+      message: smsSent
+        ? "Emergency alert created and SMS sent to next of kin"
+        : "Emergency alert created but no emergency contact found — SMS not sent",
+    });
   } catch (error: any) {
     res.status(500).json({ success: false, message: "Failed to create alert", error: error.message });
   }
 };
 
-// GET /api/emergency/alerts/:userId
 export const getAlertsByUserController = async (req: Request, res: Response) => {
   try {
     const userId = Number(req.params.userId);
@@ -120,7 +126,6 @@ export const getAlertsByUserController = async (req: Request, res: Response) => 
   }
 };
 
-// PATCH /api/emergency/alert/:id/status
 export const updateAlertStatusController = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
@@ -144,6 +149,7 @@ export const updateAlertStatusController = async (req: Request, res: Response) =
     res.status(500).json({ success: false, message: "Failed to update alert status", error: error.message });
   }
 };
+
 export const getAllAlertsController = async (req: Request, res: Response) => {
   try {
     const alerts = await getAllEmergencyAlerts();

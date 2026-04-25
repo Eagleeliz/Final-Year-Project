@@ -40,6 +40,13 @@ export interface EmergencyAlert {
   resolvedAt?: string;
 }
 
+// New type to capture full SOS response including SMS status
+export interface CreateAlertResponse {
+  alert: EmergencyAlert;
+  smsSent: boolean;
+  message: string;
+}
+
 // ── Emergency Contact API ─────────────────────────────────────
 
 export const emergencyContactApi = {
@@ -78,7 +85,7 @@ export const emergencyContactApi = {
 // ── Emergency Alert API ───────────────────────────────────────
 
 export const emergencyAlertApi = {
-  // POST /api/emergency/alert — trigger SOS
+  // POST /api/emergency/alert — trigger SOS + SMS to next of kin
   create: async (data: {
     userId: number;
     pregnancyId?: number;
@@ -87,15 +94,21 @@ export const emergencyAlertApi = {
     description?: string;
     locationLat?: number;
     locationLong?: number;
-  }): Promise<EmergencyAlert> => {
+  }): Promise<CreateAlertResponse> => {
     const response = await apiClient.post("/alert", data);
-    return response.data.data;
+    return {
+      alert: response.data.data,
+      smsSent: response.data.smsSent,
+      message: response.data.message,
+    };
   },
+
   // GET /api/emergency/alerts/all — admin only
-getAllAlerts: async (): Promise<EmergencyAlert[]> => {
-  const response = await apiClient.get("/alerts/all");
-  return response.data?.data ?? response.data;
-},
+  getAllAlerts: async (): Promise<EmergencyAlert[]> => {
+    const response = await apiClient.get("/alerts/all");
+    return response.data?.data ?? response.data;
+  },
+
   // GET /api/emergency/alerts/:userId — alert history
   getByUser: async (userId: number): Promise<EmergencyAlert[]> => {
     const response = await apiClient.get(`/alerts/${userId}`);

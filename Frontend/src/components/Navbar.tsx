@@ -3,23 +3,38 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../Features/store";
 import { clearCredentials } from "../Features/Auth/AuthSlice";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, House, Info, Calendar, Mail, LayoutDashboard, LogOut } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import ThemeToggle from "./ThemeToggle";
+import { useTheme } from "../Features/ThemeContext";
 
-const Navbar = () => {
+const NAV_LINKS = [
+  { name: "Home", to: "/", icon: House },
+  { name: "About", to: "/about", icon: Info },
+  { name: "DueDate", to: "/duedatecalculator", icon: Calendar },
+  { name: "Contact", to: "/contact", icon: Mail },
+];
+
+const MID = "#002e33";
+const TEAL = "#86d9e1";
+const ACCENT = "#00a0b0";
+
+interface NavbarProps {
+  hideThemeToggle?: boolean;
+}
+
+const Navbar = ({ hideThemeToggle = false }: NavbarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const { user, isAuthenticated } = useSelector((s: RootState) => s.auth);
 
-  const { user, isAuthenticated } = useSelector(
-    (state: RootState) => state.auth
-  );
-
-  const midnightTeal = "#002e33";
-  const aquaText = "#86d9e1";
-
-  const toggleMenu = () => setIsOpen(!isOpen);
+  const bg = isDark ? "#0a2a2e" : "#ffffff";
+  const border = isDark ? "#1a4a50" : "#e5e7eb";
+  const text = isDark ? "#ffffff" : MID;
 
   const handleLogout = () => {
     dispatch(clearCredentials());
@@ -28,147 +43,131 @@ const Navbar = () => {
     navigate("/login");
   };
 
+  const dashPath =
+    user?.userType === "admin" ? "/admin" :
+    user?.userType === "policy_maker" ? "/policymaker" : "/dashboard/journey";
+
   return (
-    <nav className="relative bg-white shadow-sm border-b border-gray-100 z-50">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <nav className="relative shadow-sm border-b z-50" style={{ backgroundColor: bg, borderColor: border }}>
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
 
-        {/* Desktop Logo Section */}
-        <h1 className="text-2xl font-bold" style={{ color: midnightTeal }}>
-          MamaCare 
-        </h1>
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-1">
+          <img src="/src/assets/logo.png" alt="BabyCentre Logo" className="w-24 h-24 object-contain" />
+          <span className="text-2xl font-bold" style={{ color: MID }}>
+            Baby<span style={{ color: ACCENT }}>Centre</span>
+          </span>
+        </Link>
 
-        {/* Desktop Navigation Links */}
-        <div className="hidden md:flex items-center gap-8 text-base font-semibold">
-          <Link to="/" className="transition-colors" style={{ color: midnightTeal }}>Home</Link>
-          <Link to="/about" className="transition-colors" style={{ color: midnightTeal }}>About</Link>
-          <Link to="/howitworks" className="transition-colors" style={{ color: midnightTeal }}>How It Works</Link>
-          <Link to="/duedatecalculator" className="transition-colors" style={{ color: midnightTeal }}>DueDate Calculator</Link>
-          <Link to="/contact" className="transition-colors" style={{ color: midnightTeal }}>Contact</Link>
+        {/* Desktop Links — centered */}
+        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-4">
+          {NAV_LINKS.map((l) => {
+            const Icon = l.icon;
+            return (
+              <Link key={l.name} to={l.to} className="flex items-center gap-2 px-3 py-1 rounded-lg text-base font-bold transition-all hover:bg-[#86d9e120]" style={{ color: text }}>
+                <Icon size={18} />
+                <span>{l.name}</span>
+              </Link>
+            );
+          })}
         </div>
 
-        {/* Desktop Auth Section */}
-        <div className="hidden md:flex items-center gap-3 relative">
+        {/* Desktop Auth */}
+        <div className="hidden md:flex items-center gap-3">
+          {!hideThemeToggle && <ThemeToggle />}
           {!isAuthenticated ? (
             <>
-              <Link
-                to="/login"
-                className="px-5 py-2 text-sm font-bold rounded-full border-2"
-                style={{ borderColor: midnightTeal, color: midnightTeal }}
-              >
-                Login
-              </Link>
-
-              <Link
-                to="/register"
-                className="px-5 py-2 text-sm font-bold rounded-full shadow-md"
-                style={{ backgroundColor: midnightTeal, color: aquaText }}
-              >
-                Register
-              </Link>
+              <Link to="/login" className="px-5 py-2 text-sm font-bold rounded-full border-2" style={{ borderColor: text, color: text }}>Login</Link>
+              <Link to="/register" className="px-5 py-2 text-sm font-bold rounded-full shadow-md" style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}>Register</Link>
             </>
           ) : (
             <div className="relative">
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 px-5 py-2 rounded-full shadow-md"
-                style={{ backgroundColor: midnightTeal, color: aquaText }}
-              >
-                Hey {user?.firstName}
-                <ChevronDown size={16} />
+              <button onClick={() => setDropdownOpen(!dropdownOpen)} className="flex items-center gap-2 px-5 py-2 rounded-full shadow-md" style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}>
+                Hey {user?.firstName} <ChevronDown size={16} />
               </button>
-
-              {/* Desktop Dropdown Menu */}
-              {dropdownOpen && (
-                <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden">
-
-                  <Link
-                    to={
-                      user?.userType === "admin"
-                        ? "/admin"
-                        : user?.userType === "policy_maker"
-                        ? "/policymaker"
-                        : "/dashboard"
-                    }
-                    onClick={() => setDropdownOpen(false)}
-                    className="block px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              <AnimatePresence>
+                {dropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 mt-3 w-56 rounded-xl shadow-xl overflow-hidden border"
+                    style={{ backgroundColor: bg, borderColor: border }}
                   >
-                    My Dashboard
-                  </Link>
-
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-3 text-sm font-semibold text-rose-500 hover:bg-gray-50"
-                  >
-                    Terminate Session
-                  </button>
-
-                </div>
-              )}
+                    <Link to={dashPath} onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold hover:bg-gray-100" style={{ color: text }}>
+  <LayoutDashboard size={16} /> My Dashboard
+</Link>
+<button onClick={handleLogout} className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm font-semibold hover:bg-gray-100" style={{ color: MID }}>
+  <LogOut size={16} /> Terminate Session
+</button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
         </div>
 
-        {/* Mobile Menu Toggle Button - Only show when NOT logged in */}
-        {!isAuthenticated && (
-          <button 
-            onClick={toggleMenu}
-            className="md:hidden p-2 rounded-lg flex items-center"
-            style={{ color: midnightTeal }}
-          >
-            {isOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
-        )}
+        {/* Hamburger */}
+        <button onClick={() => setIsOpen(!isOpen)} className="md:hidden p-2" style={{ color: text }}>
+          <AnimatePresence mode="wait">
+            <motion.div key={isOpen ? "x" : "menu"} initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+              {isOpen ? <X size={28} /> : <Menu size={28} />}
+            </motion.div>
+          </AnimatePresence>
+        </button>
       </div>
 
-      {/* Mobile Menu Container - Below navbar, not covering it */}
-      {!isAuthenticated && isOpen && (
-        <>
-          {/* Overlay */}
-          <div 
-            className="fixed inset-0 bg-black/40 z-40 md:hidden"
-            onClick={toggleMenu}
-          />
-          {/* Side drawer - below navbar */}
-          <div className="absolute top-full left-0 w-72 h-screen bg-white md:hidden flex flex-col p-6 gap-4 shadow-xl z-50 overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold" style={{ color: midnightTeal }}>
-                Menu
-              </h2>
-              <button onClick={toggleMenu} className="p-1">
-                <X size={24} style={{ color: midnightTeal }} />
-              </button>
+      {/* Mobile Dropdown */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scaleY: 0.95 }}
+            animate={{ opacity: 1, y: 0, scaleY: 1 }}
+            exit={{ opacity: 0, y: -10, scaleY: 0.95 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="md:hidden absolute top-full left-0 w-full shadow-xl border-t z-50 origin-top"
+            style={{ backgroundColor: bg, borderColor: border }}
+          >
+            <div className="flex flex-col px-6 py-3 gap-0">
+              {NAV_LINKS.map((l, i) => {
+                const Icon = l.icon;
+                return (
+                <motion.div key={l.name} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}>
+                  <Link
+                    to={l.to}
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-center gap-3 py-3 text-base font-semibold border-b"
+                    style={{ color: text, borderColor: border }}
+                  >
+                    <Icon size={18} />
+                    {l.name}
+                  </Link>
+                </motion.div>
+                );
+              })}
+
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="flex gap-3 pt-3 pb-1">
+                {!isAuthenticated ? (
+                  <>
+                    <Link to="/login" onClick={() => setIsOpen(false)} className="flex-1 py-2 text-center text-sm font-bold rounded-xl border-2" style={{ borderColor: isDark ? TEAL : MID, color: isDark ? TEAL : MID }}>Login</Link>
+                    <Link to="/register" onClick={() => setIsOpen(false)} className="flex-1 py-2 text-center text-sm font-bold rounded-xl" style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}>Register</Link>
+                  </>
+                ) : (
+                  <>
+                    <Link to={dashPath} onClick={() => setIsOpen(false)} className="flex-1 py-2 text-center text-sm font-bold rounded-xl" style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}>Dashboard</Link>
+                    <button onClick={handleLogout} className="flex-1 py-2 text-sm font-bold rounded-xl border-2 border-red-400 text-red-400">Logout</button>
+                  </>
+                )}
+              </motion.div>
+
+              <div className="pb-2 flex justify-center">
+                {!hideThemeToggle && <ThemeToggle />}
+              </div>
             </div>
-
-            <Link to="/" onClick={toggleMenu} className="text-xl font-medium" style={{ color: midnightTeal }}>Home</Link>
-            <Link to="/about" onClick={toggleMenu} className="text-xl font-medium" style={{ color: midnightTeal }}>About</Link>
-            <Link to="/howitworks" onClick={toggleMenu} className="text-xl font-medium" style={{ color: midnightTeal }}>How It Works</Link>
-            <Link to="/ai-public" onClick={toggleMenu} className="text-xl font-medium" style={{ color: midnightTeal }}>AI Assistant</Link>
-            <Link to="/contact" onClick={toggleMenu} className="text-xl font-medium" style={{ color: midnightTeal }}>Contact</Link>
-
-            <hr className="border-gray-100 my-2" />
-
-            <div className="flex flex-col gap-3">
-              <Link
-                to="/login"
-                onClick={toggleMenu}
-                className="w-full py-3 text-center font-bold rounded-xl border-2"
-                style={{ borderColor: midnightTeal, color: midnightTeal }}
-              >
-                Login
-              </Link>
-
-              <Link
-                to="/register"
-                onClick={toggleMenu}
-                className="w-full py-3 text-center font-bold rounded-xl"
-                style={{ backgroundColor: midnightTeal, color: aquaText }}
-              >
-                Register
-              </Link>
-            </div>
-          </div>
-        </>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };

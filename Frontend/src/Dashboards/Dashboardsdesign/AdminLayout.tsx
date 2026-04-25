@@ -12,13 +12,13 @@ const AdminLayout = () => {
 
       {/* Top Navbar */}
       <div className="z-50 border-b border-gray-200 bg-white">
-        <Navbar />
+        <Navbar hideThemeToggle={true} />
       </div>
 
       <div className="flex flex-1 overflow-hidden relative">
 
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex flex-col w-64 bg-[#002e33] border-r border-white/10 shrink-0">
+        <aside className="hidden lg:flex flex-col w-64 border-r border-white/10 shrink-0" style={{ backgroundColor: "#002e33" }}>
           <AdminSideNav />
         </aside>
 
@@ -29,7 +29,7 @@ const AdminLayout = () => {
               className="fixed inset-0 bg-black/40 z-40 lg:hidden"
               onClick={() => setSidebarOpen(false)}
             />
-            <aside className="fixed top-0 left-0 w-3/4 max-w-xs h-full bg-[#002e33] z-50 shadow-xl lg:hidden">
+            <aside className="fixed top-0 left-0 w-3/4 max-w-xs h-full z-50 shadow-xl lg:hidden" style={{ backgroundColor: "#002e33" }}>
               <div className="flex justify-end p-4">
                 <button onClick={() => setSidebarOpen(false)}>
                   <X size={24} className="text-white" />

@@ -8,29 +8,37 @@ const UserLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    // 1. h-screen + overflow-hidden prevents the WHOLE window from scrolling
     <div className="h-screen flex flex-col overflow-hidden bg-gray-100">
 
-      {/* Top Navbar - Make sure your Navbar component has a fixed height (e.g., h-16) */}
-      <div className="z-50 border-b border-gray-200 bg-white">
-        <Navbar />
+      {/* Top Navbar */}
+      <div className="z-50 bg-white shrink-0">
+        <Navbar hideThemeToggle={true} />
       </div>
 
-      <div className="flex flex-1 overflow-hidden relative">
+      <div
+        className="flex flex-1 overflow-hidden relative"
+        style={{ alignItems: "stretch" }}
+      >
 
-        {/* Desktop Sidebar - Fixed to the side */}
-        <aside className="hidden lg:flex flex-col w-64 bg-[#002e33] border-r border-white/10 shrink-0">
+        {/* Desktop Sidebar */}
+        <aside
+          className="hidden lg:flex flex-col w-80 shrink-0 overflow-hidden"
+          style={{ backgroundColor: "#002e33", alignSelf: "stretch" }}
+        >
           <UserSideNav />
         </aside>
 
-        {/* Mobile Sidebar (Drawer logic remains the same) */}
+        {/* Mobile Sidebar */}
         {sidebarOpen && (
           <>
             <div
               className="fixed inset-0 bg-black/40 z-40 lg:hidden"
               onClick={() => setSidebarOpen(false)}
             />
-            <aside className="fixed top-0 left-0 w-3/4 max-w-xs h-full bg-[#002e33] z-50 shadow-xl lg:hidden">
+            <aside
+              className="fixed top-0 left-0 w-3/4 max-w-xs h-full z-50 shadow-xl lg:hidden"
+              style={{ backgroundColor: "#002e33" }}
+            >
               <div className="flex justify-end p-4">
                 <button onClick={() => setSidebarOpen(false)}>
                   <X size={24} className="text-white" />
@@ -41,15 +49,14 @@ const UserLayout = () => {
           </>
         )}
 
-        {/* Main Content - 2. overflow-y-auto makes ONLY this part scrollable */}
+        {/* Main Content */}
         <main className="flex-1 overflow-y-auto w-full bg-gray-50">
-          {/* 3. Reduced top padding to fix the "too much space" issue */}
-     <div className="w-full min-h-full">
+          <div className="w-full">
             <Outlet />
           </div>
         </main>
 
-        {/* Mobile Toggle Button - Top Right */}
+        {/* Mobile Toggle Button */}
         {!sidebarOpen && (
           <button
             onClick={() => setSidebarOpen(true)}
