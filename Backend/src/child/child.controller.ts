@@ -5,7 +5,14 @@ import {
   getChildById,
   updateChild,
   deleteChild,
+  createMilestone,
+  getMilestonesByChild,
+  getMilestoneById,
+  updateMilestone,
+  deleteMilestone,
 } from "./child.service";
+
+// ── Child controllers ─────────────────────────────────────────
 
 // POST /api/children
 export const createChildController = async (req: Request, res: Response) => {
@@ -82,5 +89,77 @@ export const deleteChildController = async (req: Request, res: Response) => {
     res.status(200).json({ success: true, message: "Child deleted successfully" });
   } catch (error: any) {
     res.status(500).json({ success: false, message: "Failed to delete child", error: error.message });
+  }
+};
+
+// ── Milestone controllers ─────────────────────────────────────
+
+// POST /api/children/:id/milestones
+export const createMilestoneController = async (req: Request, res: Response) => {
+  try {
+    const childId = Number(req.params.id);
+    if (isNaN(childId)) {
+      res.status(400).json({ success: false, message: "Invalid child ID" });
+      return;
+    }
+    const milestone = await createMilestone({ ...req.body, childId });
+    res.status(201).json({ success: true, data: milestone });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: "Failed to create milestone", error: error.message });
+  }
+};
+
+// GET /api/children/:id/milestones
+export const getMilestonesByChildController = async (req: Request, res: Response) => {
+  try {
+    const childId = Number(req.params.id);
+    if (isNaN(childId)) {
+      res.status(400).json({ success: false, message: "Invalid child ID" });
+      return;
+    }
+    const milestones = await getMilestonesByChild(childId);
+    res.status(200).json({ success: true, count: milestones.length, data: milestones });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: "Failed to fetch milestones", error: error.message });
+  }
+};
+
+// PUT /api/children/:id/milestones/:milestoneId
+export const updateMilestoneController = async (req: Request, res: Response) => {
+  try {
+    const milestoneId = Number(req.params.milestoneId);
+    if (isNaN(milestoneId)) {
+      res.status(400).json({ success: false, message: "Invalid milestone ID" });
+      return;
+    }
+    const existing = await getMilestoneById(milestoneId);
+    if (!existing) {
+      res.status(404).json({ success: false, message: "Milestone not found" });
+      return;
+    }
+    const updated = await updateMilestone(milestoneId, req.body);
+    res.status(200).json({ success: true, data: updated });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: "Failed to update milestone", error: error.message });
+  }
+};
+
+// DELETE /api/children/:id/milestones/:milestoneId
+export const deleteMilestoneController = async (req: Request, res: Response) => {
+  try {
+    const milestoneId = Number(req.params.milestoneId);
+    if (isNaN(milestoneId)) {
+      res.status(400).json({ success: false, message: "Invalid milestone ID" });
+      return;
+    }
+    const existing = await getMilestoneById(milestoneId);
+    if (!existing) {
+      res.status(404).json({ success: false, message: "Milestone not found" });
+      return;
+    }
+    await deleteMilestone(milestoneId);
+    res.status(200).json({ success: true, message: "Milestone deleted successfully" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: "Failed to delete milestone", error: error.message });
   }
 };

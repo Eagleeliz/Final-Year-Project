@@ -56,7 +56,7 @@ const BabyCentreAI: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "ai",
-      content: `Hi ${user?.firstName || "Mama"} 👋 I'm MamaCare AI. Ask me anything about pregnancy, postnatal care, newborn care, or child development!`,
+      content: `Hi ${user?.firstName || "Mama"} 👋 I'm BabyCentre AI. Ask me anything about pregnancy, postnatal care, newborn care, or child development!`,
       timestamp: new Date(),
     },
   ]);
@@ -159,7 +159,7 @@ const BabyCentreAI: React.FC = () => {
             </div>
             <div>
               <p className="text-sm font-bold" style={{ color: midnightTeal }}>
-                MamaCare AI
+                BabyCentre AI
               </p>
               <p className="text-xs text-gray-400">
                 Powered by Groq · Always consult your doctor
@@ -183,7 +183,7 @@ const BabyCentreAI: React.FC = () => {
                   style={{ borderRadius: "18px 18px 18px 4px" }}>
                   <Loader2 size={14} className="animate-spin" style={{ color: aquaText }} />
                   <span className="text-sm md:text-base text-gray-400">
-                    MamaCare AI is thinking...
+                    BabyCentre AI is thinking...
                   </span>
                 </div>
               </div>
@@ -228,7 +228,7 @@ const BabyCentreAI: React.FC = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask MamaCare AI anything..."
+                placeholder="Ask BabyCentre AI anything..."
                 rows={1}
                 className="flex-1 bg-transparent text-base md:text-lg outline-none resize-none placeholder:text-gray-400"
                 style={{ color: midnightTeal, maxHeight: "100px" }}

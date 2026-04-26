@@ -1,5 +1,4 @@
 import {
-  LayoutDashboard,
   Activity,
   Sparkles,
   BellRing,
@@ -25,6 +24,8 @@ const UserSideNav = ({ onNavItemClick }: NavProps) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const midnightTeal = "#002e33";
+
   const navItems = [
     { name: "Pregnancy Journey", path: "/dashboard/journey", icon: Sparkles },
     { name: "My Health Monitoring", path: "/dashboard/health-monitoring", icon: Activity },
@@ -34,8 +35,6 @@ const UserSideNav = ({ onNavItemClick }: NavProps) => {
     { name: "Emergency", path: "/dashboard/emergency", icon: ShieldAlert },
     { name: "Profile", path: "/dashboard/profile", icon: UserCircle },
   ];
-
-  const midnightTeal = "#002e33";
 
   const handleLogout = () => {
     MySwal.fire({
@@ -55,9 +54,7 @@ const UserSideNav = ({ onNavItemClick }: NavProps) => {
           text: "You have been successfully logged out.",
           timer: 1500,
           showConfirmButton: false,
-        }).then(() => {
-          navigate("/");
-        });
+        }).then(() => navigate("/"));
       }
     });
   };
@@ -68,21 +65,23 @@ const UserSideNav = ({ onNavItemClick }: NavProps) => {
       style={{ backgroundColor: midnightTeal, height: "100%", minHeight: "100%" }}
     >
       {/* Brand Label */}
-      <div className="px-6 pt-12">
+      <div className="px-6 pt-6">
         <p className="text-xs font-black uppercase tracking-widest text-white/40">
           My Dashboard
         </p>
       </div>
 
       {/* Navigation Links */}
-      <div className="flex-1 space-y-1 overflow-y-auto">
+      <div className="flex-1 space-y-2 overflow-y-auto pt-6">
         {navItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
             onClick={onNavItemClick}
             className={({ isActive }) =>
-              `flex items-center px-4 py-3 rounded-lg transition-all text-white !text-white ${isActive ? "font-semibold" : ""}`
+              `flex items-center px-4 py-3 rounded-lg transition-all text-white !text-white ${
+                isActive ? "font-semibold bg-white/10" : ""
+              }`
             }
           >
             <item.icon size={22} className="mr-3" />

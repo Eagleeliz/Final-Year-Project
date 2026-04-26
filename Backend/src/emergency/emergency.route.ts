@@ -7,9 +7,9 @@ import {
   createEmergencyAlertController,
   getAlertsByUserController,
   updateAlertStatusController,
+  getAllAlertsController,
 } from "./emergency.controller";
-import { authMiddleware,adminOnly} from "../middlewares/bearAuth";
-import { getAllAlertsController } from "./emergency.controller";
+import { authMiddleware, adminOnly } from "../middlewares/bearAuth";
 
 const emergencyRouter = Router();
 
@@ -21,9 +21,8 @@ emergencyRouter.delete("/contact/:id",     authMiddleware(), deleteEmergencyCont
 
 // ── Emergency Alert Routes ────────────────────────────────────
 emergencyRouter.post("/alert",             authMiddleware(), createEmergencyAlertController);
+emergencyRouter.get("/alerts/all",         authMiddleware(), adminOnly, getAllAlertsController);  // ✅ before :userId
 emergencyRouter.get("/alerts/:userId",     authMiddleware(), getAlertsByUserController);
 emergencyRouter.patch("/alert/:id/status", authMiddleware(), updateAlertStatusController);
-
-emergencyRouter.get("/alerts/all", authMiddleware(), adminOnly, getAllAlertsController);
 
 export default emergencyRouter;

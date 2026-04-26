@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { pregnancyApi } from "../../Features/Apis/PregnancyAPI";
 import {
-  Baby, Search,
-  AlertCircle, Trash2, Eye,
+  Baby, Search, AlertCircle, Trash2, Eye,
+  HeartPulse,  Baby as BabyIcon, AlertTriangle, Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
@@ -58,6 +58,31 @@ const getTrimesterLabel = (week: number) => {
   if (week <= 26) return { label: "T2", color: "#a8d5a2" };
   return            { label: "T3", color: "#f4b8a0" };
 };
+
+const StatCard = ({ icon: Icon, label, value, bg, color }: any) => (
+  <div
+    className="bg-white p-7 rounded-2xl shadow-sm border-l-4 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer relative overflow-hidden"
+    style={{ borderLeftColor: color }}
+  >
+    <div
+      className="absolute inset-0 opacity-5"
+      style={{ background: `linear-gradient(135deg, ${color} 0%, transparent 50%)` }}
+    />
+    <div className="relative z-10">
+      <div className="flex items-center justify-between mb-4">
+        <div className="p-3 rounded-xl" style={{ background: bg }}>
+          <Icon size={24} style={{ color }} />
+        </div>
+      </div>
+      <p className="text-4xl font-black" style={{ color }}>
+        {value.toLocaleString()}
+      </p>
+      <p className="text-sm font-black uppercase tracking-wider text-gray-500 mt-2">
+        {label}
+      </p>
+    </div>
+  </div>
+);
 
 const AllPregnancies = () => {
   const [pregnancies, setPregnancies]           = useState<Pregnancy[]>([]);
@@ -141,6 +166,13 @@ const AllPregnancies = () => {
     );
   }
 
+  const statCards = [
+    { label: "Total",       value: pregnancies.length, icon: Baby,          bg: "#e6f7f9", color: midnightTeal },
+    { label: "Ongoing",     value: totalOngoing,       icon: HeartPulse,    bg: "#e8f5f6", color: "#005a63"   },
+    { label: "Delivered",   value: totalDelivered,     icon: Baby,         bg: "#edf7ee", color: "#2e6b38"   },
+    { label: "Miscarriage", value: totalMiscarriage,   icon: AlertTriangle, bg: "#fdecea", color: "#e53e3e"   },
+  ];
+
   return (
     <div className="space-y-6">
 
@@ -154,31 +186,22 @@ const AllPregnancies = () => {
             All Pregnancies
           </h1>
           <p className="text-gray-400 text-sm mt-1">
-            Monitor all registered pregnancies across MamaCare
+            Monitor all registered pregnancies across BabyCentre
           </p>
         </div>
       </header>
 
       {/* ── Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Total",       value: pregnancies.length, color: midnightTeal },
-          { label: "Ongoing",     value: totalOngoing,       color: "#005a63" },
-          { label: "Delivered",   value: totalDelivered,     color: "#2e6b38" },
-          { label: "Miscarriage", value: totalMiscarriage,   color: "#e53e3e" },
-        ].map((stat) => (
-          <div
+        {statCards.map((stat) => (
+          <StatCard
             key={stat.label}
-            className="bg-white p-5 rounded-2xl shadow-sm border-l-4"
-            style={{ borderLeftColor: stat.color }}
-          >
-            <p className="text-2xl font-black" style={{ color: stat.color }}>
-              {stat.value}
-            </p>
-            <p className="text-xs font-black uppercase tracking-widest text-gray-400 mt-1">
-              {stat.label}
-            </p>
-          </div>
+            icon={stat.icon}
+            label={stat.label}
+            value={stat.value}
+            bg={stat.bg}
+            color={stat.color}
+          />
         ))}
       </div>
 

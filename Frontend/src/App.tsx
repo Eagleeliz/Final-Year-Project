@@ -1,4 +1,7 @@
-import { Routes, Route, Navigate } from "react-router-dom";  {/* ← add Navigate */}
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "./Features/store";
+import type { ReactNode } from "react";
 import Home from "./pages/Home";
 import { Toaster } from "sonner";
 import './App.css';
@@ -11,13 +14,13 @@ import Login from "./pages/Login";
 
 // ── User Dashboard
 import UserLayout from "./Dashboards/Dashboardsdesign/UserLayout";
-// ← DashboardHome import removed
 import HealthMonitoring from "./Dashboards/UserDashboard/HealthMonitoring";
 import RemindersPage from "./Dashboards/UserDashboard/RemindersPage";
 import MyProfile from "./Dashboards/UserDashboard/MyProfile";
 import PregnancyJourney from "./Dashboards/UserDashboard/PreganancyJourney";
 import BabyCentreAI from "./Dashboards/UserDashboard/babyCentreAI";
 import EmergencyPage from "./Dashboards/UserDashboard/EmergencyPage";
+import ChildDevelopment from "./Dashboards/UserDashboard/childDevelopment";
 
 // ── Admin Dashboard
 import AdminLayout from "./Dashboards/Dashboardsdesign/AdminLayout";
@@ -26,7 +29,6 @@ import AllUsers from "./Dashboards/AdminDashboard/AllUsers";
 import AllPregnancies from "./Dashboards/AdminDashboard/AllPregnancies";
 import EmergencyAlerts from "./Dashboards/AdminDashboard/EmergencyAlerts";
 import HealthCheckins from "./Dashboards/AdminDashboard/HealthCheckins";
-import ManageHealthTips from "./Dashboards/AdminDashboard/ManageHealthTips";
 import ManageGuidance from "./Dashboards/AdminDashboard/ManageGuidance";
 import ManageFacilities from "./Dashboards/AdminDashboard/ManageFacilities";
 
@@ -43,6 +45,33 @@ import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { logout } from "./Features/Auth/AuthSlice";
 import { jwtDecode } from "jwt-decode";
+
+// ── Protected Route Component
+interface ProtectedRouteProps {
+  allowedRoles: string[];
+  children: ReactNode;
+}
+
+const ProtectedRoute = ({ allowedRoles, children }: ProtectedRouteProps) => {
+  const { isAuthenticated, user } = useSelector((s: RootState) => s.auth);
+
+  // Not logged in → go to login
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  // Logged in but wrong role → go to their own dashboard
+  if (!allowedRoles.includes(user?.userType ?? "")) {
+    const redirectMap: Record<string, string> = {
+      admin:         "/admin",
+      policy_maker:  "/policymaker",
+      mother:        "/dashboard/journey",
+      health_worker: "/dashboard/journey",
+    };
+    const fallback = redirectMap[user?.userType ?? ""] ?? "/";
+    return <Navigate to={fallback} replace />;
+  }
+
+  return <>{children}</>;
+};
 
 function App() {
   const dispatch = useDispatch();
@@ -93,20 +122,34 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot" element={<ForgotPassword />} />
 
-        {/* ── User Dashboard */}
-        <Route path="/dashboard" element={<UserLayout />}>
-          <Route index element={<Navigate to="journey" replace />} /> {/* ← CHANGED */}
+        {/* ── User Dashboard — mothers & health workers only */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["mother", "health_worker"]}>
+              <UserLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="journey" replace />} />
           <Route path="health-monitoring" element={<HealthMonitoring />} />
           <Route path="journey" element={<PregnancyJourney />} />
           <Route path="reminders" element={<RemindersPage />} />
-          <Route path="child-dev" element={<div>Child Development Page</div>} />
+          <Route path="child-dev" element={<ChildDevelopment />} />
           <Route path="babycentre-ai" element={<BabyCentreAI />} />
           <Route path="emergency" element={<EmergencyPage />} />
           <Route path="profile" element={<MyProfile />} />
         </Route>
 
-        {/* ── Admin Dashboard */}
-        <Route path="/admin" element={<AdminLayout />}>
+        {/* ── Admin Dashboard — admin only */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<AdminHome />} />
           <Route path="users" element={<AllUsers />} />
           <Route path="pregnancies" element={<AllPregnancies />} />
@@ -116,8 +159,15 @@ function App() {
           <Route path="facilities" element={<ManageFacilities />} />
         </Route>
 
-        {/* ── Policy Maker Dashboard */}
-        <Route path="/policymaker" element={<PolicyMakerLayout />}>
+        {/* ── Policy Maker Dashboard — policy_maker only */}
+        <Route
+          path="/policymaker"
+          element={
+            <ProtectedRoute allowedRoles={["policy_maker"]}>
+              <PolicyMakerLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<PolicyMakerHome />} />
           <Route path="national-summary" element={<PolicyMakerNationalSummary />} />
           <Route path="risk-trends" element={<PolicyMakerRiskTrends />} />

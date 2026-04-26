@@ -21,9 +21,10 @@ const ACCENT = "#00a0b0";
 
 interface NavbarProps {
   hideThemeToggle?: boolean;
+  onMenuClick?: () => void;
 }
 
-const Navbar = ({ hideThemeToggle = false }: NavbarProps) => {
+const Navbar = ({ hideThemeToggle = false, onMenuClick }: NavbarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dispatch = useDispatch();
@@ -53,7 +54,7 @@ const Navbar = ({ hideThemeToggle = false }: NavbarProps) => {
 
         {/* Logo */}
         <Link to="/" className="flex items-center gap-1">
-          <img src="/src/assets/logo.png" alt="BabyCentre Logo" className="w-24 h-24 object-contain" />
+          <img src="/src/assets/logo.png" alt="BabyCentre Logo" className="w-27 h-18 object-contain" />
           <span className="text-2xl font-bold" style={{ color: MID }}>
             Baby<span style={{ color: ACCENT }}>Centre</span>
           </span>
@@ -64,7 +65,12 @@ const Navbar = ({ hideThemeToggle = false }: NavbarProps) => {
           {NAV_LINKS.map((l) => {
             const Icon = l.icon;
             return (
-              <Link key={l.name} to={l.to} className="flex items-center gap-2 px-3 py-1 rounded-lg text-base font-bold transition-all hover:bg-[#86d9e120]" style={{ color: text }}>
+              <Link
+                key={l.name}
+                to={l.to}
+                className="flex items-center gap-2 px-3 py-1 rounded-lg text-base font-bold transition-all hover:bg-[#86d9e120]"
+                style={{ color: text }}
+              >
                 <Icon size={18} />
                 <span>{l.name}</span>
               </Link>
@@ -77,12 +83,28 @@ const Navbar = ({ hideThemeToggle = false }: NavbarProps) => {
           {!hideThemeToggle && <ThemeToggle />}
           {!isAuthenticated ? (
             <>
-              <Link to="/login" className="px-5 py-2 text-sm font-bold rounded-full border-2" style={{ borderColor: text, color: text }}>Login</Link>
-              <Link to="/register" className="px-5 py-2 text-sm font-bold rounded-full shadow-md" style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}>Register</Link>
+              <Link
+                to="/login"
+                className="px-5 py-2 text-sm font-bold rounded-full border-2"
+                style={{ borderColor: text, color: text }}
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className="px-5 py-2 text-sm font-bold rounded-full shadow-md"
+                style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}
+              >
+                Register
+              </Link>
             </>
           ) : (
             <div className="relative">
-              <button onClick={() => setDropdownOpen(!dropdownOpen)} className="flex items-center gap-2 px-5 py-2 rounded-full shadow-md" style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 px-5 py-2 rounded-full shadow-md"
+                style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}
+              >
                 Hey {user?.firstName} <ChevronDown size={16} />
               </button>
               <AnimatePresence>
@@ -95,12 +117,21 @@ const Navbar = ({ hideThemeToggle = false }: NavbarProps) => {
                     className="absolute right-0 mt-3 w-56 rounded-xl shadow-xl overflow-hidden border"
                     style={{ backgroundColor: bg, borderColor: border }}
                   >
-                    <Link to={dashPath} onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold hover:bg-gray-100" style={{ color: text }}>
-  <LayoutDashboard size={16} /> My Dashboard
-</Link>
-<button onClick={handleLogout} className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm font-semibold hover:bg-gray-100" style={{ color: MID }}>
-  <LogOut size={16} /> Terminate Session
-</button>
+                    <Link
+                      to={dashPath}
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold hover:bg-gray-100"
+                      style={{ color: text }}
+                    >
+                      <LayoutDashboard size={16} /> My Dashboard
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm font-semibold hover:bg-gray-100"
+                      style={{ color: MID }}
+                    >
+                      <LogOut size={16} /> Terminate Session
+                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -108,66 +139,115 @@ const Navbar = ({ hideThemeToggle = false }: NavbarProps) => {
           )}
         </div>
 
-        {/* Hamburger */}
-        <button onClick={() => setIsOpen(!isOpen)} className="md:hidden p-2" style={{ color: text }}>
+        {/* Hamburger — triggers SideNav on dashboard pages, public menu on public pages */}
+        <button
+          onClick={() => onMenuClick ? onMenuClick() : setIsOpen(!isOpen)}
+          className="md:hidden p-2"
+          style={{ color: text }}
+        >
           <AnimatePresence mode="wait">
-            <motion.div key={isOpen ? "x" : "menu"} initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
-              {isOpen ? <X size={28} /> : <Menu size={28} />}
+            <motion.div
+              key={onMenuClick ? "sidenav" : isOpen ? "x" : "menu"}
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {!onMenuClick && isOpen ? <X size={28} /> : <Menu size={28} />}
             </motion.div>
           </AnimatePresence>
         </button>
+
       </div>
 
-      {/* Mobile Dropdown */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scaleY: 0.95 }}
-            animate={{ opacity: 1, y: 0, scaleY: 1 }}
-            exit={{ opacity: 0, y: -10, scaleY: 0.95 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="md:hidden absolute top-full left-0 w-full shadow-xl border-t z-50 origin-top"
-            style={{ backgroundColor: bg, borderColor: border }}
-          >
-            <div className="flex flex-col px-6 py-3 gap-0">
-              {NAV_LINKS.map((l, i) => {
-                const Icon = l.icon;
-                return (
-                <motion.div key={l.name} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}>
-                  <Link
-                    to={l.to}
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center justify-center gap-3 py-3 text-base font-semibold border-b"
-                    style={{ color: text, borderColor: border }}
-                  >
-                    <Icon size={18} />
-                    {l.name}
-                  </Link>
+      {/* Mobile Dropdown — only on public pages (when onMenuClick is not provided) */}
+      {!onMenuClick && (
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scaleY: 0.95 }}
+              animate={{ opacity: 1, y: 0, scaleY: 1 }}
+              exit={{ opacity: 0, y: -10, scaleY: 0.95 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="md:hidden absolute top-full left-0 w-full shadow-xl border-t z-50 origin-top"
+              style={{ backgroundColor: bg, borderColor: border }}
+            >
+              <div className="flex flex-col px-6 py-3 gap-0">
+                {NAV_LINKS.map((l, i) => {
+                  const Icon = l.icon;
+                  return (
+                    <motion.div
+                      key={l.name}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.06 }}
+                    >
+                      <Link
+                        to={l.to}
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center justify-center gap-3 py-3 text-base font-semibold border-b"
+                        style={{ color: text, borderColor: border }}
+                      >
+                        <Icon size={18} />
+                        {l.name}
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.35 }}
+                  className="flex gap-3 pt-3 pb-1"
+                >
+                  {!isAuthenticated ? (
+                    <>
+                      <Link
+                        to="/login"
+                        onClick={() => setIsOpen(false)}
+                        className="flex-1 py-2 text-center text-sm font-bold rounded-xl border-2"
+                        style={{ borderColor: isDark ? TEAL : MID, color: isDark ? TEAL : MID }}
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        to="/register"
+                        onClick={() => setIsOpen(false)}
+                        className="flex-1 py-2 text-center text-sm font-bold rounded-xl"
+                        style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}
+                      >
+                        Register
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to={dashPath}
+                        onClick={() => setIsOpen(false)}
+                        className="flex-1 py-2 text-center text-sm font-bold rounded-xl"
+                        style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}
+                      >
+                        Dashboard
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="flex-1 py-2 text-sm font-bold rounded-xl border-2 border-red-400 text-red-400"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  )}
                 </motion.div>
-                );
-              })}
 
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="flex gap-3 pt-3 pb-1">
-                {!isAuthenticated ? (
-                  <>
-                    <Link to="/login" onClick={() => setIsOpen(false)} className="flex-1 py-2 text-center text-sm font-bold rounded-xl border-2" style={{ borderColor: isDark ? TEAL : MID, color: isDark ? TEAL : MID }}>Login</Link>
-                    <Link to="/register" onClick={() => setIsOpen(false)} className="flex-1 py-2 text-center text-sm font-bold rounded-xl" style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}>Register</Link>
-                  </>
-                ) : (
-                  <>
-                    <Link to={dashPath} onClick={() => setIsOpen(false)} className="flex-1 py-2 text-center text-sm font-bold rounded-xl" style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}>Dashboard</Link>
-                    <button onClick={handleLogout} className="flex-1 py-2 text-sm font-bold rounded-xl border-2 border-red-400 text-red-400">Logout</button>
-                  </>
-                )}
-              </motion.div>
-
-              <div className="pb-2 flex justify-center">
-                {!hideThemeToggle && <ThemeToggle />}
+                <div className="pb-2 flex justify-center">
+                  {!hideThemeToggle && <ThemeToggle />}
+                </div>
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </nav>
   );
 };

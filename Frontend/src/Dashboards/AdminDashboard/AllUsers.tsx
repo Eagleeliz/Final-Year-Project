@@ -3,6 +3,7 @@ import { usersApi, type User, type UpdateUserPayload } from "../../Features/Apis
 import {
   Search, Trash2, CheckCircle,
   XCircle, AlertCircle, Pencil, Save, ShieldCheck,
+  Users, HeartPulse, BadgeCheck, BadgeX,
 } from "lucide-react";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
@@ -29,6 +30,31 @@ const getUserTypeColor = (userType: string) => {
     default:              return { bg: "#f1f1f1", color: "#555" };
   }
 };
+
+const StatCard = ({ icon: Icon, label, value, bg, color }: any) => (
+  <div
+    className="bg-white p-7 rounded-2xl shadow-sm border-l-4 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer relative overflow-hidden"
+    style={{ borderLeftColor: color }}
+  >
+    <div
+      className="absolute inset-0 opacity-5"
+      style={{ background: `linear-gradient(135deg, ${color} 0%, transparent 50%)` }}
+    />
+    <div className="relative z-10">
+      <div className="flex items-center justify-between mb-4">
+        <div className="p-3 rounded-xl" style={{ background: bg }}>
+          <Icon size={24} style={{ color }} />
+        </div>
+      </div>
+      <p className="text-4xl font-black" style={{ color }}>
+        {value.toLocaleString()}
+      </p>
+      <p className="text-sm font-black uppercase tracking-wider text-gray-500 mt-2">
+        {label}
+      </p>
+    </div>
+  </div>
+);
 
 const AllUsers = () => {
   const [users, setUsers]           = useState<User[]>([]);
@@ -157,7 +183,6 @@ const AllUsers = () => {
   };
 
   const totalMothers    = users.filter((u) => u.userType === "mother").length;
-  const totalAdmins     = users.filter((u) => u.userType === "admin").length;
   const totalVerified   = users.filter((u) => u.isEmailVerified).length;
   const totalUnverified = users.filter((u) => !u.isEmailVerified).length;
 
@@ -177,6 +202,13 @@ const AllUsers = () => {
     );
   }
 
+  const statCards = [
+    { label: "Total Users", value: users.length,    icon: Users,       bg: "#e6f7f9", color: midnightTeal },
+    { label: "Mothers",     value: totalMothers,    icon: HeartPulse,  bg: "#fbeaf0", color: "#993556"   },
+    { label: "Verified",    value: totalVerified,   icon: BadgeCheck,  bg: "#edf7ee", color: "#2e6b38"   },
+    { label: "Unverified",  value: totalUnverified, icon: BadgeX,      bg: "#fdecea", color: "#e53e3e"   },
+  ];
+
   return (
     <div className="space-y-6">
 
@@ -194,24 +226,15 @@ const AllUsers = () => {
 
       {/* ── Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Total Users",  value: users.length,    color: midnightTeal },
-          { label: "Mothers",      value: totalMothers,    color: "#993556" },
-          { label: "Verified",     value: totalVerified,   color: "#2e6b38" },
-          { label: "Unverified",   value: totalUnverified, color: "#e53e3e" },
-        ].map((stat) => (
-          <div
+        {statCards.map((stat) => (
+          <StatCard
             key={stat.label}
-            className="bg-white p-5 rounded-2xl shadow-sm border-l-4"
-            style={{ borderLeftColor: stat.color }}
-          >
-            <p className="text-2xl font-black" style={{ color: stat.color }}>
-              {stat.value}
-            </p>
-            <p className="text-xs font-black uppercase tracking-widest text-gray-400 mt-1">
-              {stat.label}
-            </p>
-          </div>
+            icon={stat.icon}
+            label={stat.label}
+            value={stat.value}
+            bg={stat.bg}
+            color={stat.color}
+          />
         ))}
       </div>
 
@@ -443,7 +466,7 @@ const AllUsers = () => {
               </div>
             </div>
 
-            {/* Modal buttons — all midnightTeal */}
+            {/* Modal buttons */}
             <div className="flex flex-col gap-3 mt-6">
               <div className="flex gap-3">
                 <button
@@ -464,7 +487,6 @@ const AllUsers = () => {
                 </button>
               </div>
 
-              {/* Verify — only for unverified users */}
               {!editingUser.isEmailVerified && (
                 <button
                   onClick={handleVerify}

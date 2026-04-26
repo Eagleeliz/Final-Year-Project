@@ -109,7 +109,7 @@ const LoginPage = () => {
                 Welcome back
               </h2>
               <p className="text-sm text-gray-400">
-                New to MamaCare?{" "}
+                New to BabyCentre?{" "}
                 <Link to="/register" className="font-black hover:underline" style={{ color: midnightTeal }}>
                   Create account
                 </Link>

@@ -63,7 +63,7 @@ const PolicyMakerSideNav = ({ onNavItemClick }: NavProps) => {
       </div>
 
       {/* Nav Items */}
-      <div className="flex-1 space-y-3">
+      <div className="flex-1 space-y-3 pt-6">
         {navItems.map((item) => (
           <NavLink
             key={item.name}

@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../../features/ThemeContext";
+import { useTheme } from "../../Features/ThemeContext";
 
 const midnightTeal = "#002e33";
 const black = "#000000";
 const white = "#ffffff";
 
 const faqs = [
-  { q: "Is MamaCare free to use?", a: "Yes — MamaCare is completely free for all mothers across Kenya. We believe safe motherhood should never be a privilege. There are no hidden charges, subscriptions, or premium tiers." },
+  { q: "Is BabyCentre free to use?", a: "Yes — BabyCentre is completely free for all mothers across Kenya. We believe safe motherhood should never be a privilege. There are no hidden charges, subscriptions, or premium tiers." },
   { q: "How does the AI danger sign detection work?", a: "Each week, you log your symptoms through the app. Our AI analyzes your entries against clinical thresholds and your personal health history to detect early warning signs of conditions like preeclampsia, gestational diabetes, and preterm labor — alerting you and your care team instantly." },
-  { q: "Which counties does MamaCare cover?", a: "MamaCare is available across all 47 counties in Kenya — from Nairobi and Mombasa to Turkana and Mandera. Our network spans both urban and rural regions." },
+  { q: "Which counties does BabyCentre cover?", a: "BabyCentre is available across all 47 counties in Kenya — from Nairobi and Mombasa to Turkana and Mandera. Our network spans both urban and rural regions." },
   { q: "Is my health data private and secure?", a: "Absolutely. Your data is encrypted end-to-end and stored securely. We never sell your information to third parties. You control who sees your health records at all times." },
-  { q: "Can I use MamaCare after delivery?", a: "Yes! MamaCare supports you from your first antenatal visit through postnatal recovery and early childhood — tracking your baby's milestones, vaccination schedule, and your own postpartum health." },
-  { q: "Do I need internet access to use MamaCare?", a: "MamaCare is optimized for low-bandwidth environments common in rural Kenya. Key features are also available offline and sync automatically when you reconnect." },
+  { q: "Can I use BabyCentre after delivery?", a: "Yes! BabyCentre supports you from your first antenatal visit through postnatal recovery and early childhood — tracking your baby's milestones, vaccination schedule, and your own postpartum health." },
+  { q: "Do I need internet access to use BabyCentre?", a: "BabyCentre is optimized for low-bandwidth environments common in rural Kenya. Key features are also available offline and sync automatically when you reconnect." },
 ];
 
 const FAQItem = ({ q, a }: { q: string; a: string }) => {
@@ -51,7 +51,7 @@ const FAQPage = () => {
       <div className="text-center px-6 pt-20 pb-12 max-w-[680px] mx-auto">
         <span className="inline-block text-[14px] font-bold tracking-[2px] uppercase px-5 py-2 rounded-full mb-5" style={{ background: isDark ? "#1e293b" : "#f5f5f5", color: isDark ? "#5eead4" : midnightTeal }}>FAQ</span>
         <h1 className="leading-tight mb-5" style={{ color: textColor, fontFamily: "Inter", fontSize: "clamp(38px, 5vw, 60px)" }}>Got questions? <em className="not-italic" style={{ color: isDark ? "#5eead4" : black }}>We have answers.</em></h1>
-        <p className="text-[20px] leading-relaxed" style={{ color: mutedColor }}>Everything you need to know about MamaCare — clear, honest, and straight to the point.</p>
+        <p className="text-[20px] leading-relaxed" style={{ color: mutedColor }}>Everything you need to know about BabyCentre — clear, honest, and straight to the point.</p>
       </div>
 
       <div className="max-w-[760px] mx-auto px-6 pb-10 flex flex-col gap-4">

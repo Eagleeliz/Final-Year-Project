@@ -1,4 +1,4 @@
-import { useTheme } from "../../features/ThemeContext";
+import { useTheme } from "../../Features/ThemeContext";
 
 const steps = [
   {
@@ -139,7 +139,7 @@ const HowItWorksSection = () => {
           of the way
         </h2>
         <p className="text-[20px] leading-relaxed" style={{ color: isDark ? "#9ca3af" : "#4a7a7e" }}>
-          MamaCare walks with you from your first trimester through early childhood — with AI-powered support, real-time alerts, and personalized guidance.
+          BabyCentre walks with you from your first trimester through early childhood — with AI-powered support, real-time alerts, and personalized guidance.
         </p>
       </div>
 

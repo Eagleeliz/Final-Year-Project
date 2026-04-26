@@ -16,7 +16,7 @@ const HeroSection = () => {
       <div style={{ backgroundColor: bgDark }} className="py-8 px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
           <div className="text-white text-xl font-semibold text-center md:text-left">
-            MamaCare is your <br /> parenting partner.
+            BabyCentre is your <br /> parenting partner.
           </div>
           
           {/* Stat Card 1 */}
