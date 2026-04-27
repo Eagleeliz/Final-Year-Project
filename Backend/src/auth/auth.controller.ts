@@ -46,7 +46,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       user.email,
       "Your Verification Code",
       `
-      Welcome to BabyCentre Care 💛<br/><br/>
+      Welcome to BabyCentre Care<br/><br/>
       Your OTP is:<br/><br/>
       <h2>${otp}</h2>
       This code expires in 5 minutes.
@@ -55,7 +55,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       "welcome"
     );
 
-    // ✅ userType added to JWT
+    // include userType in JWT
     const token = jwt.sign(
       {
         userId: result.id,
@@ -159,7 +159,7 @@ export const loginUser = async (req: Request, res: Response) => {
     // Extended expiry for "Remember Me" - 30 days, otherwise 1 hour
     const expiresIn = rememberMe ? "30d" : "1h";
 
-    // ✅ userType added to JWT
+    // include userType in JWT
     const token = jwt.sign(
       {
         userId: userExists.id,
@@ -232,7 +232,7 @@ export const resendOtp = async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
-// FORGOT PASSWORD — sends OTP to email
+// FORGOT PASSWORD - sends OTP to email
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email } = req.body;
@@ -244,14 +244,14 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 
     const user = await getUserByEmailService(email);
 
-    // Always return 200 to avoid exposing which emails exist
+    // return 200 to avoid revealing if email exists
     if (!user) {
       res.status(200).json({ message: "If that email exists, a reset code was sent." });
       return;
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const expires = new Date(Date.now() + 10 * 60 * 1000);
 
     await setPasswordResetTokenService(email, otp, expires);
 
@@ -259,7 +259,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       user.email,
       "Your Password Reset Code",
       `
-      Hi ${user.firstName || "there"} 👋<br/><br/>
+      Hi ${user.firstName || "there"}<br/><br/>
       You requested a password reset for your BabyCentre Care account.<br/><br/>
       Your reset code is:<br/><br/>
       <h2>${otp}</h2>
@@ -277,7 +277,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
   }
 };
 
-// RESET PASSWORD — verifies OTP and sets new password
+// RESET PASSWORD - verifies OTP and sets new password
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, otp, newPassword } = req.body;

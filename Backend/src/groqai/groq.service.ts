@@ -3,7 +3,7 @@ import axios from "axios";
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 export const getGroqAdvice = async (question: string) => {
-  // Use the current working model
+  // Use the Groq model
   const model = "llama-3.3-70b-versatile";
   
   try {

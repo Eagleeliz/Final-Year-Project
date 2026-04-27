@@ -2,15 +2,15 @@ import db from "../drizzle/db";
 import { usersTable, User } from "../drizzle/schema";
 import { eq, and, or, gt, desc, isNotNull } from "drizzle-orm";
 
-// --- TYPES ---
+// TYPES
 export interface UserInsert extends Partial<User> {
     email: string;
     passwordHash: string;
 }
 
-// --- GENERAL CRUD SERVICES ---
+// GENERAL CRUD SERVICES
 
-// Create User (with conflict checking)
+// Create User - with conflict checking
 export const createUserServices = async (user: User): Promise<string | { conflict: "email" | "phone" }> => {
     const existingUser = await db.query.usersTable.findFirst({
         where: or(
@@ -28,7 +28,7 @@ export const createUserServices = async (user: User): Promise<string | { conflic
     return "User Created Successfully 😎";
 };
 
-// Get All Users (Sorted by newest first)
+// Get All Users - sorted by newest first
 export const getAllUsersService = async (limitNum: number = 50) => {
     return await db.query.usersTable.findMany({
         columns: { passwordHash: false },
@@ -68,9 +68,9 @@ export const deleteUserService = async (userId: number) => {
     return result.length > 0 ? "User deleted successfully 😎" : null;
 };
 
-// --- AUTH & SECURITY SERVICES ---
+// AUTH AND SECURITY SERVICES
 
-// Register User (Specialized for Auth flow)
+// Register User - specialized for auth flow
 export const registerUserService = async (user: UserInsert): Promise<{ id: number }> => {
     const [newUser] = await db.insert(usersTable).values({
         ...user,
@@ -123,7 +123,7 @@ export const setPasswordResetTokenService = async (email: string, token: string,
     return result.length > 0;
 };
 
-// --- LOCATION-BASED SERVICES ---
+// LOCATION-BASED SERVICES
 
 // Get Users By County
 export const getUsersByCounty = async (county: string) => {
@@ -209,7 +209,7 @@ export const resetPasswordWithTokenService = async (token: string, newPasswordHa
         .where(
             and(
                 eq(usersTable.passwordResetToken, token),
-                // 🔥 THE FIX: Changed 'lt' to 'gt'
+                // Fixed: changed 'lt' to 'gt'
                 gt(usersTable.passwordResetExpires, new Date()) 
             )
         )

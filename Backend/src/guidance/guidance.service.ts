@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { pregnancyGuidanceTable } from "../drizzle/schema";
 import { pregnancyGuidanceData } from "./guidance.data";
 
-// Seed the guidance table — run once
+// Seed the guidance table - run once
 export const seedGuidance = async () => {
   for (const week of pregnancyGuidanceData) {
     await db.insert(pregnancyGuidanceTable).values(week).onConflictDoNothing();

@@ -2,13 +2,13 @@ import db from "../drizzle/db";
 import { usersTable, User } from "../drizzle/schema";
 import { eq, and, or, gt, desc } from "drizzle-orm";
 
-// --- TYPES ---
+// TYPES
 export interface UserInsert extends Partial<User> {
     email: string;
     passwordHash: string;
 }
 
-// --- GENERAL CRUD SERVICES ---
+// GENERAL CRUD SERVICES
 
 export const createUserServices = async (user: User): Promise<string | { conflict: "email" | "phone" }> => {
     const existingUser = await db.query.usersTable.findFirst({
@@ -62,7 +62,7 @@ export const deleteUserService = async (userId: number) => {
     return result.length > 0 ? "User deleted successfully 😎" : null;
 };
 
-// --- AUTH & SECURITY SERVICES ---
+// AUTH AND SECURITY SERVICES
 
 export const registerUserService = async (user: UserInsert): Promise<{ id: number }> => {
     const [newUser] = await db.insert(usersTable).values({
@@ -73,7 +73,7 @@ export const registerUserService = async (user: UserInsert): Promise<{ id: numbe
     return { id: newUser.id };
 };
 
-// ✅ Used for OTP — stores OTP in emailVerificationToken field
+// Used for OTP - stores token in emailVerificationToken field
 export const setEmailVerificationTokenService = async (userId: number, token: string, expiresAt: Date) => {
     await db.update(usersTable)
         .set({
@@ -84,7 +84,7 @@ export const setEmailVerificationTokenService = async (userId: number, token: st
         .where(eq(usersTable.id, userId));
 };
 
-// ❌ verifyEmailService removed — was link-based, replaced by OTP flow in auth.controller.ts
+// verifyEmailService removed - replaced by OTP flow in auth.controller.ts
 
 export const setPasswordResetTokenService = async (email: string, token: string, expiresAt: Date) => {
     const result = await db.update(usersTable)

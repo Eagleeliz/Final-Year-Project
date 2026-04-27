@@ -7,7 +7,7 @@ import {
 import { smsService } from "../sms/sms.service";
 import { usersTable } from "../drizzle/schema";
 
-// ── Emergency Contact Services ────────────────────────────────
+// Emergency Contact Services
 
 export const getEmergencyContact = async (userId: number) => {
   const result = await db
@@ -63,7 +63,7 @@ export const deleteEmergencyContact = async (id: number) => {
     .where(eq(emergencyContactsTable.id, id));
 };
 
-// ── Emergency Alert Services ──────────────────────────────────
+// Emergency Alert Services
 
 export const createEmergencyAlert = async (data: {
   userId: number;
@@ -94,7 +94,7 @@ export const createEmergencyAlert = async (data: {
 
   if (emergencyContact?.phoneNumber) {
     try {
-      // ← Fetch the user's name
+      // Get user's name for the alert message
       const userResult = await db
         .select()
         .from(usersTable)
@@ -103,11 +103,11 @@ export const createEmergencyAlert = async (data: {
       const user = userResult[0];
       const userFullName = user
         ? `${user.firstName} ${user.lastName}`.trim()
-        : `User ${data.userId}`; // fallback if user not found
+        : `User ${data.userId}`;
 
       await smsService.sendEmergencyAlert(
         emergencyContact.phoneNumber,
-        userFullName,  // ← pass name instead of userId
+        userFullName,  // pass name instead of userId
         data.alertType ?? "other",
         (data.severity as "medium" | "high" | "critical") ?? "high",
         data.description ?? "Emergency alert triggered"

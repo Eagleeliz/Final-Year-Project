@@ -2,10 +2,7 @@ import { eq, and, desc } from "drizzle-orm";
 import db from "./../drizzle/db";
 import { clinicRemindersTable } from "./../drizzle/schema";
 
-/**
- * Clinic Reminder Service
- * Handles CRUD operations for clinic reminders
- */
+// Clinic Reminder Service - handles CRUD operations
 export class ClinicReminderService {
   /**
    * Create a new clinic reminder

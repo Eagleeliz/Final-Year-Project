@@ -43,13 +43,13 @@ export class SmsService {
   }
 
   
-  // Add this helper to normalize Kenyan numbers
+  // Helper to normalize Kenyan phone numbers
   private formatPhone(phone: string): string {
     const cleaned = phone.replace(/\s+/g, "").trim();
     
     if (cleaned.startsWith("+254")) return cleaned;           // already correct
     if (cleaned.startsWith("254"))  return `+${cleaned}`;    // missing +
-    if (cleaned.startsWith("0"))    return `+254${cleaned.slice(1)}`; // 07XX → +2547XX
+    if (cleaned.startsWith("0"))    return `+254${cleaned.slice(1)}`; // 07XX becomes +2547XX
     
     return cleaned; // return as-is if unknown format
   }
@@ -67,7 +67,7 @@ async sendSms(options: SmsOptions): Promise<SmsResult> {
     const response = await this.sms.send({
       to: recipients,
       message: options.body,
-      // No 'from' — sandbox doesn't support sender IDs
+      // Sandbox mode - sender ID not supported
     });
 
     console.log("📨 AT Full Response:", JSON.stringify(response, null, 2));
@@ -117,7 +117,7 @@ async sendBulkSms(phoneNumbers: string[], message: string): Promise<SmsResult[]>
     const response = await this.sms.send({
       to: formatted,
       message,
-      // No 'from' for sandbox
+      // Sandbox mode - sender ID not supported
     });
 
     console.log("📨 AT Bulk Response:", JSON.stringify(response, null, 2));
@@ -143,10 +143,10 @@ async sendBulkSms(phoneNumbers: string[], message: string): Promise<SmsResult[]>
     throw new Error(`Failed to send bulk SMS: ${error.message}`);
   }
 }
-  // Special method for emergency alerts with formatted messages
+  // Method for emergency alerts with formatted messages
  async sendEmergencyAlert(
   to: string,
-  userFullName: string,  // ← changed from userId: number
+  userFullName: string,  // changed from userId: number
   alertType: string,
   severity: 'medium' | 'high' | 'critical',
   description: string

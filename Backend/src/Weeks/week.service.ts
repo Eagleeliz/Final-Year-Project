@@ -79,7 +79,7 @@ export const createWeeklyCheckinService = async (
   data: NewWeeklyCheckin
 ): Promise<WeeklyCheckin> => {
   try {
-    // 🔹 Validate required fields
+    // Validate required fields
     if (data.pregnancyId == null) {
       throw new Error("pregnancyId is required");
     }
@@ -88,7 +88,7 @@ export const createWeeklyCheckinService = async (
   throw new Error("weekNumber is required");
 }
 
-    // 🔹 Ensure weekNumber is a valid number
+    // Ensure weekNumber is a valid number
     const weekNumber = Number(data.weekNumber);
 
     if (isNaN(weekNumber)) {
@@ -98,7 +98,7 @@ export const createWeeklyCheckinService = async (
     // Replace with clean number
     data.weekNumber = weekNumber;
 
-    // 🔹 Check if pregnancy exists
+    // Check if pregnancy exists
     const [pregnancy] = await db
       .select()
       .from(pregnanciesTable)
@@ -109,7 +109,7 @@ export const createWeeklyCheckinService = async (
       throw new Error("Pregnancy not found");
     }
 
-    // 🔹 Check for duplicate check-in
+    // Check for duplicate check-in
     const existing = await getWeeklyCheckinByWeekService(
       data.pregnancyId,
       data.weekNumber
@@ -119,7 +119,7 @@ export const createWeeklyCheckinService = async (
       throw new Error(`Check-in already exists for week ${data.weekNumber}`);
     }
 
-    // 🔹 Perform risk assessment
+    // Perform risk assessment
     const riskAssessment = assessRisk(data);
 
     const checkinData = {
@@ -128,7 +128,7 @@ export const createWeeklyCheckinService = async (
       riskReason: riskAssessment.reasons.join(", ")
     };
 
-    // 🔹 Insert into DB
+    // Insert into database
     const [checkin] = await db
       .insert(weeklyCheckinsTable)
       .values(checkinData)
@@ -137,7 +137,7 @@ export const createWeeklyCheckinService = async (
     return checkin;
 
   } catch (error: any) {
-    // ✅ Do NOT wrap the error (preserves original message)
+    // Preserves original error message
     throw error;
   }
 };
@@ -215,7 +215,7 @@ export const getWeeklySummaryService = async (
   }
 };
 
-// ========== HELPER FUNCTIONS ==========
+// Helper functions
 
 // Risk assessment for maternal health
 const assessRisk = (data: any): {
@@ -226,7 +226,7 @@ const assessRisk = (data: any): {
   const reasons: string[] = [];
   const recommendations: string[] = [];
 
-  // Emergency signs (HIGH RISK)
+  // Emergency signs - HIGH RISK
   if (data.vaginalBleeding) {
     reasons.push("Vaginal bleeding detected");
     recommendations.push("Seek immediate medical attention");

@@ -2,7 +2,7 @@ import db from "../drizzle/db";
 import { eq } from "drizzle-orm";
 import { childrenTable, childMilestonesTable } from "../drizzle/schema";
 
-// ── Types ─────────────────────────────────────────────────────
+// Types
 
 interface CreateChildInput {
   userId: number;
@@ -45,7 +45,7 @@ interface UpdateMilestoneInput {
   milestoneDate?: string;
 }
 
-// ── Helpers ───────────────────────────────────────────────────
+// Helper functions
 
 export const calcAgeMonths = (dateOfBirth: string): number => {
   const birth = new Date(dateOfBirth);
@@ -56,7 +56,7 @@ export const calcAgeMonths = (dateOfBirth: string): number => {
   );
 };
 
-// ── Child service functions ────────────────────────────────────
+// Child service functions
 
 export const createChild = async (data: CreateChildInput) => {
   const result = await db
@@ -112,10 +112,10 @@ export const deleteChild = async (id: number) => {
   await db.delete(childrenTable).where(eq(childrenTable.id, id));
 };
 
-// ── Milestone service functions ────────────────────────────────
+// Milestone service functions
 
 export const createMilestone = async (data: CreateMilestoneInput) => {
-  // Auto-calculate ageMonths from child's DOB if not provided
+  // Calculate age in months from date of birth
   let ageMonths = data.ageMonths;
   if (ageMonths === undefined) {
     const child = await getChildById(data.childId);

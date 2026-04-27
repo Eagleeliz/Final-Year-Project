@@ -3,13 +3,13 @@ import { pregnanciesTable, usersTable } from "../drizzle/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 
 /**
- * Utility to calculate pregnancy progress based on LMP
+ * Calculate pregnancy progress based on LMP
  */
 export const calculatePregnancyStats = (lmpDate: string | Date) => {
   const lmp = new Date(lmpDate);
   const today = new Date();
   
-  // Calculate difference in days
+  // Calculate days since LMP
   const diffInMs = today.getTime() - lmp.getTime();
   const totalDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
   
@@ -24,7 +24,7 @@ export const calculatePregnancyStats = (lmpDate: string | Date) => {
   return { weeks, days, trimester };
 };
 
-// --- CRUD Operations ---
+// CRUD Operations
 
 export const createPregnancy = async (data: any) => {
   if (!data.userId) throw new Error("userId is required");
@@ -32,20 +32,20 @@ export const createPregnancy = async (data: any) => {
 
   const lmp = new Date(data.lmpDate);
 
-  // 1. Calculate EDD (LMP + 280 days)
+  // Calculate EDD - LMP plus 280 days
   const edd = new Date(lmp);
   edd.setDate(edd.getDate() + 280);
 
-  // 2. Get initial trimester
+  // Get initial trimester
   const { trimester } = calculatePregnancyStats(data.lmpDate);
 
-  // 3. Deactivate all previous pregnancies for this user
+  // Deactivate all previous pregnancies for this user
   await db
     .update(pregnanciesTable)
     .set({ isActive: false })
     .where(eq(pregnanciesTable.userId, data.userId));
 
-  // 4. Insert new journey
+  // Insert new pregnancy record
   const pregnancy = await db
     .insert(pregnanciesTable)
     .values({
@@ -70,7 +70,7 @@ export const getActivePregnancyByUserId = async (userId: number) => {
 
   if (!record) return null;
 
-  // Add "Live" calculations for the dashboard
+  // Add live calculations for the dashboard
   const stats = calculatePregnancyStats(record.lmpDate);
 
   return {
@@ -131,7 +131,7 @@ export const deletePregnancy = async (id: number) => {
   return { message: "Pregnancy record deleted successfully" };
 };
 
-// --- LOCATION-BASED & ANALYTICS SERVICES ---
+// LOCATION-BASED AND ANALYTICS SERVICES
 
 // Get pregnancies with user location data
 const getPregnanciesWithLocation = async () => {

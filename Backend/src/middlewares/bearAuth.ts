@@ -1,4 +1,4 @@
-// src/middlewares/bearAuth.ts
+// Authorization middleware
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -61,7 +61,7 @@ export const authMiddleware = (
   };
 };
 
-// shortcuts
+// Shortcut functions
 export const authenticate = authMiddleware("any");
 export const motherOnly = authMiddleware(["mother"]);
 export const adminOnly = authMiddleware(["admin"]);

@@ -7,7 +7,7 @@ import {
   weeklyCheckinsTable,
 } from "../drizzle/schema";
 
-// ── Shared helper: build location WHERE filters for users ────────────────────
+// Helper - build location WHERE filters for users
 const buildLocationFilters = (county?: string, constituency?: string, ward?: string) => {
   const filters = [];
   if (county)       filters.push(eq(usersTable.county, county));
@@ -16,7 +16,7 @@ const buildLocationFilters = (county?: string, constituency?: string, ward?: str
   return filters;
 };
 
-// ── GET /api/dashboard/national-summary ──────────────────────────────────────
+// GET /api/dashboard/national-summary
 export const getNationalSummary = async (req: Request, res: Response) => {
   try {
     const { county, constituency, ward } = req.query as {
@@ -61,8 +61,8 @@ export const getNationalSummary = async (req: Request, res: Response) => {
   }
 };
 
-// ── GET /api/dashboard/risk-trends ───────────────────────────────────────────
-// Supports ?county=&constituency=&ward= to filter risk cases by location
+// GET /api/dashboard/risk-trends
+// Supports query params for location filtering
 export const getRiskTrends = async (req: Request, res: Response) => {
   try {
     const { county, constituency, ward } = req.query as {
@@ -71,7 +71,7 @@ export const getRiskTrends = async (req: Request, res: Response) => {
       ward?: string;
     };
 
-    // Step 1: users matching location (or all users)
+    // Step 1: get users matching location
     const filters = buildLocationFilters(county, constituency, ward);
     const whereClause = filters.length > 0 ? and(...filters) : undefined;
 
@@ -86,7 +86,7 @@ export const getRiskTrends = async (req: Request, res: Response) => {
       return res.json({ highRiskPregnancies: 0, riskFlaggedCheckins: 0, riskCases: [] });
     }
 
-    // Step 2: pregnancies for those users
+    // Step 2: get pregnancies for those users
     const pregnancies = await db
       .select({ id: pregnanciesTable.id, userId: pregnanciesTable.userId })
       .from(pregnanciesTable)
@@ -98,7 +98,7 @@ export const getRiskTrends = async (req: Request, res: Response) => {
       return res.json({ highRiskPregnancies: 0, riskFlaggedCheckins: 0, riskCases: [] });
     }
 
-    // Step 3: risk-flagged check-ins for those pregnancies only
+    // Step 3: get risk-flagged check-ins for those pregnancies
     const riskFlaggedCheckins = await db
       .select()
       .from(weeklyCheckinsTable)
@@ -109,7 +109,7 @@ export const getRiskTrends = async (req: Request, res: Response) => {
         )
       );
 
-    // Step 4: deduplicate by pregnancyId for the detailed risk case list
+    // Step 4: deduplicate by pregnancyId
     const pregnancyMap = new Map(pregnancies.map((p) => [p.id, p.userId]));
     const seenPregnancies = new Set<number>();
     const riskCases: any[] = [];
@@ -143,9 +143,8 @@ export const getRiskTrends = async (req: Request, res: Response) => {
   }
 };
 
-// ── GET /api/dashboard/stats ──────────────────────────────────────────────────
-// Returns all 12 calendar months Jan–Dec for the current year
-// Zero-fills months with no registrations
+// GET /api/dashboard/stats
+// Returns all 12 calendar months for current year, zero-fills empty months
 export const getStats = async (_req: Request, res: Response) => {
   try {
     const rows = await db.execute(sql`
@@ -159,7 +158,7 @@ export const getStats = async (_req: Request, res: Response) => {
       ORDER BY DATE_TRUNC('month', created_at) ASC
     `);
 
-    // Map DB results: key = "2025-01", value = count
+    // Map database results to key-value format
     const dbMap = new Map<string, number>();
     for (const row of rows.rows as { month_start: Date; count: number }[]) {
       const d = new Date(row.month_start);
@@ -167,7 +166,7 @@ export const getStats = async (_req: Request, res: Response) => {
       dbMap.set(key, row.count);
     }
 
-    // Build all 12 months Jan–Dec, zero-filling gaps
+    // Build all 12 months, zero-fill gaps
     const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
     const result: { month: string; count: number }[] = [];
     const now = new Date();
@@ -185,8 +184,8 @@ export const getStats = async (_req: Request, res: Response) => {
   }
 };
 
-// ── GET /api/dashboard/county-breakdown ──────────────────────────────────────
-// Each county only counts users whose stored `county` column exactly matches
+// GET /api/dashboard/county-breakdown
+// Only counts users with matching county values
 export const getCountyBreakdown = async (_req: Request, res: Response) => {
   try {
     const rows = await db.execute(sql`
@@ -214,10 +213,7 @@ export const getCountyBreakdown = async (_req: Request, res: Response) => {
 };
 
 // ── GET /api/dashboard/users-by-location ─────────────────────────────────────
-// Strict filtering — only returns users whose stored location fields match exactly
-// ?county=Nairobi
-// ?county=Nairobi&constituency=Westlands
-// ?county=Nairobi&constituency=Westlands&ward=Parklands
+// Strict filtering - returns users matching location fields exactly
 export const getUsersByLocation = async (req: Request, res: Response) => {
   try {
     const { county, constituency, ward } = req.query as {

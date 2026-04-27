@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import dotenv from 'dotenv'
-dotenv.config() //loads the env file 
- 
+dotenv.config()
+  
 import weekRouter from './src/Weeks/week.route'
 import cors from "cors";
 
@@ -22,18 +22,19 @@ import dashboardRouter from "./src/PolicyMaker/policyMakerRoute";
 
 const app = express();
 
-// Basicc Middleware
+// Middleware for CORS
 app.use(cors());
 
-//normal parers add
+// Body parsers
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Default route
+// Home route
 app.get("/", (req: Request, res: Response) => {
-  res.send("Backend running with TypeScript 🚀");
+  res.send("Backend running with TypeScript");
 });
-//Routers
+
+// API Routes
 app.use('/api/weeks',weekRouter)
 app.use('/api/users',userRouter)
 app.use('/api/pregnancies',pregnancyRouter)
@@ -45,9 +46,9 @@ app.use("/api/emergency", emergencyRouter);
 app.use("/api/children", childRouter);
 app.use("/api/dashboard", dashboardRouter);
 
-//404 handler
+// Handle unknown routes
 app.use((req,res)=>{
   res.status(404).json({error:"Route not found"})
 })
-// Export the app
+
 export default app;

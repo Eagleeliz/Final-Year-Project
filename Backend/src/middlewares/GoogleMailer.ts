@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
 
-// 1. Defined Email Types for Maternal Health context
+// Define Email Types for Maternal Health context
 type EmailType = 
   | "welcome" 
   | "milestone" 
@@ -13,18 +13,18 @@ type EmailType =
   | "generic"
   | "account-closure";
 
-// 2. Transporter Configuration (Updated for Port 587 / TLS)
+// Transporter Configuration - Port 587 / TLS
 const transporter = nodemailer.createTransport({
   service: "gmail",
   host: "smtp.gmail.com",
   port: 587,
-  secure: false, // Use false for 587 (Standard for local development)
+  secure: false,
   auth: {
     user: process.env.EMAIL_SENDER,
-    pass: process.env.EMAIL_PASSWORD, // Must be 16-character App Password
+    pass: process.env.EMAIL_PASSWORD,
   },
   tls: {
-    rejectUnauthorized: false, // Prevents local SSL/firewall blocking
+    rejectUnauthorized: false,
   },
   logger: true, // This will print the handshake details in your terminal
   debug: true,  // This will show detailed error logs

@@ -12,9 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-// ============================
 // Enums
-// ============================
 
 export const userTypeEnum = pgEnum("user_type", [
   "mother",
@@ -67,7 +65,7 @@ export const alertTypeEnum = pgEnum("alert_type", [
   "contractions",
   "other"
 ]);
-//weekly summary 
+// Weekly summary 
 export const pregnancyGuidanceTable = pgTable("pregnancy_guidance", {
   id: serial("id").primaryKey(),
   weekNumber: integer("week_number").notNull(),
@@ -80,11 +78,11 @@ export const pregnancyGuidanceTable = pgTable("pregnancy_guidance", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// ============================
-// Users Table
-// ============================
 
-// Update your existing usersTable in schema.ts
+// Users Table
+
+
+
 export const usersTable = pgTable("users", {
   id: serial("id").primaryKey(),
   email: varchar("email", { length: 255 }).unique().notNull(),
@@ -98,7 +96,7 @@ export const usersTable = pgTable("users", {
    ward: varchar("ward", { length: 100 }), 
   userType: userTypeEnum("user_type").default("mother"),
    profileImage: varchar("profile_image", { length: 500 }),
-  //  Email verification fields
+  // Email verification fields
   isEmailVerified: boolean("is_email_verified").default(false),
   emailVerificationToken: varchar("email_verification_token", { length: 255 }),
   emailVerificationExpires: timestamp("email_verification_expires"),
@@ -113,9 +111,9 @@ export const usersTable = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow()
 });
 
-// ============================
+
 // Mothers Table
-// ============================
+
 
 export const mothersTable = pgTable("mothers", {
   id: serial("id").primaryKey(),
@@ -167,7 +165,7 @@ export const weeklyCheckinsTable = pgTable("weekly_checkins", {
   weekNumber: integer("week_number").notNull(),
   checkinDate: date("checkin_date").defaultNow(),
   
-  // Symptoms (scale 1-5)
+  // Symptoms - scale 1-5
   nauseaLevel: integer("nausea_level").$type<1 | 2 | 3 | 4 | 5>(),
   fatigueLevel: integer("fatigue_level").$type<1 | 2 | 3 | 4 | 5>(),
   backPain: boolean("back_pain").default(false),
@@ -198,14 +196,13 @@ export const weeklyCheckinsTable = pgTable("weekly_checkins", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// ============================
 // Emergency Alerts Table
-// ============================
+
 
 export const emergencyAlertsTable = pgTable("emergency_alerts", {
   id: serial("id").primaryKey(),
 
-  // Link to authenticated user (mother)
+  // Link to authenticated user - mother
   userId: integer("user_id")
     .references(() => usersTable.id, { onDelete: "cascade" })
     .notNull(),
@@ -232,7 +229,7 @@ export const emergencyAlertsTable = pgTable("emergency_alerts", {
 
 
 
-// stores emergency contacts
+// Stores emergency contacts
 export const emergencyContactsTable = pgTable("emergency_contacts", {
   id: serial("id").primaryKey(),
 
@@ -250,14 +247,12 @@ export const emergencyContactsTable = pgTable("emergency_contacts", {
   updatedAt: timestamp("updated_at").defaultNow()
 });
 
-// ============================
 // Children Table
-// ============================
 
-// ✅ Fixed — uses usersTable directly
+
 export const childrenTable = pgTable("children", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id")           // ← renamed
+  userId: integer("user_id")
     .references(() => usersTable.id, { onDelete: "cascade" })
     .notNull(),
   pregnancyId: integer("pregnancy_id")
@@ -272,9 +267,7 @@ export const childrenTable = pgTable("children", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// ============================
 // Child Milestones Table
-// ============================
 
 export const childMilestonesTable = pgTable("child_milestones", {
   id: serial("id").primaryKey(),
@@ -290,9 +283,7 @@ export const childMilestonesTable = pgTable("child_milestones", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// ============================
 // AI Chat Logs Table
-// ============================
 
 export const aiChatLogsTable = pgTable("ai_chat_logs", {
   id: serial("id").primaryKey(),
@@ -306,9 +297,7 @@ export const aiChatLogsTable = pgTable("ai_chat_logs", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// ============================
-// Trimester Information Table (Reference Data)
-// ============================
+// Trimester Information Table - reference data
 
 export const trimesterInfoTable = pgTable("trimester_info", {
   id: serial("id").primaryKey(),
@@ -324,9 +313,7 @@ export const trimesterInfoTable = pgTable("trimester_info", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// ============================
-// Child Development Guide Table (Reference Data)
-// ============================
+// Child Development Guide Table - reference data
 
 export const developmentGuideTable = pgTable("development_guide", {
   id: serial("id").primaryKey(),
@@ -338,9 +325,7 @@ export const developmentGuideTable = pgTable("development_guide", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// ============================
 // Notifications Table
-// ============================
 
 export const notificationsTable = pgTable("notifications", {
   id: serial("id").primaryKey(),
@@ -349,38 +334,34 @@ export const notificationsTable = pgTable("notifications", {
     .notNull(),
   title: varchar("title", { length: 200 }).notNull(),
   message: text("message").notNull(),
-  type: varchar("type", { length: 50 }).default("info"), // info, warning, emergency, reminder
+  type: varchar("type", { length: 50 }).default("info"),
   isRead: boolean("is_read").default(false),
-  relatedId: integer("related_id"), // Can link to pregnancy, checkin, emergency, etc.
+  relatedId: integer("related_id"),
   relatedType: varchar("related_type", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow(),
   readAt: timestamp("read_at")
 });
 
-// ============================
 // Health Tips Table
-// ============================
 
 export const healthTipsTable = pgTable("health_tips", {
   id: serial("id").primaryKey(),
-  category: varchar("category", { length: 100 }).notNull(), // pregnancy, postnatal, newborn, toddler
+  category: varchar("category", { length: 100 }).notNull(),
   title: varchar("title", { length: 200 }).notNull(),
   content: text("content").notNull(),
-  targetTrimester: integer("target_trimester"), // 1, 2, 3, or null for general
+  targetTrimester: integer("target_trimester"),
   targetAgeMonths: numeric("target_age_months", { precision: 4, scale: 1 }),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
 });
 
-// ============================
 // Hospital/Clinic Reference Table
-// ============================
 
 export const healthcareFacilitiesTable = pgTable("healthcare_facilities", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 200 }).notNull(),
-  type: varchar("type", { length: 50 }).notNull(), // hospital, clinic, health_center
+  type: varchar("type", { length: 50 }).notNull(),
   county: varchar("county", { length: 100 }).notNull(),
   subCounty: varchar("sub_county", { length: 100 }),
   ward: varchar("ward", { length: 100 }),
@@ -389,14 +370,12 @@ export const healthcareFacilitiesTable = pgTable("healthcare_facilities", {
   emergencyPhone: varchar("emergency_phone", { length: 20 }),
   latitude: numeric("latitude", { precision: 10, scale: 8 }),
   longitude: numeric("longitude", { precision: 11, scale: 8 }),
-  services: text("services").array(), // maternity, emergency, pediatric, etc.
+  services: text("services").array(),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// ============================
-// Relations (Optional - for complex queries)
-// ============================
+// Relations - for complex queries
 
 export const usersRelations = relations(usersTable, ({ one, many }) => ({
   mother: one(mothersTable, {
@@ -468,7 +447,7 @@ export const pregnanciesRelations = relations(pregnanciesTable, ({ one, many }) 
 
 
 export const childrenRelations = relations(childrenTable, ({ one, many }) => ({
-  user: one(usersTable, {        // ← now points to usersTable
+  user: one(usersTable, {
     fields: [childrenTable.userId],
     references: [usersTable.id]
   }),
@@ -505,9 +484,7 @@ export const clinicRemindersRelations = relations(clinicRemindersTable, ({ one }
     references: [healthcareFacilitiesTable.id],
   }),
 }));
-// ============================
-// Type Definitions (Optional but helpful)
-// ============================
+// Type Definitions
 
 
 export type User = typeof usersTable.$inferSelect;
