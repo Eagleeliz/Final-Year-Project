@@ -467,11 +467,20 @@ const PregnancyJourney: React.FC = () => {
             </h1>
             <p className="text-gray-400 text-base mt-1">Your week-by-week companion through motherhood.</p>
           </div>
-          <button onClick={() => setEndModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl font-bold text-sm border-2 transition-all hover:shadow-md shrink-0 mt-1"
-            style={{ borderColor: "#F0AAAA", color: "#7C3F3F", background: "#FDF2F2" }}>
-            <HeartCrack size={16} /> End Journey
-          </button>
+           <button
+  onClick={() => setEndModalOpen(true)}
+  className="flex items-center gap-2 px-5 py-3 rounded-2xl font-bold text-sm border-2 transition-all hover:shadow-md shrink-0 mt-1"
+  style={{
+    borderColor: "#86d9e1",
+    color: "#002e33",
+    background: "#e6f7f8"
+  }}
+>
+  <HeartCrack size={16} /> End Journey
+</button>
+
+
+
         </header>
 
         {/* Stats card */}

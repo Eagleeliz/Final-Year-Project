@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Users,
   Baby,
@@ -6,10 +7,12 @@ import {
   Activity,
   TrendingUp,
   Loader2,
+  Eye,
 } from "lucide-react";
 import dashboardApi from "../../Features/Apis/policyAPI";
 
 const PolicyMakerHome = () => {
+  const navigate = useNavigate();
   const midnightTeal = "#0B3B3F";
 
   const [dashboardData, setDashboardData] = useState<any>(null);
@@ -58,12 +61,20 @@ const PolicyMakerHome = () => {
 
   return (
     <div className="space-y-6">
-
       {/* Header */}
-      <header>
-        <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Policy Maker</p>
-        <h1 className="text-3xl font-black" style={{ color: midnightTeal }}>Policy Dashboard Overview</h1>
-        <p className="text-gray-400 text-sm mt-1">Key insights for maternal health policy making</p>
+      <header className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Policy Maker</p>
+          <h1 className="text-3xl font-black" style={{ color: midnightTeal }}>Policy Dashboard Overview</h1>
+          <p className="text-gray-400 text-sm mt-1">Key insights for maternal health policy making</p>
+        </div>
+        <button
+          onClick={() => navigate("/policymaker/report")}
+          className="flex items-center gap-2 px-4 py-2 bg-[#0B3B3F] text-white rounded-lg hover:bg-[#0a3236] transition-colors"
+        >
+          <Eye size={18} />
+          View Report
+        </button>
       </header>
 
       {loading ? (
@@ -120,14 +131,14 @@ const PolicyMakerHome = () => {
             </div>
           </div>
 
-          {/* Bar Chart — Jan to Dec */}
+          {/* Bar Chart */}
           <div className="bg-white rounded-2xl shadow-sm border p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <TrendingUp className="text-gray-400" size={22} />
                 <div>
                   <h2 className="text-xl font-bold text-gray-800">User Registration Trend</h2>
-                  <p className="text-sm text-gray-400 mt-0.5">Monthly registrations — Jan to Dec</p>
+                  <p className="text-sm text-gray-400 mt-0.5">Monthly registrations</p>
                 </div>
               </div>
               {registrationStats.length > 0 && (
@@ -143,52 +154,37 @@ const PolicyMakerHome = () => {
             {registrationStats.length === 0 ? (
               <p className="text-gray-400 text-center py-12">No registration data available</p>
             ) : (
-              <>
-                {/* Chart */}
-                <div className="flex items-end justify-between gap-2 px-2" style={{ height: "200px" }}>
-                  {registrationStats.map((stat) => {
-                    const heightPct = (stat.count / maxCount) * 100;
-                    return (
-                      <div
-                        key={stat.month}
-                        className="flex-1 flex flex-col items-center gap-1 h-full justify-end group"
+              <div className="flex items-end justify-between gap-2 px-2" style={{ height: "200px" }}>
+                {registrationStats.map((stat) => {
+                  const heightPct = (stat.count / maxCount) * 100;
+                  return (
+                    <div
+                      key={stat.month}
+                      className="flex-1 flex flex-col items-center gap-1 h-full justify-end group"
+                    >
+                      <span
+                        className="text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        style={{ color: midnightTeal }}
                       >
-                        {/* Count — visible on hover */}
-                        <span
-                          className="text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                          style={{ color: midnightTeal }}
-                        >
-                          {stat.count}
-                        </span>
-
-                        {/* Bar */}
-                        <div className="w-full flex items-end" style={{ height: "160px" }}>
-                          <div
-                            className="w-full rounded-t-md transition-all duration-700 ease-out"
-                            style={{
-                              height: `${Math.max(heightPct, 2)}%`,
-                              backgroundColor: midnightTeal,
-                              minHeight: "4px",
-                            }}
-                          />
-                        </div>
-
-                        {/* Month label */}
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">
-                          {stat.month}
-                        </span>
+                        {stat.count}
+                      </span>
+                      <div className="w-full flex items-end" style={{ height: "160px" }}>
+                        <div
+                          className="w-full rounded-t-md transition-all duration-700 ease-out"
+                          style={{
+                            height: `${Math.max(heightPct, 2)}%`,
+                            backgroundColor: midnightTeal,
+                            minHeight: "4px",
+                          }}
+                        />
                       </div>
-                    );
-                  })}
-                </div>
-
-                {/* Y-axis guides */}
-                <div className="mt-3 flex justify-between text-xs text-gray-300 font-medium px-2">
-                  <span>0</span>
-                  <span>{Math.round(maxCount / 2)}</span>
-                  <span>{maxCount}</span>
-                </div>
-              </>
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+                        {stat.month}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
         </>

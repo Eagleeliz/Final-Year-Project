@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Users, Bot, FileText } from "lucide-react";
-import { useTheme } from "../../features/ThemeContext";
+import { useTheme } from "../../Features/ThemeContext";
 
 const HeroSection = () => {
   const { theme } = useTheme();

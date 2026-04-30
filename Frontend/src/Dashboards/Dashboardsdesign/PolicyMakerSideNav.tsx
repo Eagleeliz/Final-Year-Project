@@ -3,6 +3,7 @@ import {
   Map,
   AlertTriangle,
   LogOut,
+  FileText,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -25,6 +26,7 @@ const PolicyMakerSideNav = ({ onNavItemClick }: NavProps) => {
     { name: "Overview", path: "/policymaker", icon: LayoutDashboard },
     { name: "National Summary", path: "/policymaker/national-summary", icon: Map },
     { name: "Risk Overview & Trends", path: "/policymaker/risk-trends", icon: AlertTriangle },
+    { name: "Print Report", path: "/policymaker/report", icon: FileText },
   ];
 
   const handleLogout = () => {

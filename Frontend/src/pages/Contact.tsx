@@ -111,7 +111,7 @@ const Contact = () => {
                 <div>
                   <p className="text-xs text-gray-400 uppercase font-bold tracking-widest">Email Us</p>
                   <p className="text-base md:text-xl font-semibold text-gray-800 break-all">
-                    support@mamacare.co.ke
+                    support@babycentre.co.ke
                   </p>
                 </div>
               </div>

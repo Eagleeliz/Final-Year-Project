@@ -370,12 +370,14 @@ export const healthcareFacilitiesTable = pgTable("healthcare_facilities", {
   emergencyPhone: varchar("emergency_phone", { length: 20 }),
   latitude: numeric("latitude", { precision: 10, scale: 8 }),
   longitude: numeric("longitude", { precision: 11, scale: 8 }),
-  services: text("services").array(),
+  services: text("services").array(), // maternity, emergency, pediatric, etc.
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// Relations - for complex queries
+// ============================
+// Relations (Optional - for complex queries)
+// ============================
 
 export const usersRelations = relations(usersTable, ({ one, many }) => ({
   mother: one(mothersTable, {
@@ -447,7 +449,7 @@ export const pregnanciesRelations = relations(pregnanciesTable, ({ one, many }) 
 
 
 export const childrenRelations = relations(childrenTable, ({ one, many }) => ({
-  user: one(usersTable, {
+  user: one(usersTable, {        // ← now points to usersTable
     fields: [childrenTable.userId],
     references: [usersTable.id]
   }),
@@ -484,7 +486,9 @@ export const clinicRemindersRelations = relations(clinicRemindersTable, ({ one }
     references: [healthcareFacilitiesTable.id],
   }),
 }));
-// Type Definitions
+
+// Type Definitions (Optional but helpful)
+
 
 
 export type User = typeof usersTable.$inferSelect;

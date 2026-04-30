@@ -10,8 +10,8 @@ interface CreateChildInput {
   name?: string;
   gender?: "male" | "female" | "other";
   dateOfBirth: string;
-  birthWeight?: number;
-  birthHeight?: number;
+  birthWeight?: string;
+  birthHeight?: string;
   apgarScore?: string;
   bloodGroup?: string;
 }
@@ -20,8 +20,8 @@ interface UpdateChildInput {
   name?: string;
   gender?: "male" | "female" | "other";
   dateOfBirth?: string;
-  birthWeight?: number;
-  birthHeight?: number;
+  birthWeight?: string;
+  birthHeight?: string;
   apgarScore?: string;
   bloodGroup?: string;
 }
@@ -30,7 +30,7 @@ interface CreateMilestoneInput {
   childId: number;
   milestoneType?: "motor" | "language" | "social" | "cognitive";
   milestoneDescription?: string;
-  ageMonths?: number;
+  ageMonths?: string;
   achieved?: boolean;
   notes?: string;
   milestoneDate?: string;
@@ -39,7 +39,7 @@ interface CreateMilestoneInput {
 interface UpdateMilestoneInput {
   milestoneType?: "motor" | "language" | "social" | "cognitive";
   milestoneDescription?: string;
-  ageMonths?: number;
+  ageMonths?: string;
   achieved?: boolean;
   notes?: string;
   milestoneDate?: string;
@@ -67,8 +67,8 @@ export const createChild = async (data: CreateChildInput) => {
       name: data.name,
       gender: data.gender,
       dateOfBirth: data.dateOfBirth,
-      birthWeight: data.birthWeight?.toString(),
-      birthHeight: data.birthHeight?.toString(),
+      birthWeight: data.birthWeight,
+      birthHeight: data.birthHeight,
       apgarScore: data.apgarScore,
       bloodGroup: data.bloodGroup,
     })
@@ -98,8 +98,8 @@ export const updateChild = async (id: number, data: UpdateChildInput) => {
       ...(data.name        && { name: data.name }),
       ...(data.gender      && { gender: data.gender }),
       ...(data.dateOfBirth && { dateOfBirth: data.dateOfBirth }),
-      ...(data.birthWeight && { birthWeight: data.birthWeight.toString() }),
-      ...(data.birthHeight && { birthHeight: data.birthHeight.toString() }),
+      ...(data.birthWeight !== undefined && { birthWeight: data.birthWeight }),
+      ...(data.birthHeight !== undefined && { birthHeight: data.birthHeight }),
       ...(data.apgarScore  && { apgarScore: data.apgarScore }),
       ...(data.bloodGroup  && { bloodGroup: data.bloodGroup }),
     })
@@ -115,11 +115,12 @@ export const deleteChild = async (id: number) => {
 // Milestone service functions
 
 export const createMilestone = async (data: CreateMilestoneInput) => {
-  // Calculate age in months from date of birth
   let ageMonths = data.ageMonths;
   if (ageMonths === undefined) {
     const child = await getChildById(data.childId);
-    if (child) ageMonths = calcAgeMonths(child.dateOfBirth);
+    if (child) {
+      ageMonths = calcAgeMonths(child.dateOfBirth).toString();
+    }
   }
 
   const result = await db
@@ -128,7 +129,7 @@ export const createMilestone = async (data: CreateMilestoneInput) => {
       childId: data.childId,
       milestoneType: data.milestoneType,
       milestoneDescription: data.milestoneDescription,
-      ageMonths: ageMonths?.toString(),
+      ageMonths: ageMonths,
       achieved: data.achieved ?? false,
       notes: data.notes,
       milestoneDate:
@@ -159,7 +160,7 @@ export const updateMilestone = async (id: number, data: UpdateMilestoneInput) =>
     .set({
       ...(data.milestoneType        && { milestoneType: data.milestoneType }),
       ...(data.milestoneDescription && { milestoneDescription: data.milestoneDescription }),
-      ...(data.ageMonths  !== undefined && { ageMonths: data.ageMonths.toString() }),
+      ...(data.ageMonths !== undefined && { ageMonths: data.ageMonths }),
       ...(data.achieved   !== undefined && { achieved: data.achieved }),
       ...(data.notes      !== undefined && { notes: data.notes }),
       ...(data.milestoneDate         && { milestoneDate: data.milestoneDate }),

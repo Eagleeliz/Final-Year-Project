@@ -12,9 +12,9 @@ import {
   deleteMilestone,
 } from "./child.service";
 
-// ── Child controllers ─────────────────────────────────────────
+// Child controllers
 
-// POST /api/children
+// Create a new child
 export const createChildController = async (req: Request, res: Response) => {
   try {
     const child = await createChild(req.body);
@@ -24,7 +24,7 @@ export const createChildController = async (req: Request, res: Response) => {
   }
 };
 
-// GET /api/children/user/:userId
+// Get all children for a user
 export const getChildrenByUserController = async (req: Request, res: Response) => {
   try {
     const userId = Number(req.params.userId);
@@ -39,7 +39,7 @@ export const getChildrenByUserController = async (req: Request, res: Response) =
   }
 };
 
-// GET /api/children/:id
+// Get a child by ID
 export const getChildByIdController = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
@@ -58,7 +58,7 @@ export const getChildByIdController = async (req: Request, res: Response) => {
   }
 };
 
-// PUT /api/children/:id
+// Update a child
 export const updateChildController = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
@@ -77,7 +77,7 @@ export const updateChildController = async (req: Request, res: Response) => {
   }
 };
 
-// DELETE /api/children/:id
+// Delete a child
 export const deleteChildController = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
@@ -92,9 +92,9 @@ export const deleteChildController = async (req: Request, res: Response) => {
   }
 };
 
-// ── Milestone controllers ─────────────────────────────────────
+// Milestone controllers
 
-// POST /api/children/:id/milestones
+// Create a milestone for a child
 export const createMilestoneController = async (req: Request, res: Response) => {
   try {
     const childId = Number(req.params.id);
@@ -109,7 +109,7 @@ export const createMilestoneController = async (req: Request, res: Response) => 
   }
 };
 
-// GET /api/children/:id/milestones
+// Get all milestones for a child
 export const getMilestonesByChildController = async (req: Request, res: Response) => {
   try {
     const childId = Number(req.params.id);
@@ -124,7 +124,7 @@ export const getMilestonesByChildController = async (req: Request, res: Response
   }
 };
 
-// PUT /api/children/:id/milestones/:milestoneId
+// Update a milestone
 export const updateMilestoneController = async (req: Request, res: Response) => {
   try {
     const milestoneId = Number(req.params.milestoneId);
@@ -144,7 +144,7 @@ export const updateMilestoneController = async (req: Request, res: Response) => 
   }
 };
 
-// DELETE /api/children/:id/milestones/:milestoneId
+// Delete a milestone
 export const deleteMilestoneController = async (req: Request, res: Response) => {
   try {
     const milestoneId = Number(req.params.milestoneId);

@@ -37,6 +37,7 @@ import PolicyMakerLayout from "./Dashboards/Dashboardsdesign/PolicyMakerLayout";
 import PolicyMakerHome from "./Dashboards/PolicyMakerDashboard/PolicyMakerHome";
 import PolicyMakerNationalSummary from "./Dashboards/PolicyMakerDashboard/PolicyMakerNationalSummary";
 import PolicyMakerRiskTrends from "./Dashboards/PolicyMakerDashboard/PolicyMakerRiskTrends";
+import PolicyMakerReport from "./Dashboards/PolicyMakerDashboard/PolicyMakerReport";
 
 import DueDateCalculator from "./pages/DueDateCalculator";
 import { EnterOtp } from "./pages/EnterOtp";
@@ -171,6 +172,7 @@ function App() {
           <Route index element={<PolicyMakerHome />} />
           <Route path="national-summary" element={<PolicyMakerNationalSummary />} />
           <Route path="risk-trends" element={<PolicyMakerRiskTrends />} />
+          <Route path="report" element={<PolicyMakerReport />} />
         </Route>
 
         {/* ── Catch-all */}

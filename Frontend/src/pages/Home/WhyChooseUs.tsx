@@ -48,7 +48,7 @@ const WhyChooseUsSection = () => {
       name: "Jane Mwangi",
     },
     {
-      quote: "Tracking my symptoms and getting instant advice made such a difference. Highly recommend to every mother!",
+      quote: " I was at work when I received an SMS alert from BabyCentre that my wife had developed serious symptoms.immediately rushed home and got her to the hospital in time.Today, both my wife and baby are safe I’m truly grateful.",
       name: "Grace Gracie",
     },
     {
