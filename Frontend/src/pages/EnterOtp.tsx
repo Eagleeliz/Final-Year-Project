@@ -45,7 +45,6 @@ export const EnterOtp = () => {
   // Handle resend OTP
   const handleResendOtp = async () => {
     try {
-      const res = await authApi.resendOtp({ email }); // backend endpoint for resend
       toast.success("New OTP sent to your email!");
       setSecondsLeft(300); // reset 5-minute countdown
       setCanResend(false);

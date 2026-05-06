@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import {
-  Heart,
-  AlertTriangle,
   Loader2,
 } from "lucide-react";
-import dashboardApi from "../../Features/Apis/policyAPI";
+import dashboardApi from "../../Features/Apis/policyApi";
 
 const PolicyMakerRiskTrends = () => {
   const midnightTeal = "#0B3B3F";

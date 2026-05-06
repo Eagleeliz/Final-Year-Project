@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { pregnancyApi } from "../../Features/Apis/PregnancyAPI";
 import {
   Baby, Search, AlertCircle, Trash2, Eye,
-  HeartPulse,  Baby as BabyIcon, AlertTriangle, Activity,
+  HeartPulse, AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 import Swal from "sweetalert2";

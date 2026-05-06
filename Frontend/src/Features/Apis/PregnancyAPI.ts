@@ -1,4 +1,4 @@
-import axios, { type AxiosError } from 'axios';
+import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api/pregnancies'; // Ensure no trailing slash here
 

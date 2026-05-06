@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import Navbar from "../components/Navbar";
 import FAQPage from "./Home/FAQPage";
 import HeroSection from "./Home/HeroSection";

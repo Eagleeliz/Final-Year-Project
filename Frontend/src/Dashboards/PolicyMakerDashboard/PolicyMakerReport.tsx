@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Download, Loader2, Map, AlertTriangle, Users } from "lucide-react";
 import { toast } from "sonner";
-import dashboardApi from "../../Features/Apis/policyAPI";
+import dashboardApi from "../../Features/Apis/policyApi";
 
 interface NationalSummary {
   totalUsers: number;

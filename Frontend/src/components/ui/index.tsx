@@ -79,11 +79,11 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <button
       className={`${baseStyles} ${variantStyles} ${sizeStyles} ${className}`}
-      style={{
-        backgroundColor: variant === "primary" ? colors.primary : "transparent",
-        color: variant === "primary" ? colors.secondary : variant === "primary" ? undefined : colors.primary,
-        borderColor: variant === "secondary" ? colors.primary : undefined,
-      }}
+    style={{
+  backgroundColor: variant === "primary" ? colors.primary : "transparent",
+  color: variant === "primary" ? colors.secondary : colors.primary,
+  borderColor: variant === "secondary" ? colors.primary : undefined,
+}}
       disabled={disabled || isLoading}
       {...props}
     >

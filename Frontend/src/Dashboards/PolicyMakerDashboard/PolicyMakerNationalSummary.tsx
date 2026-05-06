@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Map, Users, ChevronDown, X, Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import dashboardApi from "../../Features/Apis/policyAPI";
+import dashboardApi from "../../Features/Apis/policyApi";
 
 interface NationalSummary {
   totalUsers: number;
@@ -58,7 +58,7 @@ const PolicyMakerNationalSummary = () => {
 
   // ── State ─────────────────────────────────────────────────────────────────
   const [nationalSummary, setNationalSummary]   = useState<NationalSummary | null>(null);
-  const [locationSummary, setLocationSummary]   = useState<NationalSummary | null>(null);
+  const [, setLocationSummary]   = useState<NationalSummary | null>(null);
   const [riskTrends, setRiskTrends]             = useState<RiskTrends | null>(null);
   const [countyData, setCountyData]             = useState<CountyData[]>([]);
   const [locationUsers, setLocationUsers]       = useState<LocationUser[]>([]);

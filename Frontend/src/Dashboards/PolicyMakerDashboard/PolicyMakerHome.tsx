@@ -9,7 +9,7 @@ import {
   Loader2,
   Eye,
 } from "lucide-react";
-import dashboardApi from "../../Features/Apis/policyAPI";
+import dashboardApi from "../../Features/Apis/policyApi";
 
 const PolicyMakerHome = () => {
   const navigate = useNavigate();

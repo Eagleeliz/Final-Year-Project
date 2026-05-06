@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { weeklyCheckinApi } from "../../Features/Apis/WeeklyCheckinAPI";
-import { Activity, Search, AlertTriangle, Eye, Trash2, HeartPulse, ShieldCheck, Thermometer } from "lucide-react";
+
+import { Activity, Search, AlertTriangle, Eye, Trash2, ShieldCheck, Thermometer } from "lucide-react";
+
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
