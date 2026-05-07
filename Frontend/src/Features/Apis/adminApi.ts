@@ -1,6 +1,7 @@
 import axios from "axios";
 import { weeklyCheckinApi } from "./WeeklyCheckinAPI";
 import { pregnancyApi } from "./PregnancyAPI";
+import { backend_url } from "../../backend.url";
 
 // ── Helper: clean token from localStorage ─────────────────────
 const getCleanToken = (): string | null => {
@@ -22,12 +23,12 @@ const getCleanToken = (): string | null => {
 // ── Base clients ──────────────────────────────────────────────
 
 const usersClient = axios.create({
-  baseURL: "http://localhost:5000/api/users",
+  baseURL: `${backend_url}/api/users`,
   headers: { "Content-Type": "application/json" },
 });
 
 const emergencyClient = axios.create({
-  baseURL: "http://localhost:5000/api/emergency",
+  baseURL: `${backend_url}/api/emergency`,
   headers: { "Content-Type": "application/json" },
 });
 
@@ -41,7 +42,6 @@ const attachToken = (client: any) => {
     const token = getCleanToken();
     console.log("TOKEN:", token);
 
-    // ensure headers exist
     config.headers = config.headers || {};
 
     if (token) {
@@ -110,25 +110,21 @@ export interface AdminCheckin {
 
 export const adminApi = {
 
-  // ── Users ───────────────────────────────────────────────────
   getAllUsers: async (): Promise<AdminUser[]> => {
     const response = await usersClient.get("");
     return response.data?.data ?? response.data;
   },
 
-  // ── Pregnancies ─────────────────────────────────────────────
   getAllPregnancies: async (): Promise<AdminPregnancy[]> => {
     const response = await pregnancyApi.getAll();
     return response?.data ?? response;
   },
 
-  // ── Emergency Alerts ────────────────────────────────────────
   getAllAlerts: async (): Promise<AdminEmergencyAlert[]> => {
     const response = await emergencyClient.get("/alerts/all");
     return response.data?.data ?? response.data;
   },
 
-  // PATCH /api/emergency/alert/:id/status
   updateAlertStatus: async (
     id: number,
     status: "pending" | "notified" | "responded" | "resolved"
@@ -137,7 +133,6 @@ export const adminApi = {
     return response.data?.data ?? response.data;
   },
 
-  // ── Weekly Check-ins ─────────────────────────────────────────
   getAllCheckins: async (): Promise<AdminCheckin[]> => {
     const response = await weeklyCheckinApi.getAll();
     return response?.data ?? response;

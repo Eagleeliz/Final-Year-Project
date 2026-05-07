@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { backend_url } from "../../backend.url";
 
-const API_URL = 'http://localhost:5000/api/pregnancies'; // Ensure no trailing slash here
+const API_URL = `${backend_url}/api/pregnancies`;
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -20,8 +21,7 @@ apiClient.interceptors.request.use((config) => {
 
 export const pregnancyApi = {
   create: async (data: { userId: number; lmpDate: string; pregnancyNumber?: number }) => {
-    // FIX: Change '/' to '' to avoid the trailing slash 404
-    const response = await apiClient.post('', data); 
+    const response = await apiClient.post('', data);
     return response.data;
   },
 
@@ -51,7 +51,6 @@ export const pregnancyApi = {
   },
 
   getAll: async () => {
-    // FIX: Change '/' to '' here as well
     const response = await apiClient.get('');
     return response.data;
   }

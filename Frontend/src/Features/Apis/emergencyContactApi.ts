@@ -1,11 +1,11 @@
 import axios from "axios";
+import { backend_url } from "../../backend.url";
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:5000/api/emergency",
+  baseURL: `${backend_url}/api/emergency`,
   headers: { "Content-Type": "application/json" },
 });
 
-// Auto-attach JWT token
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token && config.headers) {
@@ -14,8 +14,6 @@ apiClient.interceptors.request.use((config) => {
   }
   return config;
 });
-
-// ── Types ─────────────────────────────────────────────────────
 
 export interface EmergencyContact {
   id: number;
@@ -40,23 +38,18 @@ export interface EmergencyAlert {
   resolvedAt?: string;
 }
 
-// New type to capture full SOS response including SMS status
 export interface CreateAlertResponse {
   alert: EmergencyAlert;
   smsSent: boolean;
   message: string;
 }
 
-// ── Emergency Contact API ─────────────────────────────────────
-
 export const emergencyContactApi = {
-  // GET /api/emergency/contact/:userId
   getByUser: async (userId: number): Promise<EmergencyContact> => {
     const response = await apiClient.get(`/contact/${userId}`);
     return response.data.data;
   },
 
-  // POST /api/emergency/contact
   create: async (data: {
     userId: number;
     name: string;
@@ -67,7 +60,6 @@ export const emergencyContactApi = {
     return response.data.data;
   },
 
-  // PUT /api/emergency/contact/:id
   update: async (
     id: number,
     data: { name?: string; phoneNumber?: string; relationship?: string }
@@ -76,16 +68,12 @@ export const emergencyContactApi = {
     return response.data.data;
   },
 
-  // DELETE /api/emergency/contact/:id
   delete: async (id: number): Promise<void> => {
     await apiClient.delete(`/contact/${id}`);
   },
 };
 
-// ── Emergency Alert API ───────────────────────────────────────
-
 export const emergencyAlertApi = {
-  // POST /api/emergency/alert — trigger SOS + SMS to next of kin
   create: async (data: {
     userId: number;
     pregnancyId?: number;
@@ -103,19 +91,16 @@ export const emergencyAlertApi = {
     };
   },
 
-  // GET /api/emergency/alerts/all — admin only
   getAllAlerts: async (): Promise<EmergencyAlert[]> => {
     const response = await apiClient.get("/alerts/all");
     return response.data?.data ?? response.data;
   },
 
-  // GET /api/emergency/alerts/:userId — alert history
   getByUser: async (userId: number): Promise<EmergencyAlert[]> => {
     const response = await apiClient.get(`/alerts/${userId}`);
     return response.data.data;
   },
 
-  // PATCH /api/emergency/alert/:id/status
   updateStatus: async (
     id: number,
     status: "pending" | "notified" | "responded" | "resolved"

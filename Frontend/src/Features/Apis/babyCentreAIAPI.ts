@@ -1,7 +1,8 @@
 import axios from "axios";
+import { backend_url } from "../../backend.url";
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: `${backend_url}/api`,
   headers: { "Content-Type": "application/json" },
 });
 
@@ -35,19 +36,16 @@ export interface AIResponse {
 // ── Health Tips API ───────────────────────────────────────────
 
 export const babyCentreAIAPI = {
-  // GET /api/health-tips/all
   getAll: async (): Promise<HealthTip[]> => {
     const response = await apiClient.get("/health-tips/all");
     return response.data.data;
   },
 
-  // GET /api/health-tips/category/:category
   getByCategory: async (category: string): Promise<HealthTip[]> => {
     const response = await apiClient.get(`/health-tips/category/${category}`);
     return response.data.data;
   },
 
-  // GET /api/health-tips/trimester/:trimester
   getByTrimester: async (trimester: number): Promise<HealthTip[]> => {
     const response = await apiClient.get(`/health-tips/trimester/${trimester}`);
     return response.data.data;
@@ -57,7 +55,6 @@ export const babyCentreAIAPI = {
 // ── Groq AI API ───────────────────────────────────────────────
 
 export const groqApi = {
-  // POST /api/ai/ask
   ask: async (question: string): Promise<string> => {
     const response = await apiClient.post<AIResponse>("/ai/ask", { question });
     return response.data.answer;

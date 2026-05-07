@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { backend_url } from "../../backend.url";
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = `${backend_url}/api`;
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -73,7 +74,7 @@ const dashboardApi = {
     if (params?.county) queryParams.append('county', params.county);
     if (params?.constituency) queryParams.append('constituency', params.constituency);
     if (params?.ward) queryParams.append('ward', params.ward);
-    
+
     const response = await apiClient.get(`/dashboard/national-summary?${queryParams.toString()}`);
     return response.data?.data ?? response.data;
   },

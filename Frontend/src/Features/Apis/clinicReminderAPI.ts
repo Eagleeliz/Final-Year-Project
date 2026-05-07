@@ -1,6 +1,7 @@
 import axios from "axios";
+import { backend_url } from "../../backend.url";
 
-const API_URL = "http://localhost:5000/api/clinic-reminders";
+const API_URL = `${backend_url}/api/clinic-reminders`;
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -9,7 +10,6 @@ const apiClient = axios.create({
   },
 });
 
-// Automatically attach JWT token to requests
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token && config.headers) {
@@ -19,15 +19,12 @@ apiClient.interceptors.request.use((config) => {
 });
 
 export const clinicReminderApi = {
-  /**
-   * Create a new reminder
-   */
   create: async (data: {
     title: string;
     appointmentDate: string | Date;
     userId: number;
     notes?: string;
-    description?: string; 
+    description?: string;
     pregnancyId?: number;
     facilityId?: number;
   }) => {
@@ -55,22 +52,18 @@ export const clinicReminderApi = {
     return response.data;
   },
 
-  /**
-   * Update reminder
-   * FIXED: Added userId to the allowed properties in the type definition
-   */
   update: async (id: number, updateData: Partial<{
     title: string;
     appointmentDate: string | Date;
     notes?: string;
     description?: string;
     status?: "pending" | "completed";
-    userId: number; // <--- ADDED THIS LINE
+    userId: number;
   }>) => {
     const userId = localStorage.getItem("userId");
     const payload = {
       ...updateData,
-      userId: Number(userId), 
+      userId: Number(userId),
       notes: updateData.notes || updateData.description,
     };
     const response = await apiClient.put(`/${id}`, payload);

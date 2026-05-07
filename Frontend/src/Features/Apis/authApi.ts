@@ -1,8 +1,9 @@
 import axios from "axios";
 import { store } from "../store";
 import { logout } from "../Auth/AuthSlice";
+import { backend_url } from "../../backend.url";
 
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = `${backend_url}/api/auth`;
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -36,19 +37,16 @@ apiClient.interceptors.response.use(
 );
 
 export const authApi = {
-  // REGISTER
   register: async (userData: any) => {
     const response = await apiClient.post("/register", userData);
     return response.data;
   },
 
-  // LOGIN
   login: async (credentials: { email: string; password: string; rememberMe?: boolean }) => {
     const response = await apiClient.post("/login", credentials);
     return response.data;
   },
 
-  // OTP
   verifyOtp: async (data: { email: string; otp: string }) => {
     const response = await apiClient.post("/verify-otp", data);
     return response.data;
@@ -59,7 +57,6 @@ export const authApi = {
     return response.data;
   },
 
-  // PASSWORD RESET
   forgotPassword: async (email: string) => {
     const response = await apiClient.post("/forgot-password", { email });
     return response.data;
@@ -74,13 +71,11 @@ export const authApi = {
     return response.data;
   },
 
-  // PROFILE
   getProfile: async () => {
     const response = await apiClient.get("/profile");
     return response.data;
   },
 
-  // UPLOAD IMAGE
   uploadProfileImage: async (userId: number, file: File) => {
     const formData = new FormData();
     formData.append("image", file);
@@ -97,7 +92,6 @@ export const authApi = {
     return response.data;
   },
 
-  // CHANGE PASSWORD
   changePassword: async (data: {
     userId: number;
     currentPassword: string;
@@ -107,7 +101,6 @@ export const authApi = {
     return response.data;
   },
 
-  // UPDATE PROFILE
   completeProfile: async (data: any) => {
     const response = await apiClient.put("/complete-profile", data);
     return response.data;
