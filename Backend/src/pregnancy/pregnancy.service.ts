@@ -149,7 +149,7 @@ const getPregnanciesWithLocation = async () => {
 export const getPregnancyCountByCounty = async () => {
   const data = await getPregnanciesWithLocation();
   const counts: Record<string, number> = {};
-  data.forEach(row => {
+  data.forEach((row: { userCounty: any; }) => {
     const county = row.userCounty;
     if (county) {
       counts[county] = (counts[county] || 0) + 1;
@@ -164,7 +164,7 @@ export const getPregnancyOutcomeStats = async () => {
     columns: { outcome: true },
   });
   const stats: Record<string, number> = {};
-  pregnancies.forEach(p => {
+  pregnancies.forEach((p: { outcome: string; }) => {
     const outcome = p.outcome || "ongoing";
     stats[outcome] = (stats[outcome] || 0) + 1;
   });
@@ -177,7 +177,7 @@ export const getPregnancyTrimesterStats = async () => {
     columns: { currentTrimester: true },
   });
   const stats: Record<string, number> = { 1: 0, 2: 0, 3: 0 };
-  pregnancies.forEach(p => {
+  pregnancies.forEach((p: { currentTrimester: any; }) => {
     if (p.currentTrimester) {
       stats[String(p.currentTrimester)] = (stats[String(p.currentTrimester)] || 0) + 1;
     }
@@ -201,7 +201,7 @@ export const getDeliveryStatsByMonth = async (months: number = 12) => {
     stats[key] = 0;
   }
   
-  pregnancies.forEach(p => {
+  pregnancies.forEach((p: { deliveryDate: string | number | Date; }) => {
     if (p.deliveryDate) {
       const date = new Date(p.deliveryDate);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -237,7 +237,7 @@ export const getHighRiskPregnancies = async () => {
 export const getRiskCountByCounty = async () => {
   const highRiskData = await getHighRiskPregnancies();
   const counts: Record<string, number> = {};
-  highRiskData.forEach(row => {
+  highRiskData.forEach((row: { userCounty: any; }) => {
     const county = row.userCounty;
     if (county) {
       counts[county] = (counts[county] || 0) + 1;
