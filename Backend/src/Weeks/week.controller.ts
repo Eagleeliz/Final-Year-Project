@@ -39,7 +39,7 @@ export const getWeeklyCheckinsController = async (req: Request, res: Response): 
 // Get weekly check-in by ID
 export const getWeeklyCheckinByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     
     if (isNaN(id)) {
       res.status(400).json({
@@ -74,7 +74,7 @@ export const getWeeklyCheckinByIdController = async (req: Request, res: Response
 // Get weekly check-ins for a pregnancy
 export const getWeeklyCheckinsForPregnancyController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const pregnancyId = parseInt(req.params.pregnancyId);
+  const pregnancyId = parseInt(req.params.pregnancyId as string);
     
     if (isNaN(pregnancyId)) {
       res.status(400).json({
@@ -110,8 +110,8 @@ export const getWeeklyCheckinsForPregnancyController = async (req: Request, res:
 // Get weekly check-in by pregnancy and week number
 export const getWeeklyCheckinByWeekController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const pregnancyId = parseInt(req.params.pregnancyId);
-    const weekNumber = parseInt(req.params.weekNumber);
+   const pregnancyId = parseInt(req.params.pregnancyId as string);
+   const weekNumber = parseInt(req.params.weekNumber as string);
     
     if (isNaN(pregnancyId) || isNaN(weekNumber)) {
       res.status(400).json({
@@ -177,7 +177,7 @@ if (data.pregnancyId == null || data.weekNumber == null || data.weekNumber === "
 // Update weekly check-in
 export const updateWeeklyCheckinController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+const id = parseInt(req.params.id as string);
     const data = req.body;
     
     if (isNaN(id)) {
@@ -214,7 +214,7 @@ export const updateWeeklyCheckinController = async (req: Request, res: Response)
 // Delete weekly check-in
 export const deleteWeeklyCheckinController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     
     if (isNaN(id)) {
       res.status(400).json({
@@ -250,7 +250,7 @@ export const deleteWeeklyCheckinController = async (req: Request, res: Response)
 // Get weekly summary for pregnancy
 export const getWeeklySummaryController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const pregnancyId = parseInt(req.params.pregnancyId);
+   const pregnancyId = parseInt(req.params.pregnancyId as string);
     
     if (isNaN(pregnancyId)) {
       res.status(400).json({

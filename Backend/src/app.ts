@@ -2,18 +2,18 @@ import express, { Request, Response } from "express";
 import dotenv from 'dotenv'
 dotenv.config()
   
-import weekRouter from './src/Weeks/week.route'
+import weekRouter from './Weeks/week.route'
 import cors from "cors";
 
-import userRouter from "./src/users/user.route";
-import pregnancyRouter from "./src/pregnancy/pregnancy.route";
-import guidanceRouter from "./src/guidance/guidance.route";
-import aiRouter from "./src/groqai/groq.route";
-import { authRouter } from "./src/auth/auth.route";
-import clinicReminderRouter from "./src/ClinicReminders/clinicReminder.route";
-import childRouter from "./src/child/child.route";
-import emergencyRouter from "./src/emergency/emergency.route";
-import dashboardRouter from "./src/PolicyMaker/policyMakerRoute";
+import userRouter from "./users/user.route";
+import pregnancyRouter from "./pregnancy/pregnancy.route";
+import guidanceRouter from "./guidance/guidance.route";
+import aiRouter from "./groqai/groq.route";
+import { authRouter } from "./auth/auth.route";
+import clinicReminderRouter from "./ClinicReminders/clinicReminder.route";
+import childRouter from "./child/child.route";
+import emergencyRouter from "./emergency/emergency.route";
+import dashboardRouter from ".//PolicyMaker/policyMakerRoute";
 
 
 
