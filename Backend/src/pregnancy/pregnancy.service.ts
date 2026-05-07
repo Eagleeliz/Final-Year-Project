@@ -164,7 +164,7 @@ export const getPregnancyOutcomeStats = async () => {
     columns: { outcome: true },
   });
   const stats: Record<string, number> = {};
-  pregnancies.forEach((p: { outcome: string; }) => {
+pregnancies.forEach((p: { outcome: string | null; }) => {
     const outcome = p.outcome || "ongoing";
     stats[outcome] = (stats[outcome] || 0) + 1;
   });
@@ -201,7 +201,7 @@ export const getDeliveryStatsByMonth = async (months: number = 12) => {
     stats[key] = 0;
   }
   
-  pregnancies.forEach((p: { deliveryDate: string | number | Date; }) => {
+  pregnancies.forEach((p: { deliveryDate: string | null; }) => {
     if (p.deliveryDate) {
       const date = new Date(p.deliveryDate);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
