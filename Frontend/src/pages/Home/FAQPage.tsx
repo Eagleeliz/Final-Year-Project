@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../../Features/ThemeContext";
 
 const midnightTeal = "#002e33";
 const black = "#000000";
@@ -17,18 +16,16 @@ const faqs = [
 
 const FAQItem = ({ q, a }: { q: string; a: string }) => {
   const [open, setOpen] = useState(false);
-  const { theme } = useTheme?.() || { theme: "light" };
-  const isDark = theme === "dark";
-  const bgCard = isDark ? "#1f2937" : "#ffffff";
-  const textColor = isDark ? "#f3f4f6" : midnightTeal;
-  const mutedColor = isDark ? "#d1d5db" : "#4a4a4a";
+  const bgCard = "#ffffff";
+  const textColor = midnightTeal;
+  const mutedColor = "#4a4a4a";
 
   return (
-    <div className="rounded-[18px] overflow-hidden transition-all duration-300" style={{ background: open ? midnightTeal : bgCard, border: open ? "none" : `1.5px solid ${isDark ? "#374151" : "#e5e5e5"}`, boxShadow: open ? "0 8px 32px rgba(0,46,51,0.15)" : "0 1px 4px rgba(0,0,0,0.04)" }}>
+    <div className="rounded-[18px] overflow-hidden transition-all duration-300" style={{ background: open ? midnightTeal : bgCard, border: open ? "none" : "1.5px solid #e5e5e5", boxShadow: open ? "0 8px 32px rgba(0,46,51,0.15)" : "0 1px 4px rgba(0,0,0,0.04)" }}>
       <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-7 py-6 text-left gap-4">
         <span className="text-[19px] font-semibold leading-snug" style={{ color: open ? white : textColor }}>{q}</span>
-        <span className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300" style={{ background: open ? "rgba(255,255,255,0.18)" : isDark ? "#374151" : "#f5f5f5", transform: open ? "rotate(45deg)" : "rotate(0deg)" }}>
-          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke={open ? white : isDark ? "#9ca3af" : black} strokeWidth={2.5} strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+        <span className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300" style={{ background: open ? "rgba(255,255,255,0.18)" : "#f5f5f5", transform: open ? "rotate(45deg)" : "rotate(0deg)" }}>
+          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke={open ? white : black} strokeWidth={2.5} strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
         </span>
       </button>
       <div className="overflow-hidden transition-all duration-300" style={{ maxHeight: open ? "300px" : "0px" }}>
@@ -40,17 +37,15 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
 
 const FAQPage = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme?.() || { theme: "light" };
-  const isDark = theme === "dark";
-  const textColor = isDark ? "#f3f4f6" : "#1f2937";
-  const bgSection = isDark ? "#0f172a" : "#ffffff";
-  const mutedColor = isDark ? "#9ca3af" : "#4a4a4a";
+  const textColor = "#1f2937";
+  const bgSection = "#ffffff";
+  const mutedColor = "#4a4a4a";
 
   return (
-    <section className="w-full min-h-screen" style={{ background: `linear-gradient(160deg, ${isDark ? "#1f2937" : "#f5f5f5"} 0%, ${bgSection} 60%, ${isDark ? "#111827" : "#fafafa"} 100%)` }}>
+    <section className="w-full min-h-screen" style={{ background: `linear-gradient(160deg, #f5f5f5 0%, ${bgSection} 60%, #fafafa 100%)` }}>
       <div className="text-center px-6 pt-20 pb-12 max-w-[680px] mx-auto">
-        <span className="inline-block text-[14px] font-bold tracking-[2px] uppercase px-5 py-2 rounded-full mb-5" style={{ background: isDark ? "#1e293b" : "#f5f5f5", color: isDark ? "#5eead4" : midnightTeal }}>FAQ</span>
-        <h1 className="leading-tight mb-5" style={{ color: textColor, fontFamily: "Inter", fontSize: "clamp(38px, 5vw, 60px)" }}>Got questions? <em className="not-italic" style={{ color: isDark ? "#5eead4" : black }}>We have answers.</em></h1>
+        <span className="inline-block text-[14px] font-bold tracking-[2px] uppercase px-5 py-2 rounded-full mb-5" style={{ background: "#f5f5f5", color: midnightTeal }}>FAQ</span>
+        <h1 className="leading-tight mb-5" style={{ color: textColor, fontFamily: "Inter", fontSize: "clamp(38px, 5vw, 60px)" }}>Got questions? <em className="not-italic" style={{ color: black }}>We have answers.</em></h1>
         <p className="text-[20px] leading-relaxed" style={{ color: mutedColor }}>Everything you need to know about BabyCentre — clear, honest, and straight to the point.</p>
       </div>
 
@@ -74,11 +69,11 @@ const FAQPage = () => {
       </div>
 
       <div className="max-w-[760px] mx-auto px-6 pb-24">
-        <button onClick={() => navigate("/register")} className="w-full flex items-center justify-center gap-3 py-6 rounded-[18px] text-[20px] font-bold transition-all duration-300 hover:-translate-y-1" style={{ background: isDark ? "#374151" : "#333333", color: "#fff", boxShadow: "0 12px 40px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.2)" }}>
+        <button onClick={() => navigate("/register")} className="w-full flex items-center justify-center gap-3 py-6 rounded-[18px] text-[20px] font-bold transition-all duration-300 hover:-translate-y-1" style={{ background: "#333333", color: "#fff", boxShadow: "0 12px 40px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.2)" }}>
           <span>Get Started — It's Free</span>
           <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="#fff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
         </button>
-        <p className="text-center text-[15px] mt-3" style={{ color: isDark ? "#9ca3af" : "#5a5a5a" }}>Join 10,000+ mothers across Kenya — no credit card needed.</p>
+        <p className="text-center text-[15px] mt-3" style={{ color: "#5a5a5a" }}>Join 10,000+ mothers across Kenya — no credit card needed.</p>
       </div>
     </section>
   );

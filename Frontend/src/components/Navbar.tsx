@@ -5,9 +5,7 @@ import type { RootState } from "../Features/store";
 import { clearCredentials } from "../Features/Auth/AuthSlice";
 import { Menu, X, ChevronDown, House, Info, Calendar, Mail, LayoutDashboard, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import ThemeToggle from "./ThemeToggle";
-import { useTheme } from "../Features/ThemeContext";
-
+import logo from "../assets/logo.png";
 const NAV_LINKS = [
   { name: "Home", to: "/", icon: House },
   { name: "About", to: "/about", icon: Info },
@@ -20,22 +18,19 @@ const TEAL = "#86d9e1";
 const ACCENT = "#00a0b0";
 
 interface NavbarProps {
-  hideThemeToggle?: boolean;
   onMenuClick?: () => void;
 }
 
-const Navbar = ({ hideThemeToggle = false, onMenuClick }: NavbarProps) => {
+const Navbar = ({ onMenuClick }: NavbarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
   const { user, isAuthenticated } = useSelector((s: RootState) => s.auth);
 
-  const bg = isDark ? "#0a2a2e" : "#ffffff";
-  const border = isDark ? "#1a4a50" : "#e5e7eb";
-  const text = isDark ? "#ffffff" : MID;
+  const bg = "#ffffff";
+  const border = "#e5e7eb";
+  const text = MID;
 
   const handleLogout = () => {
     dispatch(clearCredentials());
@@ -54,7 +49,7 @@ const Navbar = ({ hideThemeToggle = false, onMenuClick }: NavbarProps) => {
 
         {/* Logo */}
         <Link to="/" className="flex items-center gap-1">
-          <img src="/src/assets/logo.png" alt="BabyCentre Logo" className="w-27 h-18 object-contain" />
+          <img src={logo} alt="BabyCentre Logo" className="w-27 h-18 object-contain" />
           <span className="text-2xl font-bold" style={{ color: MID }}>
             Baby<span style={{ color: ACCENT }}>Centre</span>
           </span>
@@ -80,7 +75,6 @@ const Navbar = ({ hideThemeToggle = false, onMenuClick }: NavbarProps) => {
 
         {/* Desktop Auth */}
         <div className="hidden md:flex items-center gap-3">
-          {!hideThemeToggle && <ThemeToggle />}
           {!isAuthenticated ? (
             <>
               <Link
@@ -93,7 +87,7 @@ const Navbar = ({ hideThemeToggle = false, onMenuClick }: NavbarProps) => {
               <Link
                 to="/register"
                 className="px-5 py-2 text-sm font-bold rounded-full shadow-md"
-                style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}
+                style={{ backgroundColor: MID, color: TEAL }}
               >
                 Register
               </Link>
@@ -103,7 +97,7 @@ const Navbar = ({ hideThemeToggle = false, onMenuClick }: NavbarProps) => {
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-2 px-5 py-2 rounded-full shadow-md"
-                style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}
+                style={{ backgroundColor: MID, color: TEAL }}
               >
                 Hey {user?.firstName} <ChevronDown size={16} />
               </button>
@@ -207,7 +201,7 @@ const Navbar = ({ hideThemeToggle = false, onMenuClick }: NavbarProps) => {
                         to="/login"
                         onClick={() => setIsOpen(false)}
                         className="flex-1 py-2 text-center text-sm font-bold rounded-xl border-2"
-                        style={{ borderColor: isDark ? TEAL : MID, color: isDark ? TEAL : MID }}
+                        style={{ borderColor: MID, color: MID }}
                       >
                         Login
                       </Link>
@@ -215,7 +209,7 @@ const Navbar = ({ hideThemeToggle = false, onMenuClick }: NavbarProps) => {
                         to="/register"
                         onClick={() => setIsOpen(false)}
                         className="flex-1 py-2 text-center text-sm font-bold rounded-xl"
-                        style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}
+                        style={{ backgroundColor: MID, color: TEAL }}
                       >
                         Register
                       </Link>
@@ -226,7 +220,7 @@ const Navbar = ({ hideThemeToggle = false, onMenuClick }: NavbarProps) => {
                         to={dashPath}
                         onClick={() => setIsOpen(false)}
                         className="flex-1 py-2 text-center text-sm font-bold rounded-xl"
-                        style={{ backgroundColor: isDark ? TEAL : MID, color: isDark ? MID : TEAL }}
+                        style={{ backgroundColor: MID, color: TEAL }}
                       >
                         Dashboard
                       </Link>
@@ -241,7 +235,6 @@ const Navbar = ({ hideThemeToggle = false, onMenuClick }: NavbarProps) => {
                 </motion.div>
 
                 <div className="pb-2 flex justify-center">
-                  {!hideThemeToggle && <ThemeToggle />}
                 </div>
               </div>
             </motion.div>

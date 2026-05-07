@@ -1,5 +1,3 @@
-import { useTheme } from "../../Features/ThemeContext";
-
 const steps = [
   {
     num: "1",
@@ -121,24 +119,22 @@ const featureCards = [
 ];
 
 const HowItWorksSection = () => {
-  const { theme } = useTheme?.() || { theme: "light" };
-  const isDark = theme === "dark";
-  const midnightTeal = isDark ? "#86d9e1" : "#002e33";
-  const bgSection = isDark ? "#0f172a" : "#f7fdfd";
+  const midnightTeal = "#002e33";
+  const bgSection = "#f7fdfd";
 
   return (
     <section className="w-full py-20 px-6 overflow-hidden mt-8" style={{ background: bgSection }}>
       {/* Header */}
       <div className="text-center mb-11 max-w-2xl mx-auto">
-        <span className="inline-block text-xs font-bold tracking-[2px] uppercase px-4 py-1.5 rounded-full mb-4" style={{ background: isDark ? "#1e293b" : "#e0f7f9", color: isDark ? "#5eead4" : "#007a87" }}>
+        <span className="inline-block text-xs font-bold tracking-[2px] uppercase px-4 py-1.5 rounded-full mb-4" style={{ background: "#e0f7f9", color: "#007a87" }}>
           How It Works
         </span>
         <h2 className="leading-tight mb-4" style={{ color: midnightTeal, fontFamily: "Inter", fontSize: "clamp(40px, 5.5vw, 64px)" }}>
           Your journey,{" "}
-          <em className="not-italic" style={{ color: isDark ? "#5eead4" : "#00a0b0" }}>every step</em>{" "}
+          <em className="not-italic" style={{ color: "#00a0b0" }}>every step</em>{" "}
           of the way
         </h2>
-        <p className="text-[20px] leading-relaxed" style={{ color: isDark ? "#9ca3af" : "#4a7a7e" }}>
+        <p className="text-[20px] leading-relaxed" style={{ color: "#4a7a7e" }}>
           BabyCentre walks with you from your first trimester through early childhood — with AI-powered support, real-time alerts, and personalized guidance.
         </p>
       </div>
@@ -156,7 +152,7 @@ const HowItWorksSection = () => {
             </div>
             <div className="md:text-center text-left">
               <p className="text-[16px] font-bold mb-1.5 leading-snug" style={{ color: midnightTeal }}>{step.label}</p>
-              <p className="text-[15px] leading-relaxed" style={{ color: isDark ? "#9ca3af" : "#5a8a8e" }}>{step.desc}</p>
+              <p className="text-[15px] leading-relaxed" style={{ color: "#5a8a8e" }}>{step.desc}</p>
             </div>
           </div>
         ))}
@@ -165,11 +161,11 @@ const HowItWorksSection = () => {
       {/* Feature Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[18px] max-w-5xl mx-auto">
         {featureCards.map((card, i) => (
-          <div key={i} className="border rounded-2xl p-6 relative overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ background: isDark ? "#1f2937" : "#ffffff", borderColor: isDark ? "#374151" : "#c8eef1" }}>
+          <div key={i} className="border rounded-2xl p-6 relative overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ background: "#ffffff", borderColor: "#c8eef1" }}>
             <div className={`absolute top-0 left-0 right-0 h-[5px] rounded-t-2xl bg-gradient-to-r ${card.accent}`} />
             <div className={`w-[42px] h-[42px] rounded-[11px] flex items-center justify-center mb-3.5 ${card.iconBg}`}>{card.icon}</div>
             <p className="text-[20px] font-bold mb-2" style={{ color: midnightTeal }}>{card.title}</p>
-            <p className="text-[17px] leading-relaxed" style={{ color: isDark ? "#9ca3af" : "#5a8a8e" }}>{card.body}</p>
+            <p className="text-[17px] leading-relaxed" style={{ color: "#5a8a8e" }}>{card.body}</p>
           </div>
         ))}
       </div>

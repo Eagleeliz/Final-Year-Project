@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { useTheme } from "../../Features/ThemeContext";
 
 type FeatureCard = {
   title: string;
@@ -13,15 +12,12 @@ type Testimonial = {
 };
 
 const WhyChooseUsSection = () => {
-  const { theme } = useTheme?.() || { theme: "light" };
-  const isDark = theme === "dark";
-  
-  const textColor = isDark ? "#f3f4f6" : "#002e33";
-  const mutedColor = isDark ? "#9ca3af" : "#4a7a7e";
-  const bgSection = isDark ? "#0f172a" : "#f7fdfd";
-  const bgCard = isDark ? "#1f2937" : "#ffffff";
-  const borderColor = isDark ? "#374151" : "#d4eef1";
-  const accentTeal = isDark ? "#86d9e1" : "#00a0b0";
+  const textColor = "#002e33";
+  const mutedColor = "#4a7a7e";
+  const bgSection = "#f7fdfd";
+  const bgCard = "#ffffff";
+  const borderColor = "#d4eef1";
+  const accentTeal = "#00a0b0";
   const quoteColor = "#b0dde2";
 
   const featureCards: FeatureCard[] = [

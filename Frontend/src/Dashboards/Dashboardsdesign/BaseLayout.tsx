@@ -17,7 +17,7 @@ const BaseLayout = ({ SideNav }: BaseLayoutProps) => {
       {/* Top Navbar */}
       <div ref={navbarRef} className="z-50 bg-white shrink-0">
         <Navbar
-          hideThemeToggle={true}
+
           onMenuClick={() => setSidebarOpen(true)}
         />
       </div>

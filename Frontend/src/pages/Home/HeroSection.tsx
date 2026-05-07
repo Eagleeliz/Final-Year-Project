@@ -1,12 +1,9 @@
 import { Link } from "react-router-dom";
 import { Users, Bot, FileText } from "lucide-react";
-import { useTheme } from "../../Features/ThemeContext";
 
 const HeroSection = () => {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-  const bgDark = isDark ? "#0a0a0a" : "#002e33";
-   const midnightTeal = "#002e33";
+  const bgDark = "#002e33";
+  const midnightTeal = "#002e33";
   const aquaText = "#86d9e1";
 
   return (
