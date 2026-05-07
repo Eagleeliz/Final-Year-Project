@@ -1,3 +1,4 @@
+import { JWT_SECRET } from '../config.js';
 import { Request, Response } from "express";
 import {
   getUserByEmailService,
@@ -6,11 +7,11 @@ import {
   updateUserService,
     setPasswordResetTokenService,
     getUserByIdService
-} from "./auth.service";
-import { createUserValidator, userLogInValidator } from "../validation/user.validator";
+} from "./auth.service.js";
+import { createUserValidator, userLogInValidator } from "../validation/user.validator.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { sendNotificationEmail } from "../middlewares/GoogleMailer";
+import { sendNotificationEmail } from "../middlewares/GoogleMailer.js";
 
 // REGISTER WITH OTP
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
@@ -55,14 +56,13 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       "welcome"
     );
 
-    // include userType in JWT
     const token = jwt.sign(
       {
         userId: result.id,
         userEmail: user.email,
         userType: user.userType || 'mother'
       },
-      process.env.JWT_SECRET as string,
+      JWT_SECRET,
       { expiresIn: "1h" }
     );
 
@@ -156,17 +156,15 @@ export const loginUser = async (req: Request, res: Response) => {
       return;
     }
 
-    // Extended expiry for "Remember Me" - 30 days, otherwise 1 hour
     const expiresIn = rememberMe ? "30d" : "1h";
 
-    // include userType in JWT
     const token = jwt.sign(
       {
         userId: userExists.id,
         userEmail: userExists.email,
         userType: userExists.userType
       },
-      process.env.JWT_SECRET as string,
+      JWT_SECRET,
       { expiresIn }
     );
 
@@ -232,7 +230,8 @@ export const resendOtp = async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
-// FORGOT PASSWORD - sends OTP to email
+
+// FORGOT PASSWORD
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email } = req.body;
@@ -244,7 +243,6 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 
     const user = await getUserByEmailService(email);
 
-    // return 200 to avoid revealing if email exists
     if (!user) {
       res.status(200).json({ message: "If that email exists, a reset code was sent." });
       return;
@@ -277,7 +275,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
   }
 };
 
-// RESET PASSWORD - verifies OTP and sets new password
+// RESET PASSWORD
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, otp, newPassword } = req.body;
@@ -365,10 +363,9 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
   }
 };
 
-// auth.controller.ts
 export const getProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = Number((req as any).user?.userId); // from JWT middleware
+    const userId = Number((req as any).user?.userId);
     const user = await getUserByIdService(userId);
     if (!user) { res.status(404).json({ error: "User not found" }); return; }
     res.status(200).json({
@@ -377,8 +374,8 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
       email: user.email,
       phone: user.phone,
       county: user.county,
-      constituency: user.constituency,  
-      ward: user.ward,                  
+      constituency: user.constituency,
+      ward: user.ward,
       dateOfBirth: user.dateOfBirth,
       profileImage: user.profileImage,
     });
@@ -386,6 +383,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
     res.status(500).json({ error: error.message });
   }
 };
+
 export const completeProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = Number((req as any).user?.userId);
@@ -419,4 +417,3 @@ export const completeProfile = async (req: Request, res: Response): Promise<void
     res.status(500).json({ error: error.message });
   }
 };
-
