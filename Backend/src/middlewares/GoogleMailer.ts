@@ -30,6 +30,9 @@ const transporter = nodemailer.createTransport({
   debug: true,  // This will show detailed error logs
 });
 
+console.log("EMAIL_SENDER:", process.env.EMAIL_SENDER);
+console.log("EMAIL_PASSWORD:", process.env.EMAIL_PASSWORD ? "SET ✅" : "NOT SET ❌");
+
 const PLATFORM_NAME = "BabyCentre Care";
 
 export const sendNotificationEmail = async (

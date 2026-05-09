@@ -14,6 +14,7 @@ import jwt from "jsonwebtoken";
 import { sendNotificationEmail } from "../middlewares/GoogleMailer.js";
 
 // REGISTER WITH OTP
+// REGISTER WITH OTP
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = createUserValidator.safeParse(req.body);
@@ -43,7 +44,11 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
     await setEmailVerificationTokenService(result.id, otp, expires);
 
-    await sendNotificationEmail(
+    // ✅ ADD THESE LINES
+    console.log("EMAIL_SENDER:", process.env.EMAIL_SENDER);
+    console.log("EMAIL_PASSWORD:", process.env.EMAIL_PASSWORD ? "SET ✅" : "NOT SET ❌");
+
+    const emailResult = await sendNotificationEmail(
       user.email,
       "Your Verification Code",
       `
@@ -55,6 +60,15 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       undefined,
       "welcome"
     );
+
+    // ✅ ADD THIS LINE
+    console.log("📧 Email result:", emailResult);
+
+    if (emailResult.includes("❌")) {
+      res.status(500).json({ error: "Failed to send OTP email. Check email configuration." });
+      return;
+    }
+    // ✅ END OF ADDED LINES
 
     const token = jwt.sign(
       {
