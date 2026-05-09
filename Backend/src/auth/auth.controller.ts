@@ -41,8 +41,9 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expires = new Date(Date.now() + 5 * 60 * 1000);
-
+console.log("Hello World")
     await setEmailVerificationTokenService(result.id, otp, expires);
+
 
     // ✅ ADD THESE LINES
     console.log("EMAIL_SENDER:", process.env.EMAIL_SENDER);
