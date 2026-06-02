@@ -46,35 +46,37 @@ const HeroSection = () => {
       </div>
 
       {/* Main Visual Hero */}
-      <div className="relative w-full h-[600px] overflow-hidden">
+      <div className="relative w-full">
+        {/* Image */}
         <img 
           src="https://images.unsplash.com/photo-1568043625493-2b0633c7c491?q=80&w=2000" 
-          className="w-full h-full object-cover"
+          className="w-full h-[400px] md:h-[600px] object-cover"
           alt="Motherhood"
         />
-        
-        {/* Floating CTA Card */}
-            <div className="absolute inset-0 flex items-center justify-center md:justify-start max-w-7xl mx-auto px-0">
-          <div className="bg-white/95 backdrop-blur-sm p-2 rounded-4xl shadow-2xl max-w-md border border-gray-100">
+
+        {/* CTA Card — below image on mobile, overlaid on desktop */}
+        <div className="md:absolute md:inset-0 md:flex md:items-center md:justify-start md:max-w-7xl md:mx-auto md:px-6">
+          <div className="bg-white/95 backdrop-blur-sm p-6 md:rounded-4xl shadow-2xl max-w-md border border-gray-100">
             <h1 className="text-4xl font-black leading-tight mb-3" style={{ color: midnightTeal }}>
               A Secure Path to <br />
               <span className="text-teal-500">Safe Motherhood.</span>
             </h1>
             <p className="text-gray-600 text-lg mb-8">
-              Experience a smarter way to track your baby’s growth. From the first kick to the final push, 
-            get AI-powered health insights tailored for the modern Kenyan mother.
+              Experience a smarter way to track your baby's growth. From the first kick to the final push, 
+              get AI-powered health insights tailored for the modern Kenyan mother.
             </p>
-            <Link to ="/login">
-            <button 
-              className="w-full py-4 rounded-full font-bold text-xl transition-transform hover:scale-105"
-              style={{ backgroundColor: midnightTeal, color: aquaText }}
-            >
-              Get Started
-            </button>
+            <Link to="/login">
+              <button 
+                className="w-full py-4 rounded-full font-bold text-xl transition-transform hover:scale-105"
+                style={{ backgroundColor: midnightTeal, color: aquaText }}
+              >
+                Get Started
+              </button>
             </Link>
           </div>
         </div>
       </div>
+
     </div>
   );
 };

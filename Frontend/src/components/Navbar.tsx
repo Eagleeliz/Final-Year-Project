@@ -44,7 +44,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
     user?.userType === "policy_maker" ? "/policymaker" : "/dashboard/journey";
 
   return (
-    <nav className="relative shadow-sm border-b z-50" style={{ backgroundColor: bg, borderColor: border }}>
+ <nav className="sticky top-0 shadow-sm border-b z-50" style={{ backgroundColor: bg, borderColor: border }}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
 
         {/* Logo */}
