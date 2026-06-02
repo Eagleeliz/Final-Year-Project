@@ -856,7 +856,7 @@ const ChildDevelopment: React.FC = () => {
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ color: M }}>
-              Hello, {user?.firstName || "Mama"} 👶
+              Hello, {user?.firstName || "Mama"} 
             </h1>
             <p className="text-gray-400 text-base mt-1">
               Track your child's growth and milestone journey.
@@ -896,13 +896,12 @@ const ChildDevelopment: React.FC = () => {
         {children.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 rounded-3xl bg-white border-2 border-dashed"
             style={{ borderColor: T + "60" }}>
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-5"
-              style={{ background: TL }}>
-              <Baby size={38} style={{ color: M }} />
-            </div>
-            <h2 className="text-2xl font-black mb-2 tracking-tight" style={{ color: M }}>
-              No Children Yet
-            </h2>
+                <h2
+  className="text-2xl font-black mb-2 tracking-tight mt-2"
+  style={{ color: M }}
+>
+  No Children Yet
+</h2>
             <p className="text-gray-400 text-sm text-center max-w-xs mb-6">
               Register your baby's details to start tracking milestones and development.
             </p>
