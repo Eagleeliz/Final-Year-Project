@@ -141,7 +141,12 @@ const LoginPage = () => {
                   </span>
                 </div>
               </div>
-
+  <div>
+    <p> Demo Credentials</p>
+    <p> Email: wanjikukiruno@gmail.com</p>
+    <p>Password: Wanjiku5</p>
+  </div>
+  
               {/* Form */}
               <form onSubmit={handleLogin} className="space-y-5" name="loginForm">
                 <div>
